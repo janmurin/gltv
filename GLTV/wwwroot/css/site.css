@@ -33,3 +33,16 @@
         display: none;
     }
 }
+
+.login-body {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    background-image: url('/images/header_gltv_5.jpg');
+}
+
+    .login-body .login-column {
+        background-color: rgba(0, 0, 0, 0.8);
+        padding-bottom: 100%;
+        margin-bottom: -100%;
+        padding-top: 40%;
+    }

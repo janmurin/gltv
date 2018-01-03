@@ -1,0 +1,301 @@
+﻿/* Make clicks pass-through */
+#nprogress {
+    pointer-events: none;
+}
+
+    #nprogress .bar {
+        background: #F37038;
+        position: fixed;
+        z-index: 1031;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        z-index: 101;
+    }
+
+    /* Fancy blur effect */
+    #nprogress .peg {
+        display: block;
+        position: absolute;
+        right: 0px;
+        width: 100px;
+        height: 100%;
+        box-shadow: 0 0 10px #CF5322, 0 0 5px #CF5322;
+        opacity: 1.0;
+        -webkit-transform: rotate(3deg) translate(0px, -4px);
+        -ms-transform: rotate(3deg) translate(0px, -4px);
+        transform: rotate(3deg) translate(0px, -4px);
+    }
+
+.nprogress-custom-parent {
+    overflow: hidden;
+    position: relative;
+}
+
+    .nprogress-custom-parent #nprogress .spinner,
+    .nprogress-custom-parent #nprogress .bar {
+        position: absolute;
+    }
+
+* {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    min-height: 400px;
+    min-width: 320px;
+    position: relative;
+}
+
+a {
+    color: #F37037;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.wrapper {
+    position: relative;
+    text-align: left;
+    top: 8px;
+    padding: 0 12px;
+}
+
+button.disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: #EB957B !important;
+}
+
+.gl-container-fluid {
+    height: 100%;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: nowrap;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    align-items: center;
+}
+
+.gl-info-section {
+    height: 100%;
+    text-align: center;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: nowrap;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-flex-grow: 2;
+    flex-grow: 2;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    -webkit-flex-basis: 0;
+    flex-basis: 0;
+    -webkit-transition: flex-grow 0.4s ease-in-out 0.2s;
+    -moz-transition: flex-grow 0.4s ease-in-out 0.2s;
+    transition: flex-grow 0.4s ease-in-out 0.2s;
+}
+
+    .gl-info-section .gl-heading {
+        color: #fff;
+        text-shadow: 1px 0px 0px #F1F1F1;
+        font-weight: bold;
+        font-size: 3em;
+        opacity: 1;
+        -webkit-transition: opacity 0.4s ease-in-out 0s;
+        -moz-transition: opacity 0.4s ease-in-out 0s;
+        transition: opacity 0.4s ease-in-out 0s;
+    }
+
+.gl-login-section {
+    background-color: rgba(0,0,0, .35);
+    text-align: center;
+    height: 100%;
+    -webkit-display: flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-flex-grow: 1;
+    flex-grow: 1;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    -webkit-flex-basis: 0;
+    flex-basis: 0;
+    -webkit-transition: flex-grow 0.1s ease-in-out;
+    -moz-transition: flex-grow 0.1s ease-in-out;
+    transition: flex-grow 0.1s ease-in-out;
+}
+
+    .gl-login-section .gl-form-block {
+        padding: 15px 0;
+        width: 62%;
+        position: relative;
+        bottom: 20px;
+    }
+
+    .gl-login-section .gl-login-form .gl-error-message {
+        margin-bottom: 10px;
+        color: #ff0000;
+        background-color: rgb(250, 255, 189);
+    }
+
+    .gl-login-section .gl-login-form .gl-list-group .gl-list-item input,
+    .gl-login-section .gl-login-form .gl-list-group button,
+    .gl-modal button {
+        width: 100%;
+        /*height: 34px;*/
+        margin: 4px 0;
+        padding: 6px 12px;
+        border: none;
+        outline: none;
+    }
+
+    .gl-login-section .gl-login-form .gl-list-group .gl-list-item input {
+        background: transparent;
+        color: #FFF;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .gl-login-section .gl-login-form .gl-list-group button,
+    .gl-modal button {
+        color: #fff;
+        margin-top: 25px;
+        border-radius: 2px;
+        background: transparent;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+        .gl-login-section .gl-login-form .gl-list-group button:hover,
+        .gl-modal button:hover {
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        .gl-login-section .gl-login-form .gl-list-group button:hover,
+        .gl-modal button:hover {
+            border: 1px solid;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, .5), 0 0 20px rgba(255, 255, 255, .2);
+            outline-color: rgba(255, 255, 255, 0);
+            outline-offset: 15px;
+            text-shadow: 1px 1px 2px #427388;
+        }
+
+.gl-modal .gl-cancel-button:hover {
+    color: #fff;
+}
+
+@media (max-width: 1260px) {
+    .gl-info-section {
+        -webkit-flex-grow: 1;
+        flex-grow: 1;
+        font-size: .7em;
+    }
+
+    .gl-login-section {
+        -webkit-flex-grow: 1;
+        flex-grow: 1;
+    }
+}
+
+@media (max-width: 760px) {
+    .gl-info-section {
+        -webkit-flex-grow: 0;
+        flex-grow: 0;
+    }
+
+        .gl-info-section .gl-heading {
+            opacity: 0;
+        }
+}
+
+
+.gl-modal-overlay {
+    display: none;
+    background: rgba(0,0,0, .7);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.gl-modal {
+    background-color: #fff;
+}
+
+.gl-modal-header {
+    background: #414042;
+    color: #fff;
+    padding: 10px 25px 0;
+}
+
+.gl-modal-body {
+    padding: 25px;
+    font-size: 16px;
+}
+
+.gl-scopes li span {
+    font-size: 14px;
+    color: #111;
+}
+
+.gl-modal button {
+    width: auto;
+    margin-right: 15px;
+    font-size: 14px;
+}
+
+.gl-modal .gl-cancel-button {
+    background: #fff;
+    color: #ff5722;
+}
+
+.gl-close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+    .gl-close-modal:hover,
+    .gl-close-modal:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
