@@ -22,7 +22,14 @@ namespace GLTV.Controllers
         // GET: TvItems
         public async Task<IActionResult> Index()
         {
-            return View(await _context.TvItem.ToListAsync());
+            List<TvItem> tvItems = await _context.TvItem.ToListAsync();
+            List<TvItemLocation> tvItemLocations = await _context.TvItemLocation.ToListAsync();
+            foreach (TvItem tvItem in tvItems)
+            {
+                tvItem.Locations = tvItemLocations.Where(x => x.TvItemId == tvItem.ID).ToList();
+            }
+
+            return View(tvItems);
         }
 
         // GET: TvItems/Details/5

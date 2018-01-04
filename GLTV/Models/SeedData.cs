@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GLTV.Models
@@ -18,10 +19,9 @@ namespace GLTV.Models
                 // Look for any movies.
                 if (context.TvItem.Any())
                 {
-                    return;   // DB has been seeded
+                    return; // DB has been seeded
                 }
-
-                context.TvItem.AddRange(
+                TvItem item1 = context.TvItem.Add(
                     new TvItem()
                     {
                         Author = "jan.murin",
@@ -31,7 +31,9 @@ namespace GLTV.Models
                         TimeInserted = DateTime.Now,
                         Title = "first image gallery",
                         Type = TvItemType.Gallery
-                    },
+                    }).Entity;
+
+                TvItem item2 = context.TvItem.Add(
                     new TvItem()
                     {
                         Author = "jan.murin",
@@ -41,7 +43,9 @@ namespace GLTV.Models
                         TimeInserted = DateTime.Now,
                         Title = "first image",
                         Type = TvItemType.Image
-                    },
+                    }).Entity;
+
+                TvItem item3 = context.TvItem.Add(
                     new TvItem()
                     {
                         Author = "jan.murin",
@@ -51,36 +55,36 @@ namespace GLTV.Models
                         TimeInserted = DateTime.Now,
                         Title = "first video",
                         Type = TvItemType.Video
-                    }
-                );
+                    }).Entity;
+
                 context.TvItemFile.AddRange(
                     new TvItemFile()
                     {
-                        TvItemId = 1,
+                        TvItemId = item1.ID,
                         FileName = "image1.jpg",
                         Length = 500000
                     },
                     new TvItemFile()
                     {
-                        TvItemId = 1,
+                        TvItemId = item1.ID,
                         FileName = "image2.jpg",
                         Length = 500000
                     },
                     new TvItemFile()
                     {
-                        TvItemId = 1,
+                        TvItemId = item1.ID,
                         FileName = "image3.jpg",
                         Length = 500000
                     },
                     new TvItemFile()
                     {
-                        TvItemId = 2,
+                        TvItemId = item2.ID,
                         FileName = "first-image.jpg",
                         Length = 500000
                     },
                     new TvItemFile()
                     {
-                        TvItemId = 3,
+                        TvItemId = item3.ID,
                         FileName = "first-video.mp4",
                         Length = 500000
                     }
@@ -89,50 +93,51 @@ namespace GLTV.Models
                 context.TvItemLocation.AddRange(
                     new TvItemLocation()
                     {
-                        TvItemId = 1,
+                        TvItemId = item1.ID,
                         Location = Location.Kosice
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 1,
+                        TvItemId = item1.ID,
                         Location = Location.BanskaBystrica
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 1,
+                        TvItemId = item1.ID,
                         Location = Location.Zilina
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 2,
+                        TvItemId = item2.ID,
                         Location = Location.Kosice
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 2,
+                        TvItemId = item2.ID,
                         Location = Location.BanskaBystrica
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 2,
+                        TvItemId = item2.ID,
                         Location = Location.Zilina
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 3,
+                        TvItemId = item3.ID,
                         Location = Location.Kosice
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 3,
+                        TvItemId = item3.ID,
                         Location = Location.BanskaBystrica
                     },
                     new TvItemLocation()
                     {
-                        TvItemId = 3,
+                        TvItemId = item3.ID,
                         Location = Location.Zilina
                     }
                 );
+
                 context.SaveChanges();
             }
         }

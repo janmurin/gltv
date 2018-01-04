@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using GLTV.Controllers;
+using System.Reflection;
 
-namespace Microsoft.AspNetCore.Mvc
+namespace GLTV.Extensions
 {
     public static class UrlHelperExtensions
     {
