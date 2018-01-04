@@ -9,13 +9,30 @@ namespace GLTV.Models
     public class TvItem
     {
         public int ID { get; set; }
+
+        [StringLength(150, MinimumLength = 3)]
+        [Required]
         public string Title { get; set; }
-        //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd }", ApplyFormatInEditMode = true)]
+
+        
         public DateTime TimeInserted { get; set; }
+
+        [DataType(DataType.Text)]
+        [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:mm}", ApplyFormatInEditMode = true)]
+        [Required]
         public DateTime StartTime { get; set; }
+
+        [DataType(DataType.Text)]
+        [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:mm}", ApplyFormatInEditMode = true)]
+        [Required]
         public DateTime EndTime { get; set; }
+
         public string Author { get; set; }
+
+        [Required]
         public int Duration { get; set; }
+
+        [Required]
         public TvItemType Type { get; set; }
 
         public List<TvItemLocation> Locations { get; set; }

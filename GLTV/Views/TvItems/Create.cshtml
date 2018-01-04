@@ -20,12 +20,22 @@
             </div>
             <div class="form-group">
                 <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
+                <div class='input-group date' id='startTimeInput'>
+                    <input asp-for="StartTime" class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
+                <div class='input-group date' id='endTimeInput'>
+                    <input asp-for="EndTime" class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
                 <span asp-validation-for="EndTime" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -49,3 +59,13 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+<script type="text/javascript">
+    $(function () {
+        $('#startTimeInput').datetimepicker({
+            locale: 'sk'
+        });
+        $('#endTimeInput').datetimepicker({
+            locale: 'sk'
+        });
+    });
+</script>
