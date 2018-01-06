@@ -8,16 +8,19 @@ using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 
 namespace GLTV.Controllers
 {
     public class HomeController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IFileProvider _fileProvider;
 
-        public HomeController(SignInManager<ApplicationUser> signInManager)
+        public HomeController(SignInManager<ApplicationUser> signInManager, IFileProvider fileProvider)
         {
             _signInManager = signInManager;
+            _fileProvider = fileProvider;
         }
 
         [AllowAnonymous]
@@ -28,9 +31,11 @@ namespace GLTV.Controllers
                 return RedirectToAction("Login","Account");
             }
 
-            return View();
+            var contents = _fileProvider.GetDirectoryContents("");
+            return View(contents);
         }
 
+        
         //public IActionResult About()
         //{
         //    ViewData["Message"] = "Your application description page.";

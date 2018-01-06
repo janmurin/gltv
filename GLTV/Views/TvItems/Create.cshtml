@@ -11,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" id="editTvItemForm">
+        <form asp-action="Create" id="editTvItemForm" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="TvItem.Title" class="control-label"></label>
@@ -73,8 +73,32 @@
                 <select asp-for="TvItem.Type" asp-items="Model.TypeDropdownItems" class="form-control"></select>
                 <span asp-validation-for="TvItem.Type" class="text-danger"></span>
             </div>
+            @*<div class="form-group">
+                <div class="col-md-10">
+                    <p>Upload one or more files using this form:</p>
+                    <input type="file" name="files" multiple />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-10">
+                    <input type="submit" value="Upload" />
+                </div>
+            </div>*@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
+        <form method="post" enctype="multipart/form-data" asp-controller="TvItems" asp-action="UploadFiles">
+            <div class="form-group">
+                <div class="col-md-10">
+                    <p>Upload one or more files using this form:</p>
+                    <input type="file" name="files" multiple />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-10">
+                    <input type="submit" value="Upload" />
+                </div>
             </div>
         </form>
     </div>
