@@ -53,7 +53,7 @@ namespace GLTV.Controllers
         // GET: TvItems/Create
         public IActionResult Create()
         {
-            return View();
+            return View("Create", new TvItemEditViewModel());
         }
 
         // POST: TvItems/Create
@@ -61,15 +61,16 @@ namespace GLTV.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Title,TimeInserted,StartTime,EndTime,Author,Duration,Type")] TvItem tvItem)
+        public async Task<IActionResult> Create([Bind]TvItemEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(tvItem);
+                _context.Add(model.TvItem);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(tvItem);
+
+            return View(model);
         }
 
         // GET: TvItems/Edit/5

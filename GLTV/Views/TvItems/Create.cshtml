@@ -1,4 +1,4 @@
-﻿@model GLTV.Models.TvItem
+﻿@model GLTV.Models.TvItemEditViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -11,42 +11,67 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" id="editTvItemForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+                <label asp-for="TvItem.Title" class="control-label"></label>
+                <textarea asp-for="TvItem.Title" class="form-control nonresizable"></textarea>
+                <span asp-validation-for="TvItem.Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
+                <label asp-for="TvItem.StartTime" class="control-label"></label>
                 <div class='input-group date' id='startTimeInput'>
-                    <input asp-for="StartTime" class="form-control" />
+                    <input asp-for="TvItem.StartTime" class="form-control" />
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div>
-                <span asp-validation-for="StartTime" class="text-danger"></span>
+                <span asp-validation-for="TvItem.StartTime" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
+                <label asp-for="TvItem.EndTime" class="control-label"></label>
                 <div class='input-group date' id='endTimeInput'>
-                    <input asp-for="EndTime" class="form-control" />
+                    <input asp-for="TvItem.EndTime" class="form-control" />
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div>
-                <span asp-validation-for="EndTime" class="text-danger"></span>
+                <span asp-validation-for="TvItem.EndTime" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Duration" class="control-label"></label>
-                <input asp-for="Duration" class="form-control" />
-                <span asp-validation-for="Duration" class="text-danger"></span>
+                <label asp-for="TvItem.Duration" class="control-label"></label>
+                <input asp-for="TvItem.Duration" class="form-control" />
+                <span asp-validation-for="TvItem.Duration" class="text-danger"></span>
+            </div>
+            <div class="form-group" id="locationsGroup">
+                <label asp-for="LocationCheckboxes" class="control-label"></label>
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="LocationCheckboxes.LocationKosice" class="location-checkbox"/>
+                        <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                        Kosice
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="LocationCheckboxes.LocationBanskaBystrica" class="location-checkbox"/>
+                        <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                        Banska Bystrica
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="LocationCheckboxes.LocationZilina" class="location-checkbox"/>
+                        <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                        Zilina
+                    </label>
+                </div>
+                <span asp-validation-for="LocationCheckboxes" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Type" class="control-label"></label>
-                <select asp-for="Type" class="form-control"></select>
-                <span asp-validation-for="Type" class="text-danger"></span>
+                <label asp-for="TvItem.Type" class="control-label"></label>
+                <select asp-for="TvItem.Type" asp-items="Model.TypeDropdownItems" class="form-control"></select>
+                <span asp-validation-for="TvItem.Type" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />
@@ -61,11 +86,50 @@
 
 <script type="text/javascript">
     $(function () {
-        $('#startTimeInput').datetimepicker({
+        var startTimeDp = $('#startTimeInput').datetimepicker({
             locale: 'sk'
         });
-        $('#endTimeInput').datetimepicker({
+        var endTimeDp = $('#endTimeInput').datetimepicker({
+            useCurrent: false, //Important! See issue #1075
             locale: 'sk'
+        });
+        startTimeDp.on("dp.change",
+            function (e) {
+                endTimeDp.data("DateTimePicker").minDate(e.date);
+            });
+        endTimeDp.on("dp.change",
+            function (e) {
+                startTimeDp.data("DateTimePicker").maxDate(e.date);
+            });
+
+        $('input.location-checkbox').change(function() {
+            validateLocationCheckboxes();
+        });
+
+        function validateLocationCheckboxes() {
+            var checked = $('#locationsGroup').find('input[type=checkbox]:checked').length;
+            var span = $('#locationsGroup').find('span.text-danger');
+
+            if (checked == 0) {
+                span.removeClass('field-validation-valid');
+                span.addClass('field-validation-error');
+                span.text('At least one location must be checked.');
+                return false;
+            } else {
+                span.addClass('field-validation-valid');
+                span.removeClass('field-validation-error');
+                span.text('');
+                return true;
+            }
+        }
+
+        $('#editTvItemForm').submit(function(ev) {
+            ev.preventDefault(); // to stop the form from submitting
+            /* Validations go here */
+            if (!validateLocationCheckboxes()) {
+                return false;
+            }
+            this.submit(); // If all the validations succeeded
         });
     });
 </script>

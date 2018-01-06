@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace GLTV.Models
@@ -14,22 +15,29 @@ namespace GLTV.Models
         [Required]
         public string Title { get; set; }
 
-        
+        [DataType(DataType.Text)]
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}", ApplyFormatInEditMode = true)]
+        [Display(Name = "Time Inserted")]
         public DateTime TimeInserted { get; set; }
 
         [DataType(DataType.Text)]
-        [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:mm}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}", ApplyFormatInEditMode = true)]
         [Required]
+        [Display(Name = "Start Time")]
         public DateTime StartTime { get; set; }
 
         [DataType(DataType.Text)]
-        [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:mm}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}", ApplyFormatInEditMode = true)]
         [Required]
+        [Display(Name = "End Time")]
         public DateTime EndTime { get; set; }
 
         public string Author { get; set; }
 
         [Required]
+        [Range(3, 120)]
+        [RegularExpression(@"^\d{1,3}$", ErrorMessage = "Required integer with max 3 digits.")]
+        [Display(Name = "Duration in seconds")]
         public int Duration { get; set; }
 
         [Required]
@@ -50,6 +58,9 @@ namespace GLTV.Models
     {
         public int ID { get; set; }
         public int TvItemId { get; set; }
+
+        [StringLength(150, MinimumLength = 3)]
+        [Required]
         public string FileName { get; set; }
         public long Length { get; set; }
     }
