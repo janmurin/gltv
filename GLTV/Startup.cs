@@ -86,6 +86,7 @@ namespace GLTV
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<IFileService, FileService>();
 
             services.AddMvc(config =>
             {

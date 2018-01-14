@@ -47,21 +47,21 @@
                 <label asp-for="LocationCheckboxes" class="control-label"></label>
                 <div class="checkbox">
                     <label>
-                        <input asp-for="LocationCheckboxes.LocationKosice" class="location-checkbox"/>
+                        <input asp-for="LocationCheckboxes.LocationKosice" class="location-checkbox" />
                         <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
                         Kosice
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input asp-for="LocationCheckboxes.LocationBanskaBystrica" class="location-checkbox"/>
+                        <input asp-for="LocationCheckboxes.LocationBanskaBystrica" class="location-checkbox" />
                         <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
                         Banska Bystrica
                     </label>
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input asp-for="LocationCheckboxes.LocationZilina" class="location-checkbox"/>
+                        <input asp-for="LocationCheckboxes.LocationZilina" class="location-checkbox" />
                         <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
                         Zilina
                     </label>
@@ -73,22 +73,16 @@
                 <select asp-for="TvItem.Type" asp-items="Model.TypeDropdownItems" class="form-control"></select>
                 <span asp-validation-for="TvItem.Type" class="text-danger"></span>
             </div>
-            @*<div class="form-group">
-                <div class="col-md-10">
-                    <p>Upload one or more files using this form:</p>
-                    <input type="file" name="files" multiple />
-                </div>
-            </div>
             <div class="form-group">
-                <div class="col-md-10">
-                    <input type="submit" value="Upload" />
-                </div>
-            </div>*@
+                <label asp-for="Files" class="control-label"></label>
+                <input asp-for="Files" class="form-control" multiple/>
+                <span asp-validation-for="Files" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />
             </div>
         </form>
-        <form method="post" enctype="multipart/form-data" asp-controller="TvItems" asp-action="UploadFiles">
+        @*<form method="post" enctype="multipart/form-data" asp-controller="TvItems" asp-action="UploadFiles">
             <div class="form-group">
                 <div class="col-md-10">
                     <p>Upload one or more files using this form:</p>
@@ -100,7 +94,7 @@
                     <input type="submit" value="Upload" />
                 </div>
             </div>
-        </form>
+        </form>*@
     </div>
 </div>
 
@@ -126,7 +120,7 @@
                 startTimeDp.data("DateTimePicker").maxDate(e.date);
             });
 
-        $('input.location-checkbox').change(function() {
+        $('input.location-checkbox').change(function () {
             validateLocationCheckboxes();
         });
 
@@ -147,7 +141,7 @@
             }
         }
 
-        $('#editTvItemForm').submit(function(ev) {
+        $('#editTvItemForm').submit(function (ev) {
             ev.preventDefault(); // to stop the form from submitting
             /* Validations go here */
             if (!validateLocationCheckboxes()) {

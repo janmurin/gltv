@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using GLTV.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GLTV.Models
@@ -16,9 +17,14 @@ namespace GLTV.Models
         }
 
         public TvItem TvItem { get; set; }
+
         public List<SelectListItem> TypeDropdownItems { get; internal set; }
+
         [Display(Name = "Locations")]
         public CheckBoxList LocationCheckboxes { get; set; }
+
+        [Required]
+        public List<IFormFile> Files { get; set; }
     }
 
     [ValidateAtLeastOneChecked(ErrorMessage = "At least one location must be checked.")]

@@ -8,22 +8,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GLTV.Data;
 using GLTV.Models;
+using GLTV.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 
 namespace GLTV.Controllers
 {
+    [Authorize]
     public class TvItemsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IFileProvider _fileProvider;
+        private readonly IFileService _fileService;
         private IHostingEnvironment _env;
 
-        public TvItemsController(ApplicationDbContext context, IFileProvider fileProvider, IHostingEnvironment env)
+        public TvItemsController(ApplicationDbContext context, IFileService fileService, IHostingEnvironment env)
         {
             _context = context;
-            _fileProvider = fileProvider;
+            _fileService = fileService;
             _env = env;
         }
 
@@ -69,89 +72,42 @@ namespace GLTV.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(1073741824)]
         public async Task<IActionResult> Create([Bind]TvItemEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(model.TvItem);
-                await _context.SaveChangesAsync();
+                // add item
+                TvItem item = model.TvItem;
+                item.Author = User.Identity.Name;
+                item.TimeInserted = DateTime.Now;
+                _context.Add(item);
+                _context.SaveChanges();
+
+                // add locations
+                model.TvItem.Locations = new List<TvItemLocation>();
+                if (model.LocationCheckboxes.LocationBanskaBystrica)
+                {
+                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.BanskaBystrica });
+                }
+                if (model.LocationCheckboxes.LocationKosice)
+                {
+                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Kosice });
+                }
+                if (model.LocationCheckboxes.LocationZilina)
+                {
+                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
+                }
+                _context.AddRange(model.TvItem.Locations);
+                _context.SaveChanges();
+
+                // add files
+                _fileService.SaveFiles(item.ID, model.Files);
+
                 return RedirectToAction(nameof(Index));
             }
 
             return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequestSizeLimit(1073741824)]
-        public async Task<IActionResult> UploadFiles(List<IFormFile> files)
-        {
-            long size = files.Sum(f => f.Length);
-
-            // full path to file in temp location
-            //var stream = System.IO.File.Create("/files/file");
-            List<string> paths = new List<string>();
-
-            foreach (var formFile in files)
-            {
-                if (formFile.Length > 0)
-                {
-                    string path = _env.WebRootPath + "/files/" + formFile.FileName;
-                    paths.Add(path);
-
-                    using (var stream = System.IO.File.Create(path))
-                    {
-                        await formFile.CopyToAsync(stream);
-                    }
-                }
-            }
-
-            // process uploaded files
-            // Don't rely on or trust the FileName property without validation.
-
-            return RedirectToAction(nameof(Create));
-        }
-
-        //public async Task<IActionResult> Download(string filename)
-        //{
-        //    if (filename == null)
-        //        return Content("filename not present");
-
-        //    var path = Path.Combine(
-        //        Directory.GetCurrentDirectory(),
-        //        "wwwroot", filename);
-
-        //    var memory = new MemoryStream();
-        //    using (var stream = new FileStream(path, FileMode.Open))
-        //    {
-        //        await stream.CopyToAsync(memory);
-        //    }
-        //    memory.Position = 0;
-        //    return File(memory, GetContentType(path), Path.GetFileName(path));
-        //}
-
-        private string GetContentType(string path)
-        {
-            var types = GetMimeTypes();
-            var ext = Path.GetExtension(path).ToLowerInvariant();
-            return types[ext];
-        }
-
-        private Dictionary<string, string> GetMimeTypes()
-        {
-            return new Dictionary<string, string>
-            {
-                {".txt", "text/plain"},
-                {".pdf", "application/pdf"},
-                {".doc", "application/vnd.ms-word"},
-                {".docx", "application/vnd.ms-word"},
-                {".xls", "application/vnd.ms-excel"},
-                {".png", "image/png"},
-                {".jpg", "image/jpeg"},
-                {".jpeg", "image/jpeg"},
-                {".gif", "image/gif"},
-                {".csv", "text/csv"}
-            };
         }
 
         // GET: TvItems/Edit/5

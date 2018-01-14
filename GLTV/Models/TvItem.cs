@@ -37,7 +37,7 @@ namespace GLTV.Models
         [Required]
         [Range(3, 120)]
         [RegularExpression(@"^\d{1,3}$", ErrorMessage = "Required integer with max 3 digits.")]
-        [Display(Name = "Duration in seconds")]
+        [Display(Name = "Duration (s)")]
         public int Duration { get; set; }
 
         [Required]
