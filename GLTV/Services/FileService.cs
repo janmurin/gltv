@@ -13,10 +13,10 @@ namespace GLTV.Services
 {
     public class FileService : IFileService
     {
-        private readonly ApplicationDbContext _context;
         private readonly string _webRootPath;
         private readonly string _webPath;
         private readonly List<string> _allowedExtensions;
+        private readonly ApplicationDbContext _context;
 
         public FileService(ApplicationDbContext context, IHostingEnvironment env)
         {
@@ -26,35 +26,39 @@ namespace GLTV.Services
             _allowedExtensions = new List<string> { "jpg", "jpe", "jpeg", "gif", "png", "avi", "mkv", "mp4" };
         }
 
-        public List<string> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
+        public Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
         {
-            var result = new List<string>();
-
-            foreach (var file in files)
+            return Task.Run(async () =>
             {
-                // TODO: validation of extensions and video length
-                //if (file.Length <= 0) continue;
+                var result = new List<TvItemFile>();
 
-                string filename = tvItemId + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
-
-                using (var fileStream = new FileStream(Path.Combine(_webRootPath, filename), FileMode.Create))
+                foreach (var file in files)
                 {
-                    file.CopyToAsync(fileStream);
+                    // TODO: validation of extensions, video length and image size
+                    //if (file.Length <= 0) continue;
+
+                    string filename = tvItemId + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
+
+                    using (var fileStream = new FileStream(Path.Combine(_webRootPath, filename), FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+
+                    TvItemFile itemFile = new TvItemFile()
+                    {
+                        FileName = filename,
+                        Length = file.Length,
+                        TvItemId = tvItemId
+                    };
+
+                    _context.Add(itemFile);
+                    result.Add(itemFile);
                 }
 
-                _context.Add(new TvItemFile()
-                {
-                    FileName = filename,
-                    Length = file.Length,
-                    TvItemId = tvItemId
-                });
+                _context.SaveChanges();
 
-                result.Add(filename);
-            }
-
-            _context.SaveChanges();
-
-            return result;
+                return result;
+            });
         }
 
         public bool DeleteFile(string filename)

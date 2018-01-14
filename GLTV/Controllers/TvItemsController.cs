@@ -90,19 +90,22 @@ namespace GLTV.Controllers
                 {
                     model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.BanskaBystrica });
                 }
+
                 if (model.LocationCheckboxes.LocationKosice)
                 {
                     model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Kosice });
                 }
+
                 if (model.LocationCheckboxes.LocationZilina)
                 {
                     model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
                 }
+
                 _context.AddRange(model.TvItem.Locations);
                 _context.SaveChanges();
 
                 // add files
-                _fileService.SaveFiles(item.ID, model.Files);
+                List<TvItemFile> files = await _fileService.SaveFiles(item.ID, model.Files);
 
                 return RedirectToAction(nameof(Index));
             }

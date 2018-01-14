@@ -10,13 +10,18 @@
 <h4>TvItem</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" id="editTvItemForm" method="post" enctype="multipart/form-data">
+    <form asp-action="Create" id="editTvItemForm" method="post" enctype="multipart/form-data">
+        <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="TvItem.Title" class="control-label"></label>
                 <textarea asp-for="TvItem.Title" class="form-control nonresizable"></textarea>
                 <span asp-validation-for="TvItem.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TvItem.Type" class="control-label"></label>
+                <select asp-for="TvItem.Type" asp-items="Model.TypeDropdownItems" class="form-control" id="typeDropdown"></select>
+                <span asp-validation-for="TvItem.Type" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="TvItem.StartTime" class="control-label"></label>
@@ -68,34 +73,19 @@
                 </div>
                 <span asp-validation-for="LocationCheckboxes" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TvItem.Type" class="control-label"></label>
-                <select asp-for="TvItem.Type" asp-items="Model.TypeDropdownItems" class="form-control"></select>
-                <span asp-validation-for="TvItem.Type" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+        </div>
+        <div class="col-md-12">
+            <div class="form-group" id="fileInputGroup">
                 <label asp-for="Files" class="control-label"></label>
-                <input asp-for="Files" class="form-control" multiple/>
+                <input id="fileInput" asp-for="Files" class="file" multiple
+                       data-show-upload="false" data-show-caption="true" data-msg-placeholder="Select {files} for upload...">
                 <span asp-validation-for="Files" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default" />
+                <input type="submit" value="Create" class="btn btn-default"/>
             </div>
-        </form>
-        @*<form method="post" enctype="multipart/form-data" asp-controller="TvItems" asp-action="UploadFiles">
-            <div class="form-group">
-                <div class="col-md-10">
-                    <p>Upload one or more files using this form:</p>
-                    <input type="file" name="files" multiple />
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-10">
-                    <input type="submit" value="Upload" />
-                </div>
-            </div>
-        </form>*@
-    </div>
+        </div>
+    </form>
 </div>
 
 <div>
@@ -105,7 +95,8 @@
 <script type="text/javascript">
     $(function () {
         var startTimeDp = $('#startTimeInput').datetimepicker({
-            locale: 'sk'
+            locale: 'sk',
+            defaultDate: new Date()
         });
         var endTimeDp = $('#endTimeInput').datetimepicker({
             useCurrent: false, //Important! See issue #1075
@@ -141,13 +132,40 @@
             }
         }
 
+        function validateFileSelected() {
+            var span = $('#fileInputGroup').find('span.text-danger');
+
+            if (!document.getElementById('fileInput').files[0]) {
+                span.removeClass('field-validation-valid');
+                span.addClass('field-validation-error');
+                span.text('At one file is required.');
+                return false;
+            } else {
+                span.addClass('field-validation-valid');
+                span.removeClass('field-validation-error');
+                span.text('');
+                return true;
+            }
+        }
+
         $('#editTvItemForm').submit(function (ev) {
             ev.preventDefault(); // to stop the form from submitting
             /* Validations go here */
             if (!validateLocationCheckboxes()) {
                 return false;
             }
+
+            if (!validateFileSelected()) {
+                return false;
+            }
+
             this.submit(); // If all the validations succeeded
+        });
+
+        $("#fileInput").fileinput();
+
+        $('#typeDropdown').change(function() {
+            console.log('type dropdown change: ' + $('#typeDropdown').val());
         });
     });
 </script>
