@@ -23,7 +23,7 @@ namespace GLTV.Models
         [Display(Name = "Locations")]
         public CheckBoxList LocationCheckboxes { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "At least one file is required.")]
         public List<IFormFile> Files { get; set; }
     }
 

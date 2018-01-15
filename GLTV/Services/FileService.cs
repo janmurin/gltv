@@ -23,7 +23,7 @@ namespace GLTV.Services
             _context = context;
             _webPath = "files";
             _webRootPath = Path.Combine(env.WebRootPath, _webPath);
-            _allowedExtensions = new List<string> { "jpg", "jpe", "jpeg", "gif", "png", "avi", "mkv", "mp4" };
+            _allowedExtensions = new List<string> { "jpg", "jpe", "bmp", "jpeg", "png", "mkv", "mp4" };
         }
 
         public Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
