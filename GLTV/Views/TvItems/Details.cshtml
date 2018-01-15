@@ -1,4 +1,5 @@
-﻿@model GLTV.Models.TvItem
+﻿@using GLTV.Extensions
+@model GLTV.Models.TvItem
 
 @{
     ViewData["Title"] = "Details";
@@ -53,9 +54,46 @@
         <dd>
             @Html.DisplayFor(model => model.Type)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Locations)
+        </dt>
+        <dd>
+            @Utils.GetLocationsString(Model.Locations)
+        </dd>
     </dl>
+</div>
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">‹</a>
+    <a class="next">›</a>
+    <a class="close">×</a>
+    <a class="play-pause"></a>
+    <ol class="indicator"></ol>
+</div>
+<div style="padding-top: 50px;" id="links">
+    @{
+        foreach (TvItemFile file in Model.Files)
+        {
+            <a href="@file.Url" title="@file.FileName">
+                <img src="@file.Url" alt="@file.FileName" width="200">
+            </a>
+        }
+    }
+   
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+<script>
+    document.getElementById('links').onclick = function (event) {
+        event = event || window.event;
+        var target = event.target || event.srcElement,
+            link = target.src ? target.parentNode : target,
+            options = {index: link, event: event},
+            links = this.getElementsByTagName('a');
+        blueimp.Gallery(links, options);
+    };
+</script>

@@ -12,22 +12,25 @@ using GLTV.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.Extensions.FileProviders;
 
 namespace GLTV.Controllers
 {
     [Authorize]
+    [Route("[controller]/[action]")]
     public class TvItemsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IFileService _fileService;
+        private readonly ITvItemService _tvItemService;
         private IHostingEnvironment _env;
 
-        public TvItemsController(ApplicationDbContext context, IFileService fileService, IHostingEnvironment env)
+        public TvItemsController(ApplicationDbContext context, IFileService fileService, ITvItemService tvItemService)
         {
             _context = context;
             _fileService = fileService;
-            _env = env;
+            _tvItemService = tvItemService;
         }
 
         // GET: TvItems
@@ -44,21 +47,11 @@ namespace GLTV.Controllers
         }
 
         // GET: TvItems/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            TvItem item = _tvItemService.FetchTvItem(id);
 
-            var tvItem = await _context.TvItem
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (tvItem == null)
-            {
-                return NotFound();
-            }
-
-            return View(tvItem);
+            return View(item);
         }
 
         // GET: TvItems/Create

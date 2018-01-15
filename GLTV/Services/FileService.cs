@@ -8,22 +8,15 @@ using GLTV.Data;
 using GLTV.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace GLTV.Services
 {
-    public class FileService : IFileService
+    public class FileService : ServiceBase, IFileService
     {
-        private readonly string _webRootPath;
-        private readonly string _webPath;
-        private readonly List<string> _allowedExtensions;
-        private readonly ApplicationDbContext _context;
-
-        public FileService(ApplicationDbContext context, IHostingEnvironment env)
+        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
+            : base(context, env, signInManager)
         {
-            _context = context;
-            _webPath = "files";
-            _webRootPath = Path.Combine(env.WebRootPath, _webPath);
-            _allowedExtensions = new List<string> { "jpg", "jpe", "bmp", "jpeg", "png", "mkv", "mp4" };
         }
 
         public Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
@@ -39,7 +32,7 @@ namespace GLTV.Services
 
                     string filename = tvItemId + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
 
-                    using (var fileStream = new FileStream(Path.Combine(_webRootPath, filename), FileMode.Create))
+                    using (var fileStream = new FileStream(Path.Combine(WebRootPath, filename), FileMode.Create))
                     {
                         await file.CopyToAsync(fileStream);
                     }
@@ -76,14 +69,6 @@ namespace GLTV.Services
             throw new NotImplementedException();
         }
 
-        private static string MakeWebPath(string path, bool addSeperatorToBegin = false, bool addSeperatorToLast = false)
-        {
-            path = path.Replace("\\", "/");
-
-            if (addSeperatorToBegin) path = "/" + path;
-            if (addSeperatorToLast) path = path + "/";
-
-            return path;
-        }
+        
     }
 }

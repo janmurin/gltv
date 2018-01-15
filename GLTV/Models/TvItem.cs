@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using GLTV.Extensions;
 
 namespace GLTV.Models
 {
@@ -63,6 +65,9 @@ namespace GLTV.Models
         [Required]
         public string FileName { get; set; }
         public long Length { get; set; }
+
+        [NotMapped]
+        public string Url { get; set; }
     }
 
     public enum TvItemType
