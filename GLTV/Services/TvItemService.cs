@@ -13,9 +13,12 @@ namespace GLTV.Services
 {
     public class TvItemService : ServiceBase, ITvItemService
     {
-        public TvItemService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
+        private readonly IFileService _fileService;
+
+        public TvItemService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager, IFileService fileService)
             : base(context, env, signInManager)
         {
+            _fileService = fileService;
         }
 
         public TvItem FetchTvItem(int id)
@@ -31,6 +34,38 @@ namespace GLTV.Services
             tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
 
             return tvItem;
+        }
+
+        public bool DeleteTvItem(int id)
+        {
+            _fileService.DeleteFiles(id);
+
+            var tvItem = _context.TvItem.SingleOrDefault(m => m.ID == id);
+            if (tvItem == null)
+            {
+                throw new Exception($"Item not found with id {id}.");
+            }
+
+            _context.TvItem.Remove(tvItem);
+            _context.SaveChanges();
+
+            return true;
+        }
+
+        public List<TvItem> FetchTvItems()
+        {
+            List<TvItem> tvItems = _context.TvItem.ToList();
+            List<TvItemLocation> tvItemLocations = _context.TvItemLocation.ToList();
+            List<TvItemFile> tvItemFiles = _context.TvItemFile.ToList();
+
+            foreach (TvItem tvItem in tvItems)
+            {
+                tvItem.Locations = tvItemLocations.Where(x => x.TvItemId == tvItem.ID).ToList();
+                tvItem.Files = tvItemFiles.Where(x => x.TvItemId == tvItem.ID).ToList();
+                tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
+            }
+
+            return tvItems;
         }
     }
 }

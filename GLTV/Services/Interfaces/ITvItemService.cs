@@ -9,5 +9,7 @@ namespace GLTV.Services
     public interface ITvItemService
     {
         TvItem FetchTvItem(int id);
+        bool DeleteTvItem(int id);
+        List<TvItem> FetchTvItems();
     }
 }

@@ -14,9 +14,12 @@ namespace GLTV.Services
 {
     public class FileService : ServiceBase, IFileService
     {
-        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
+        private readonly ITvItemService _tvItemService;
+
+        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager, ITvItemService tvItemService)
             : base(context, env, signInManager)
         {
+            _tvItemService = tvItemService;
         }
 
         public Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
@@ -56,12 +59,51 @@ namespace GLTV.Services
 
         public bool DeleteFile(string filename)
         {
-            throw new NotImplementedException();
+            TvItemFile tvItemFile = _context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
+            if (tvItemFile == null)
+            {
+                throw new Exception($"TvItemFile not found with filename[{filename}].");
+            }
+
+            string path = Path.Combine(WebRootPath, filename);
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            return true;
         }
 
         public bool DeleteFiles(int tvItemId)
         {
-            throw new NotImplementedException();
+            List<TvItemFile> files = _tvItemService.FetchTvItem(tvItemId).Files;
+
+            foreach (TvItemFile file in files)
+            {
+                string path = Path.Combine(WebRootPath, file.FileName);
+                try
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    //throw;
+                }
+            }
+
+            return true;
         }
 
         public byte[] GetBytes(string filename)
@@ -69,6 +111,6 @@ namespace GLTV.Services
             throw new NotImplementedException();
         }
 
-        
+
     }
 }

@@ -18,7 +18,7 @@ using Microsoft.Extensions.FileProviders;
 namespace GLTV.Controllers
 {
     [Authorize]
-    [Route("[controller]/[action]")]
+    [Route("[controller]/[action]/{id?}")]
     public class TvItemsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -36,12 +36,7 @@ namespace GLTV.Controllers
         // GET: TvItems
         public async Task<IActionResult> Index()
         {
-            List<TvItem> tvItems = await _context.TvItem.ToListAsync();
-            List<TvItemLocation> tvItemLocations = await _context.TvItemLocation.ToListAsync();
-            foreach (TvItem tvItem in tvItems)
-            {
-                tvItem.Locations = tvItemLocations.Where(x => x.TvItemId == tvItem.ID).ToList();
-            }
+            List<TvItem> tvItems = _tvItemService.FetchTvItems();
 
             return View(tvItems);
         }
@@ -106,20 +101,11 @@ namespace GLTV.Controllers
             return View(model);
         }
 
-        // GET: TvItems/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            TvItem item = _tvItemService.FetchTvItem(id);
 
-            var tvItem = await _context.TvItem.SingleOrDefaultAsync(m => m.ID == id);
-            if (tvItem == null)
-            {
-                return NotFound();
-            }
-            return View(tvItem);
+            return View(item);
         }
 
         // POST: TvItems/Edit/5
@@ -157,32 +143,19 @@ namespace GLTV.Controllers
             return View(tvItem);
         }
 
-        // GET: TvItems/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            TvItem item = _tvItemService.FetchTvItem(id);
 
-            var tvItem = await _context.TvItem
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (tvItem == null)
-            {
-                return NotFound();
-            }
-
-            return View(tvItem);
+            return View(item);
         }
 
-        // POST: TvItems/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tvItem = await _context.TvItem.SingleOrDefaultAsync(m => m.ID == id);
-            _context.TvItem.Remove(tvItem);
-            await _context.SaveChangesAsync();
+            _tvItemService.DeleteTvItem(id);
+            
             return RedirectToAction(nameof(Index));
         }
 
