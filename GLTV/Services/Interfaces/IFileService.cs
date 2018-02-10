@@ -11,7 +11,7 @@ namespace GLTV.Services
     {
         Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files);
         bool DeleteFile(string filename);
-        bool DeleteFiles(int tvItemId);
+        bool DeleteFiles(List<TvItemFile> files);
         byte[] GetBytes(string filename);
     }
 }

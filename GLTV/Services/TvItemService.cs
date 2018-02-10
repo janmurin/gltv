@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,13 +39,13 @@ namespace GLTV.Services
 
         public bool DeleteTvItem(int id)
         {
-            _fileService.DeleteFiles(id);
-
             var tvItem = _context.TvItem.SingleOrDefault(m => m.ID == id);
             if (tvItem == null)
             {
                 throw new Exception($"Item not found with id {id}.");
             }
+
+            _fileService.DeleteFiles(FetchTvItem(id).Files);
 
             _context.TvItem.Remove(tvItem);
             _context.SaveChanges();
@@ -66,6 +67,21 @@ namespace GLTV.Services
             }
 
             return tvItems;
+        }
+
+        public bool AddTvItem(TvItem item, List<TvItemLocation> tvItemLocations)
+        {
+            _context.Add(item);
+
+            foreach (TvItemLocation itemLocation in tvItemLocations)
+            {
+                itemLocation.TvItemId = item.ID;
+            }
+
+            _context.AddRange(tvItemLocations);
+            _context.SaveChanges();
+
+            return true;
         }
     }
 }

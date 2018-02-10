@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace GLTV.Services
 {
@@ -11,5 +12,6 @@ namespace GLTV.Services
         TvItem FetchTvItem(int id);
         bool DeleteTvItem(int id);
         List<TvItem> FetchTvItems();
+        bool AddTvItem(TvItem item, List<TvItemLocation> tvItemLocations);
     }
 }

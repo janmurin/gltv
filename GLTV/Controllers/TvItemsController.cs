@@ -24,7 +24,6 @@ namespace GLTV.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IFileService _fileService;
         private readonly ITvItemService _tvItemService;
-        private IHostingEnvironment _env;
 
         public TvItemsController(ApplicationDbContext context, IFileService fileService, ITvItemService tvItemService)
         {
@@ -55,9 +54,6 @@ namespace GLTV.Controllers
             return View("Create", new TvItemEditViewModel());
         }
 
-        // POST: TvItems/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(1073741824)]
@@ -69,28 +65,25 @@ namespace GLTV.Controllers
                 TvItem item = model.TvItem;
                 item.Author = User.Identity.Name;
                 item.TimeInserted = DateTime.Now;
-                _context.Add(item);
-                _context.SaveChanges();
-
+                
                 // add locations
                 model.TvItem.Locations = new List<TvItemLocation>();
                 if (model.LocationCheckboxes.LocationBanskaBystrica)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.BanskaBystrica });
+                    model.TvItem.Locations.Add(new TvItemLocation() { Location = Location.BanskaBystrica });
                 }
 
                 if (model.LocationCheckboxes.LocationKosice)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Kosice });
+                    model.TvItem.Locations.Add(new TvItemLocation() { Location = Location.Kosice });
                 }
 
                 if (model.LocationCheckboxes.LocationZilina)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
+                    model.TvItem.Locations.Add(new TvItemLocation() { Location = Location.Zilina });
                 }
 
-                _context.AddRange(model.TvItem.Locations);
-                _context.SaveChanges();
+                _tvItemService.AddTvItem(item, model.TvItem.Locations);
 
                 // add files
                 List<TvItemFile> files = await _fileService.SaveFiles(item.ID, model.Files);
@@ -155,7 +148,7 @@ namespace GLTV.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             _tvItemService.DeleteTvItem(id);
-            
+
             return RedirectToAction(nameof(Index));
         }
 

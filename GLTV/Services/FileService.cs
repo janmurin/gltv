@@ -14,12 +14,9 @@ namespace GLTV.Services
 {
     public class FileService : ServiceBase, IFileService
     {
-        private readonly ITvItemService _tvItemService;
-
-        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager, ITvItemService tvItemService)
+        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
             : base(context, env, signInManager)
         {
-            _tvItemService = tvItemService;
         }
 
         public Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
@@ -82,10 +79,8 @@ namespace GLTV.Services
             return true;
         }
 
-        public bool DeleteFiles(int tvItemId)
+        public bool DeleteFiles(List<TvItemFile> files)
         {
-            List<TvItemFile> files = _tvItemService.FetchTvItem(tvItemId).Files;
-
             foreach (TvItemFile file in files)
             {
                 string path = Path.Combine(WebRootPath, file.FileName);
