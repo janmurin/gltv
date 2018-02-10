@@ -21,13 +21,11 @@ namespace GLTV.Controllers
     [Route("[controller]/[action]/{id?}")]
     public class TvItemsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IFileService _fileService;
         private readonly ITvItemService _tvItemService;
 
-        public TvItemsController(ApplicationDbContext context, IFileService fileService, ITvItemService tvItemService)
+        public TvItemsController(IFileService fileService, ITvItemService tvItemService)
         {
-            _context = context;
             _fileService = fileService;
             _tvItemService = tvItemService;
         }
@@ -51,13 +49,13 @@ namespace GLTV.Controllers
         // GET: TvItems/Create
         public IActionResult Create()
         {
-            return View("Create", new TvItemEditViewModel());
+            return View("Create", new TvItemCreateViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(1073741824)]
-        public async Task<IActionResult> Create([Bind]TvItemEditViewModel model)
+        public async Task<IActionResult> Create([Bind]TvItemCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -65,7 +63,7 @@ namespace GLTV.Controllers
                 TvItem item = model.TvItem;
                 item.Author = User.Identity.Name;
                 item.TimeInserted = DateTime.Now;
-                
+
                 // add locations
                 model.TvItem.Locations = new List<TvItemLocation>();
                 if (model.LocationCheckboxes.LocationBanskaBystrica)
@@ -98,42 +96,54 @@ namespace GLTV.Controllers
         {
             TvItem item = _tvItemService.FetchTvItem(id);
 
-            return View(item);
+            var model = new TvItemEditViewModel();
+            model.TvItem = item;
+            model.LocationCheckboxes.LocationBanskaBystrica =
+                item.Locations.Any(x => x.Location == Location.BanskaBystrica);
+            model.LocationCheckboxes.LocationKosice =
+                item.Locations.Any(x => x.Location == Location.Kosice);
+            model.LocationCheckboxes.LocationZilina =
+                item.Locations.Any(x => x.Location == Location.Zilina);
+
+            return View(model);
         }
 
-        // POST: TvItems/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,TimeInserted,StartTime,EndTime,Author,Duration,Type")] TvItem tvItem)
+        public async Task<IActionResult> Edit([Bind]TvItemEditViewModel model)
         {
-            if (id != tvItem.ID)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
+                // update item
+                TvItem item = _tvItemService.FetchTvItem(model.TvItem.ID);
+                item.Title = model.TvItem.Title;
+                item.StartTime = model.TvItem.StartTime;
+                item.EndTime = model.TvItem.EndTime;
+                item.Duration = model.TvItem.Duration;
+
+                // update locations
+                model.TvItem.Locations = new List<TvItemLocation>();
+                if (model.LocationCheckboxes.LocationBanskaBystrica)
                 {
-                    _context.Update(tvItem);
-                    await _context.SaveChangesAsync();
+                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.BanskaBystrica });
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (model.LocationCheckboxes.LocationKosice)
                 {
-                    if (!TvItemExists(tvItem.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Kosice });
                 }
+
+                if (model.LocationCheckboxes.LocationZilina)
+                {
+                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
+                }
+
+                _tvItemService.UpdateTvItem(item, model.TvItem.Locations);
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(tvItem);
+
+            return View(model);
         }
 
         public async Task<IActionResult> Delete(int id)
@@ -152,9 +162,5 @@ namespace GLTV.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TvItemExists(int id)
-        {
-            return _context.TvItem.Any(e => e.ID == id);
-        }
     }
 }

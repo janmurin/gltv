@@ -13,5 +13,6 @@ namespace GLTV.Services
         bool DeleteTvItem(int id);
         List<TvItem> FetchTvItems();
         bool AddTvItem(TvItem item, List<TvItemLocation> tvItemLocations);
+        bool UpdateTvItem(TvItem item, List<TvItemLocation> tvItemLocations);
     }
 }

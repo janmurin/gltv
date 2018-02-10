@@ -14,6 +14,7 @@ namespace GLTV.Models
         public TvItemEditViewModel()
         {
             TypeDropdownItems = Utils.Types;
+            LocationCheckboxes = new CheckBoxList();
         }
 
         public TvItem TvItem { get; set; }
@@ -22,9 +23,6 @@ namespace GLTV.Models
 
         [Display(Name = "Locations")]
         public CheckBoxList LocationCheckboxes { get; set; }
-
-        [Required(ErrorMessage = "At least one file is required.")]
-        public List<IFormFile> Files { get; set; }
     }
 
     [ValidateAtLeastOneChecked(ErrorMessage = "At least one location must be checked.")]

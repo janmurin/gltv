@@ -83,5 +83,18 @@ namespace GLTV.Services
 
             return true;
         }
+
+        public bool UpdateTvItem(TvItem item, List<TvItemLocation> tvItemLocations)
+        {
+            _context.Update(item);
+
+            List<TvItemLocation> itemLocations = _context.TvItemLocation.Where(m => m.TvItemId == item.ID).ToList();
+            _context.TvItemLocation.RemoveRange(itemLocations);
+
+            _context.AddRange(tvItemLocations);
+            _context.SaveChanges();
+
+            return true;
+        }
     }
 }
