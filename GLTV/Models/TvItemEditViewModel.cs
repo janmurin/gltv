@@ -17,6 +17,7 @@ namespace GLTV.Models
             LocationCheckboxes = new CheckBoxList();
         }
 
+        [TvItemValidation(ErrorMessage = "StartTime is after EndTime")]
         public TvItem TvItem { get; set; }
 
         public List<SelectListItem> TypeDropdownItems { get; internal set; }
@@ -47,6 +48,21 @@ namespace GLTV.Models
                 {
                     return ValidationResult.Success;
                 }
+            }
+
+            return new ValidationResult(base.ErrorMessageString);
+        }
+    }
+
+    public class TvItemValidationAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            TvItem item = (TvItem)value;
+
+            if (DateTime.Compare(item.StartTime, item.EndTime) < 0)
+            {
+                return ValidationResult.Success;
             }
 
             return new ValidationResult(base.ErrorMessageString);

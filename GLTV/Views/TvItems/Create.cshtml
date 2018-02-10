@@ -1,4 +1,4 @@
-﻿@model GLTV.Models.TvItemEditViewModel
+﻿@model GLTV.Models.TvItemCreateViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -43,7 +43,7 @@
                 </div>
                 <span asp-validation-for="TvItem.EndTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="durationGroup">
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 <input asp-for="TvItem.Duration" class="form-control" />
                 <span asp-validation-for="TvItem.Duration" class="text-danger"></span>
@@ -82,7 +82,7 @@
                 <span asp-validation-for="Files" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default"/>
+                <input type="submit" value="Create" class="btn btn-default" />
             </div>
         </div>
     </form>
@@ -142,6 +142,11 @@
                 span.addClass('field-validation-error');
                 span.text('Total file size must not be greater than 1073741824 bytes (1 GB).');
                 return false;
+            } else if (totalFileSize == 0) {
+                span.removeClass('field-validation-valid');
+                span.addClass('field-validation-error');
+                span.text('At least one file is required.');
+                return false;
             } else {
                 span.addClass('field-validation-valid');
                 span.removeClass('field-validation-error');
@@ -170,7 +175,7 @@
         });
 
         $('#typeDropdown').change(function() {
-            console.log('type dropdown change: ' + $('#typeDropdown').val());
+            //console.log('type dropdown change: ' + $('#typeDropdown').val());
             $('#fileInput').fileinput('clear');
 
             var value = $('#typeDropdown').val();
@@ -184,14 +189,18 @@
                 $('#fileInput').removeAttr("multiple");
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".mp4,.mkv");
+                $('#durationGroup').hide();
+                $('#@(Html.IdFor(model=>model.TvItem.Duration))').val(3);
             } else if (value == "@((int)TvItemType.Gallery)") {
                 $('#fileInput').attr("multiple", true);
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".jpg,.jpe,.bmp,.jpeg,.png");
+                $('#durationGroup').show();
             } else {
                 $('#fileInput').removeAttr("multiple");
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".jpg,.jpe,.bmp,.jpeg,.png");
+                $('#durationGroup').show();
             }
         });
 

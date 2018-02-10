@@ -1,18 +1,19 @@
-﻿@model GLTV.Models.TvItemEditViewModel
+﻿@using System.Globalization
+@model GLTV.Models.TvItemEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
+<h2>Edit</h2>
 
 <h4>TvItem</h4>
 <hr />
 <div class="row">
     <form asp-action="Edit" id="editTvItemForm" method="post" enctype="multipart/form-data">
         <div class="col-md-4">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             @Html.HiddenFor(model => model.TvItem.ID)
             <div class="form-group">
                 <label asp-for="TvItem.Author" class="control-label"></label>
@@ -53,7 +54,14 @@
             </div>
             <div class="form-group">
                 <label asp-for="TvItem.Duration" class="control-label"></label>
-                <input asp-for="TvItem.Duration" class="form-control" />
+                @if (Model.TvItem.Type == TvItemType.Video)
+                {
+                    <input asp-for="TvItem.Duration" class="form-control" readonly />
+                }
+                else
+                {
+                    <input asp-for="TvItem.Duration" class="form-control" />
+                }
                 <span asp-validation-for="TvItem.Duration" class="text-danger"></span>
             </div>
             <div class="form-group" id="locationsGroup">
@@ -84,7 +92,7 @@
         </div>
         <div class="col-md-12">
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default"/>
+                <input type="submit" value="Update" class="btn btn-default" />
             </div>
         </div>
     </form>
@@ -134,7 +142,7 @@ else
     }
 }
 
-<div>
+<div style="padding-top: 50px;">
     <a asp-action="Index">Back to List</a>
 </div>
 
@@ -143,11 +151,13 @@ else
     $(function () {
         var startTimeDp = $('#startTimeInput').datetimepicker({
             locale: 'sk',
-            defaultDate: new Date()
+            useCurrent: false,
+            //maxDate: new Date('@(Model.TvItem.EndTime.ToString("o", CultureInfo.InvariantCulture))')
         });
         var endTimeDp = $('#endTimeInput').datetimepicker({
             useCurrent: false, //Important! See issue #1075
-            locale: 'sk'
+            locale: 'sk',
+            //minDate: new Date('@(Model.TvItem.StartTime.ToString("o", CultureInfo.InvariantCulture))')
         });
         startTimeDp.on("dp.change",
             function (e) {
@@ -157,6 +167,8 @@ else
             function (e) {
                 startTimeDp.data("DateTimePicker").maxDate(e.date);
             });
+        @*endTimeDp.data("DateTimePicker").minDate(new Date('@(Model.TvItem.StartTime.ToString("o", CultureInfo.InvariantCulture))'));
+        startTimeDp.data("DateTimePicker").maxDate(new Date('@(Model.TvItem.EndTime.ToString("o", CultureInfo.InvariantCulture))'));*@
 
         $('input.location-checkbox').change(function () {
             validateLocationCheckboxes();

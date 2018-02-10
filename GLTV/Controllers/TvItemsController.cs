@@ -112,10 +112,11 @@ namespace GLTV.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind]TvItemEditViewModel model)
         {
+            TvItem item = _tvItemService.FetchTvItem(model.TvItem.ID);
+
             if (ModelState.IsValid)
             {
                 // update item
-                TvItem item = _tvItemService.FetchTvItem(model.TvItem.ID);
                 item.Title = model.TvItem.Title;
                 item.StartTime = model.TvItem.StartTime;
                 item.EndTime = model.TvItem.EndTime;
@@ -142,6 +143,8 @@ namespace GLTV.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+
+            model.TvItem.Files = item.Files;
 
             return View(model);
         }
