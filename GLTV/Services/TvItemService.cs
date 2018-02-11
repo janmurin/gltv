@@ -45,17 +45,17 @@ namespace GLTV.Services
                 throw new Exception($"Item not found with id {id}.");
             }
 
-            _fileService.DeleteFiles(FetchTvItem(id).Files);
+            // items are never actually deleted
+            tvItem.Deleted = true;
 
-            _context.TvItem.Remove(tvItem);
             _context.SaveChanges();
 
             return true;
         }
 
-        public List<TvItem> FetchTvItems()
+        public List<TvItem> FetchTvItems(bool deleted)
         {
-            List<TvItem> tvItems = _context.TvItem.ToList();
+            List<TvItem> tvItems = _context.TvItem.Where(x => x.Deleted == deleted).OrderByDescending(x => x.TimeInserted).ToList();
             List<TvItemLocation> tvItemLocations = _context.TvItemLocation.ToList();
             List<TvItemFile> tvItemFiles = _context.TvItemFile.ToList();
 
@@ -96,5 +96,6 @@ namespace GLTV.Services
 
             return true;
         }
+
     }
 }

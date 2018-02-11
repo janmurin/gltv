@@ -33,7 +33,14 @@ namespace GLTV.Controllers
         // GET: TvItems
         public async Task<IActionResult> Index()
         {
-            List<TvItem> tvItems = _tvItemService.FetchTvItems();
+            List<TvItem> tvItems = _tvItemService.FetchTvItems(false);
+
+            return View(tvItems);
+        }
+
+        public async Task<IActionResult> IndexDeleted()
+        {
+            List<TvItem> tvItems = _tvItemService.FetchTvItems(true);
 
             return View(tvItems);
         }
@@ -165,5 +172,15 @@ namespace GLTV.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost, ActionName("DeleteFiles")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFiles(int id)
+        {
+            TvItem item = _tvItemService.FetchTvItem(id);
+
+            _fileService.DeleteFiles(item.Files);
+
+            return RedirectToAction(nameof(IndexDeleted));
+        }
     }
 }

@@ -91,6 +91,9 @@ namespace GLTV.Services
                     {
                         File.Delete(path);
                     }
+
+                    file.Deleted = true;
+                    _context.TvItemFile.Update(file);
                 }
                 catch (Exception e)
                 {
@@ -98,6 +101,8 @@ namespace GLTV.Services
                     //throw;
                 }
             }
+
+            _context.SaveChanges();
 
             return true;
         }

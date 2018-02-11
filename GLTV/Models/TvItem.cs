@@ -66,6 +66,7 @@ namespace GLTV.Models
         [Required]
         public string FileName { get; set; }
         public long Length { get; set; }
+        public bool Deleted { get; set; }
 
         [NotMapped]
         public string Url { get; set; }
