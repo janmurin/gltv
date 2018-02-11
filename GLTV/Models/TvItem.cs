@@ -35,6 +35,7 @@ namespace GLTV.Models
         public DateTime EndTime { get; set; }
 
         public string Author { get; set; }
+        public bool Deleted { get; set; }
 
         [Required]
         [Range(3, 120)]

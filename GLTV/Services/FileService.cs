@@ -83,6 +83,7 @@ namespace GLTV.Services
         {
             foreach (TvItemFile file in files)
             {
+                Console.WriteLine("deleting files: " + String.Join(", ", files.Select(x => x.FileName)));
                 string path = Path.Combine(WebRootPath, file.FileName);
                 try
                 {
