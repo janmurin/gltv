@@ -19,13 +19,13 @@ namespace GLTV.Extensions
                 switch (itemLocation.Location)
                 {
                     case Location.BanskaBystrica:
-                        items.Add("BB");
+                        items.Add(Constants.BB);
                         break;
                     case Location.Kosice:
-                        items.Add("KE");
+                        items.Add(Constants.KE);
                         break;
                     case Location.Zilina:
-                        items.Add("ZA");
+                        items.Add(Constants.ZA);
                         break;
                 }
             }

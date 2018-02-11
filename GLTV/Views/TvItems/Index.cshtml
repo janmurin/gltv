@@ -1,46 +1,117 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using GLTV.Extensions
-@model IEnumerable<GLTV.Models.TvItem>
+@model TvItemsViewModel
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Index</h2>
+<h2>Active TvItems</h2>
 
 <p>
     <a asp-action="Create" class="btn btn-success">Create New</a>
+    <div class="pull-right" style="padding: 10px;" id="locationRadioDiv">
+        <span style="font-weight: bold; padding-right: 20px;">Filter by location:</span>
+        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="-1" checked>All</label>
+        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="@((int)Location.Kosice)">@Constants.KE</label>
+        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="@((int)Location.Zilina)">@Constants.ZA</label>
+        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="@((int)Location.BanskaBystrica)">@Constants.BB</label>
+    </div>
 </p>
-<table class="table">
+<table class="table" id="activeItemsTable">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                Title
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.StartTime)
+                Start Time
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EndTime)
+                End Time
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Author)
+                Author
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Duration)
+                Total Duration
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Type)
+                Type
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Locations)
+                Locations
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.ActiveTvItems)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Author)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Duration)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td class="location-col">
+                    @Utils.GetLocationsString(item.Locations)
+                </td>
+                <td>
+                    <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                    <a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                    <a asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2 style="padding-top: 100px;">Expired TvItems</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Title
+            </th>
+            <th>
+                Start Time
+            </th>
+            <th>
+                End Time
+            </th>
+            <th>
+                Author
+            </th>
+            <th>
+                Total Duration
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Locations
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ExpiredTvItems)
         {
             <tr>
                 <td>
@@ -73,3 +144,36 @@
         }
     </tbody>
 </table>
+
+<script type="text/javascript">
+    $(function () {
+        $('#locationRadioDiv .location-radio').on('change',
+            function() {
+                var value = $(this).val();
+
+                $('#activeItemsTable > tbody > tr > td.location-col').each(function(index) {
+                    var text = $(this).text().trim();
+
+                    if (value == -1) {
+                        $(this).closest('tr').show();
+                        return;
+                    }
+
+                    if (text.includes("@Constants.KE") && value == @((int)Location.Kosice)) {
+                        $(this).closest('tr').show();
+                        return;
+                    } else if (text.includes("@Constants.ZA") && value == @((int)Location.Zilina)) {
+                        $(this).closest('tr').show();
+                        return;
+                    } else if (text.includes("@Constants.BB") && value == @((int)Location.BanskaBystrica)) {
+                        $(this).closest('tr').show();
+                        return;
+                    } else {
+                        $(this).closest('tr').hide();
+                        return;
+                    }
+                });
+            });
+    });
+
+</script>

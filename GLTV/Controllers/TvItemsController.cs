@@ -34,8 +34,11 @@ namespace GLTV.Controllers
         public async Task<IActionResult> Index()
         {
             List<TvItem> tvItems = _tvItemService.FetchTvItems(false);
+            var model = new TvItemsViewModel();
+            model.ActiveTvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
+            model.ExpiredTvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.EndTime) > 0).ToList();
 
-            return View(tvItems);
+            return View(model);
         }
 
         public async Task<IActionResult> IndexDeleted()
