@@ -76,23 +76,23 @@ namespace GLTV.Controllers
                 item.TimeInserted = DateTime.Now;
 
                 // add locations
-                model.TvItem.Locations = new List<TvItemLocation>();
+                item.Locations = new List<TvItemLocation>();
                 if (model.LocationCheckboxes.LocationBanskaBystrica)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { Location = Location.BanskaBystrica });
+                    item.Locations.Add(new TvItemLocation() { Location = Location.BanskaBystrica });
                 }
 
                 if (model.LocationCheckboxes.LocationKosice)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { Location = Location.Kosice });
+                    item.Locations.Add(new TvItemLocation() { Location = Location.Kosice });
                 }
 
                 if (model.LocationCheckboxes.LocationZilina)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { Location = Location.Zilina });
+                    item.Locations.Add(new TvItemLocation() { Location = Location.Zilina });
                 }
 
-                _tvItemService.AddTvItem(item, model.TvItem.Locations);
+                _tvItemService.AddTvItem(item);
 
                 // add files
                 List<TvItemFile> files = await _fileService.SaveFiles(item.ID, model.Files);
@@ -100,6 +100,22 @@ namespace GLTV.Controllers
                 {
                     TvItemFile file = files[0];
                     IMediaInfo mediaInfo = new MediaInfo(file.AbsolutePath);
+                    try
+                    {
+                        item.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
+                        if (item.Duration == 0)
+                        {
+                            throw new Exception("Video duration is 0s.");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _tvItemService.DeleteTvItem(item.ID);
+                        Console.WriteLine(e);
+                        ModelState.AddModelError("", e.Message);
+                        return View(model);
+                    }
+                    _tvItemService.UpdateTvItem(item);
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -139,23 +155,23 @@ namespace GLTV.Controllers
                 item.Duration = model.TvItem.Duration;
 
                 // update locations
-                model.TvItem.Locations = new List<TvItemLocation>();
+                item.Locations = new List<TvItemLocation>();
                 if (model.LocationCheckboxes.LocationBanskaBystrica)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.BanskaBystrica });
+                    item.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.BanskaBystrica });
                 }
 
                 if (model.LocationCheckboxes.LocationKosice)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Kosice });
+                    item.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Kosice });
                 }
 
                 if (model.LocationCheckboxes.LocationZilina)
                 {
-                    model.TvItem.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
+                    item.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
                 }
 
-                _tvItemService.UpdateTvItem(item, model.TvItem.Locations);
+                _tvItemService.UpdateTvItem(item);
 
                 return RedirectToAction(nameof(Index));
             }

@@ -27,9 +27,6 @@ namespace GLTV.Services
 
                 foreach (var file in files)
                 {
-                    // TODO: validation of extensions, video length and image size
-                    //if (file.Length <= 0) continue;
-
                     string filename = tvItemId + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
 
                     using (var fileStream = new FileStream(Path.Combine(WebRootPath, filename), FileMode.Create))
@@ -46,10 +43,10 @@ namespace GLTV.Services
                         Url = MakeWebPath(filename)
                     };
 
-                    _context.Add(itemFile);
                     result.Add(itemFile);
                 }
 
+                _context.AddRange(result);
                 _context.SaveChanges();
 
                 return result;

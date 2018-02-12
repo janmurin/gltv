@@ -24,14 +24,16 @@ namespace GLTV.Services
 
         public TvItem FetchTvItem(int id)
         {
-            var tvItem = _context.TvItem.SingleOrDefault(m => m.ID == id);
+            var tvItem = _context.TvItem
+                .Include(x => x.Files)
+                .Include(y => y.Locations)
+                .SingleOrDefault(m => m.ID == id);
+
             if (tvItem == null)
             {
                 throw new Exception($"Item not found with id {id}.");
             }
 
-            tvItem.Locations = _context.TvItemLocation.ToList().Where(x => x.TvItemId == tvItem.ID).ToList();
-            tvItem.Files = _context.TvItemFile.ToList().Where(x => x.TvItemId == tvItem.ID).ToList();
             tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
             tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
 
@@ -56,14 +58,15 @@ namespace GLTV.Services
 
         public List<TvItem> FetchTvItems(bool deleted)
         {
-            List<TvItem> tvItems = _context.TvItem.Where(x => x.Deleted == deleted).OrderByDescending(x => x.TimeInserted).ToList();
-            List<TvItemLocation> tvItemLocations = _context.TvItemLocation.ToList();
-            List<TvItemFile> tvItemFiles = _context.TvItemFile.ToList();
+            List<TvItem> tvItems = _context.TvItem
+                .Include(x => x.Files)
+                .Include(y => y.Locations)
+                .Where(x => x.Deleted == deleted)
+                .OrderByDescending(x => x.TimeInserted)
+                .ToList();
 
             foreach (TvItem tvItem in tvItems)
             {
-                tvItem.Locations = tvItemLocations.Where(x => x.TvItemId == tvItem.ID).ToList();
-                tvItem.Files = tvItemFiles.Where(x => x.TvItemId == tvItem.ID).ToList();
                 tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
                 tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
             }
@@ -71,29 +74,17 @@ namespace GLTV.Services
             return tvItems;
         }
 
-        public bool AddTvItem(TvItem item, List<TvItemLocation> tvItemLocations)
+        public bool AddTvItem(TvItem item)
         {
             _context.Add(item);
-
-            foreach (TvItemLocation itemLocation in tvItemLocations)
-            {
-                itemLocation.TvItemId = item.ID;
-            }
-
-            _context.AddRange(tvItemLocations);
             _context.SaveChanges();
 
             return true;
         }
 
-        public bool UpdateTvItem(TvItem item, List<TvItemLocation> tvItemLocations)
+        public bool UpdateTvItem(TvItem item)
         {
             _context.Update(item);
-
-            List<TvItemLocation> itemLocations = _context.TvItemLocation.Where(m => m.TvItemId == item.ID).ToList();
-            _context.TvItemLocation.RemoveRange(itemLocations);
-
-            _context.AddRange(tvItemLocations);
             _context.SaveChanges();
 
             return true;
