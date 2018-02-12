@@ -33,6 +33,7 @@ namespace GLTV.Services
             tvItem.Locations = _context.TvItemLocation.ToList().Where(x => x.TvItemId == tvItem.ID).ToList();
             tvItem.Files = _context.TvItemFile.ToList().Where(x => x.TvItemId == tvItem.ID).ToList();
             tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
+            tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
 
             return tvItem;
         }
@@ -64,6 +65,7 @@ namespace GLTV.Services
                 tvItem.Locations = tvItemLocations.Where(x => x.TvItemId == tvItem.ID).ToList();
                 tvItem.Files = tvItemFiles.Where(x => x.TvItemId == tvItem.ID).ToList();
                 tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
+                tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
             }
 
             return tvItems;

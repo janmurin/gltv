@@ -41,7 +41,9 @@ namespace GLTV.Services
                     {
                         FileName = filename,
                         Length = file.Length,
-                        TvItemId = tvItemId
+                        TvItemId = tvItemId,
+                        AbsolutePath = Path.Combine(WebRootPath, filename),
+                        Url = MakeWebPath(filename)
                     };
 
                     _context.Add(itemFile);

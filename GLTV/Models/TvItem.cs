@@ -70,6 +70,8 @@ namespace GLTV.Models
 
         [NotMapped]
         public string Url { get; set; }
+        [NotMapped]
+        public string AbsolutePath { get; set; }
     }
 
     public enum TvItemType

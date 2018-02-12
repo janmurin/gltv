@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.Extensions.FileProviders;
+using Xabe.FFmpeg;
 
 namespace GLTV.Controllers
 {
@@ -95,6 +96,11 @@ namespace GLTV.Controllers
 
                 // add files
                 List<TvItemFile> files = await _fileService.SaveFiles(item.ID, model.Files);
+                if (item.Type == TvItemType.Video)
+                {
+                    TvItemFile file = files[0];
+                    IMediaInfo mediaInfo = new MediaInfo(file.AbsolutePath);
+                }
 
                 return RedirectToAction(nameof(Index));
             }
