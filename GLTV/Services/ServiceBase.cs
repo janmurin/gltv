@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -75,6 +76,11 @@ namespace GLTV.Services
             if (addSeperatorToLast) path = path + "/";
 
             return path;
+        }
+
+        protected string MakeFullWebPath(string filename)
+        {
+            return string.Concat(Constants.SERVER_URL, MakeWebPath(filename));
         }
     }
 }

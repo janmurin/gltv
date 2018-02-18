@@ -90,5 +90,25 @@ namespace GLTV.Services
             return true;
         }
 
+        public List<TvItem> FetchActiveTvItems(Location location)
+        {
+            List<TvItem> tvItems = _context.TvItem
+                .Include(x => x.Files)
+                .Include(y => y.Locations)
+                .Where(x => x.Deleted == false
+                            && x.Locations.Select(y => y.Location).Contains(location)
+                            && DateTime.Compare(DateTime.Now, x.StartTime) > 0
+                            && DateTime.Compare(DateTime.Now, x.EndTime) < 0)
+                .OrderByDescending(x => x.TimeInserted)
+                .ToList();
+
+            foreach (TvItem tvItem in tvItems)
+            {
+                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName));
+                tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
+            }
+
+            return tvItems;
+        }
     }
 }

@@ -28,8 +28,9 @@ namespace GLTV.Controllers
         {
             List<TvItem> tvItems = _tvItemService.FetchTvItems(false);
             var model = new TvItemsViewModel();
+            // these active items list contains items that were not yet played on tv screens
             model.ActiveTvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
-            model.ExpiredTvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.EndTime) > 0).ToList();
+            model.ExpiredTvItems = tvItems.Where(x => !model.ActiveTvItems.Select(y => y.ID).Contains(x.ID)).ToList();
 
             return View(model);
         }

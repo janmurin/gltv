@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -44,6 +45,9 @@ namespace GLTV
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
             });
+
+            Constants.ANDROID_TOKEN = Configuration["androidToken"];
+            Constants.SERVER_URL = Configuration["serverUrl"];
 
             services.Configure<IdentityOptions>(options =>
             {
