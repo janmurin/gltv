@@ -5,10 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using SixLabors.ImageSharp;
+using Xabe.FFmpeg;
 
 namespace GLTV.Services
 {
@@ -19,38 +22,92 @@ namespace GLTV.Services
         {
         }
 
-        public Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files)
+        public bool SaveVideoFile(TvItem tvItem, IFormFile file)
         {
-            return Task.Run(async () =>
+            string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
+            string path = Path.Combine(WebRootPath, filename);
+
+            using (var fileStream = new FileStream(path, FileMode.Create))
             {
-                var result = new List<TvItemFile>();
+                file.CopyTo(fileStream);
+            }
 
-                foreach (var file in files)
+            IMediaInfo mediaInfo = new MediaInfo(path);
+            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
+            if (tvItem.Duration == 0)
+            {
+                throw new Exception("Video duration is 0s.");
+            }
+
+            TvItemFile itemFile = new TvItemFile()
+            {
+                FileName = filename,
+                Length = file.Length,
+                TvItemId = tvItem.ID
+            };
+
+            _context.Add(itemFile);
+            _context.SaveChanges();
+
+            return true;
+        }
+
+        public bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles)
+        {
+            foreach (IFormFile formFile in modelFiles)
+            {
+                Image<Rgba32> image = null;
+                Stream inputStream = formFile.OpenReadStream();
+
+                image = Image.Load(inputStream);
+                double height = image.Height;
+                double width = image.Width;
+
+                if (width > Constants.MAX_IMAGE_WIDTH)
                 {
-                    string filename = tvItemId + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    double k = width / Constants.MAX_IMAGE_WIDTH;
+                    image.Mutate(x => x.Resize(Constants.MAX_IMAGE_WIDTH, (int)(height / k)));
+                }
+                height = image.Height;
+                if (height > Constants.MAX_IMAGE_HEIGHT)
+                {
+                    double k = height / Constants.MAX_IMAGE_HEIGHT;
+                    image.Mutate(x => x.Resize((int)(width / k), Constants.MAX_IMAGE_HEIGHT));
+                }
 
-                    using (var fileStream = new FileStream(Path.Combine(WebRootPath, filename), FileMode.Create))
+                string extension = Path.GetExtension(formFile.FileName) ?? "";
+                string filename = item.ID + "_" + Guid.NewGuid() + extension;
+                string path = Path.Combine(WebRootPath, filename);
+
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    if (extension.ToLower().EndsWith("jpg") || extension.ToLower().EndsWith("jpeg"))
                     {
-                        await file.CopyToAsync(fileStream);
+                        image.SaveAsJpeg(fileStream);
+                    }
+                    else if (extension.ToLower().EndsWith("png"))
+                    {
+                        image.SaveAsPng(fileStream);
+                    }
+                    else
+                    {
+                        throw new Exception($"Unsupported image file extension [{extension}].");
                     }
 
                     TvItemFile itemFile = new TvItemFile()
                     {
                         FileName = filename,
-                        Length = file.Length,
-                        TvItemId = tvItemId,
-                        AbsolutePath = Path.Combine(WebRootPath, filename),
-                        Url = MakeWebPath(filename)
+                        Length = formFile.Length,
+                        TvItemId = item.ID
                     };
 
-                    result.Add(itemFile);
+                    _context.Add(itemFile);
                 }
+            }
 
-                _context.AddRange(result);
-                _context.SaveChanges();
+            _context.SaveChanges();
 
-                return result;
-            });
+            return true;
         }
 
         public bool DeleteFile(string filename)
@@ -110,7 +167,5 @@ namespace GLTV.Services
         {
             throw new NotImplementedException();
         }
-
-
     }
 }

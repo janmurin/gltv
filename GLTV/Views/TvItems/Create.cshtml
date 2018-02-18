@@ -43,7 +43,7 @@
                 </div>
                 <span asp-validation-for="TvItem.EndTime" class="text-danger"></span>
             </div>
-            <div class="form-group" id="durationGroup" style="@(Model.TvItem.Type == TvItemType.Video ? "display:none;" : "")">
+            <div class="form-group" id="durationGroup" style="@(Model.TvItem?.Type == TvItemType.Video ? "display:none;" : "")">
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 <input asp-for="TvItem.Duration" class="form-control" />
                 <span asp-validation-for="TvItem.Duration" class="text-danger"></span>
@@ -197,12 +197,12 @@
             } else if (value == "@((int)TvItemType.Gallery)") {
                 $('#fileInput').attr("multiple", true);
                 $('#fileInput').fileinput('clear');
-                $('#fileInput').attr("accept", ".jpg,.jpe,.bmp,.jpeg,.png");
+                $('#fileInput').attr("accept", ".jpg,.jpeg,.png");
                 $('#durationGroup').show();
             } else {
                 $('#fileInput').removeAttr("multiple");
                 $('#fileInput').fileinput('clear');
-                $('#fileInput').attr("accept", ".jpg,.jpe,.bmp,.jpeg,.png");
+                $('#fileInput').attr("accept", ".jpg,.jpeg,.png");
                 $('#durationGroup').show();
             }
         }

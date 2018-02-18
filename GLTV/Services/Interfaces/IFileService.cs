@@ -9,9 +9,10 @@ namespace GLTV.Services
 {
     public interface IFileService
     {
-        Task<List<TvItemFile>> SaveFiles(int tvItemId, IEnumerable<IFormFile> files);
+        bool SaveVideoFile(TvItem tvItemId, IFormFile files);
         bool DeleteFile(string filename);
         bool DeleteFiles(List<TvItemFile> files);
         byte[] GetBytes(string filename);
+        bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles);
     }
 }

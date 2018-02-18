@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GLTV.Data;
 using GLTV.Models;
 using GLTV.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing.Constraints;
-using Microsoft.Extensions.FileProviders;
-using Xabe.FFmpeg;
+
 
 namespace GLTV.Controllers
 {
@@ -95,27 +87,38 @@ namespace GLTV.Controllers
                 _tvItemService.AddTvItem(item);
 
                 // add files
-                List<TvItemFile> files = await _fileService.SaveFiles(item.ID, model.Files);
                 if (item.Type == TvItemType.Video)
                 {
-                    TvItemFile file = files[0];
-                    IMediaInfo mediaInfo = new MediaInfo(file.AbsolutePath);
+                    if (model.Files.Count > 1)
+                    {
+                        _tvItemService.DeleteTvItem(item.ID);
+                        ModelState.AddModelError("", "Only 1 file is allowed for video TV item type.");
+                        return View(model);
+                    }
+
                     try
                     {
-                        item.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
-                        if (item.Duration == 0)
-                        {
-                            throw new Exception("Video duration is 0s.");
-                        }
+                        _fileService.SaveVideoFile(item, model.Files[0]);
                     }
                     catch (Exception e)
                     {
                         _tvItemService.DeleteTvItem(item.ID);
-                        Console.WriteLine(e);
                         ModelState.AddModelError("", e.Message);
                         return View(model);
                     }
-                    _tvItemService.UpdateTvItem(item);
+                }
+                else
+                {
+                    try
+                    {
+                        _fileService.SaveImageFiles(item, model.Files);
+                    }
+                    catch (Exception e)
+                    {
+                        _tvItemService.DeleteTvItem(item.ID);
+                        ModelState.AddModelError("", e.Message);
+                        return View(model);
+                    }
                 }
 
                 return RedirectToAction(nameof(Index));
