@@ -58,7 +58,7 @@ namespace GLTV.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequestSizeLimit(1073741824)]
+        //[RequestSizeLimit(1073741824)]
         public async Task<IActionResult> Create([Bind]TvItemCreateViewModel model)
         {
             if (ModelState.IsValid)

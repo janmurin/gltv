@@ -40,6 +40,7 @@ namespace GLTV
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .UseKestrel(options => options.Limits.MaxRequestBodySize = 1073741824)
                 .Build();
     }
 }

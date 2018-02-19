@@ -195,6 +195,7 @@ else
             ev.preventDefault(); // to stop the form from submitting
             /* Validations go here */
             if (!validateLocationCheckboxes()) {
+                $.unblockUI();
                 return false;
             }
 
