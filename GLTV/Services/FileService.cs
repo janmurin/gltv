@@ -60,19 +60,19 @@ namespace GLTV.Services
                 Stream inputStream = formFile.OpenReadStream();
 
                 image = Image.Load(inputStream);
+
                 double height = image.Height;
                 double width = image.Width;
-
-                if (width > Constants.MAX_IMAGE_WIDTH)
+                double k1 = width / Constants.MAX_IMAGE_WIDTH;
+                double k2 = height / Constants.MAX_IMAGE_HEIGHT;
+                if (k1 > k2 && k1 > 1)
                 {
-                    double k = width / Constants.MAX_IMAGE_WIDTH;
-                    image.Mutate(x => x.Resize(Constants.MAX_IMAGE_WIDTH, (int)(height / k)));
+                    image.Mutate(x => x.Resize(Constants.MAX_IMAGE_WIDTH, (int)(height / k1)));
                 }
-                height = image.Height;
-                if (height > Constants.MAX_IMAGE_HEIGHT)
+
+                if (k1 < k2 && k2 > 1)
                 {
-                    double k = height / Constants.MAX_IMAGE_HEIGHT;
-                    image.Mutate(x => x.Resize((int)(width / k), Constants.MAX_IMAGE_HEIGHT));
+                    image.Mutate(x => x.Resize((int)(width / k2), Constants.MAX_IMAGE_HEIGHT));
                 }
 
                 string extension = Path.GetExtension(formFile.FileName) ?? "";
