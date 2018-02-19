@@ -42,5 +42,11 @@ namespace GLTV.Controllers
 
             return new ObjectResult(items.Select(x => new MainContentResponse(x)).ToList());
         }
+
+        [Route("/api/read/chatmessages/location/{locationID:int}/{token}")]
+        public IActionResult GetChatMessages(int locationID, string token)
+        {
+            return new ObjectResult(new List<MainContentResponse>());
+        }
     }
 }

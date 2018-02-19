@@ -16,11 +16,13 @@ namespace GLTV.Controllers
     {
         private readonly IFileService _fileService;
         private readonly ITvItemService _tvItemService;
+        private readonly IEmailSender _emailSender;
 
-        public TvItemsController(IFileService fileService, ITvItemService tvItemService)
+        public TvItemsController(IFileService fileService, ITvItemService tvItemService, IEmailSender emailSender)
         {
             _fileService = fileService;
             _tvItemService = tvItemService;
+            _emailSender = emailSender;
         }
 
         // GET: TvItems
@@ -58,7 +60,6 @@ namespace GLTV.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //[RequestSizeLimit(1073741824)]
         public async Task<IActionResult> Create([Bind]TvItemCreateViewModel model)
         {
             if (ModelState.IsValid)
@@ -121,6 +122,8 @@ namespace GLTV.Controllers
                         return View(model);
                     }
                 }
+
+                _emailSender.SendEmailAsync("jan.murin@globallogic.com", "gltv insert", "tvitem was inserted: " + item.Title);
 
                 return RedirectToAction(nameof(Index));
             }

@@ -80,19 +80,12 @@ namespace GLTV
                 options.SlidingExpiration = true;
             });
 
-            // Set an application wide limit on number of unique keys (ex: key1=value1&key2=value2) that are
-            // posted in a 'application/x-www-form-urlencoded' or 'multipart/form-data' request.
-            // These options are used by the FormFeature.
-            //services.Configure<FormOptions>(options =>
-            //{
-            //    options.MultipartBodyLengthLimit = 1073741824;
-            //    options.BufferBodyLengthLimit = 1073741824;
-            //});
-
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ITvItemService, TvItemService>();
+            services.Configure<EmailConfig>(Configuration.GetSection("Email"));
+            services.AddScoped<IEmailSender, EmailSender>();
 
             services.AddMvc(config =>
             {
