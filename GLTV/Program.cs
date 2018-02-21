@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using GLTV.Models;
 using Microsoft.AspNetCore;
@@ -40,7 +41,11 @@ namespace GLTV
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseKestrel(options => options.Limits.MaxRequestBodySize = 1073741824)
+                .UseKestrel(options =>
+                {
+                    options.Limits.MaxRequestBodySize = 1073741824;
+                    options.Listen(IPAddress.Loopback, 5050);
+                })
                 .Build();
     }
 }
