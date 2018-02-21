@@ -260,5 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 
-/GLTV/appsettings.json
+appsettings.json
 /GLTV/appsettings.Development.json
