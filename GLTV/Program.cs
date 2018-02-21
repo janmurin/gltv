@@ -44,7 +44,7 @@ namespace GLTV
                 .UseKestrel(options =>
                 {
                     options.Limits.MaxRequestBodySize = 1073741824;
-                    options.Listen(IPAddress.Loopback, 8080);
+                    options.Listen(IPAddress.Loopback, 5000);
                 })
                 .Build();
     }
