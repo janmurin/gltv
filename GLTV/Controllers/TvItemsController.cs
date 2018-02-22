@@ -123,7 +123,7 @@ namespace GLTV.Controllers
                     }
                 }
 
-                _emailSender.SendEmailAsync("jan.murin@globallogic.com", "gltv insert", "tvitem was inserted: " + item.Title);
+                await _emailSender.SendEmailAsync("jan.murin@globallogic.com", "gltv insert", "tvitem was inserted: " + item.Title);
 
                 return RedirectToAction(nameof(Index));
             }

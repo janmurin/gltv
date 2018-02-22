@@ -28,6 +28,7 @@ namespace GLTV.Services
         {
             try
             {
+                Console.WriteLine("sending email to " + email);
                 var emailMessage = new MimeMessage();
 
                 emailMessage.From.Add(new MailboxAddress(ec.FromName, ec.FromAddress));
