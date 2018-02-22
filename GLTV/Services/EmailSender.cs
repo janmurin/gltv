@@ -53,7 +53,7 @@ namespace GLTV.Services
                         o.Author, o.Title, o.Type.ToString(), o.StartTime.ToString("dd.MM.yyyy HH:mm"), o.EndTime.ToString("dd.MM.yyyy HH:mm"),
                         Utils.GetFormattedDuration(o),
                         Utils.GetLocationsString(o.Locations), Constants.SERVER_URL + "/TvItems/DetailsAnonymous/" + o.ID, Ec.ServerAdmins.FirstOrDefault());
-                    mailMessage.IsBodyHtml = true;
+                    mailMessage.IsBodyHtml = false;
                     mailMessage.Subject = "GLTV insert";
                     SmtpClient smtpClient = new SmtpClient();
                     smtpClient.Host = "localhost";
