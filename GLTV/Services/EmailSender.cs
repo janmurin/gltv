@@ -28,7 +28,7 @@ namespace GLTV.Services
 
         public EmailConfig Ec { get; set; }
 
-        public Task SendEmailAsync(string senderEmail, EmailType type, object data)
+        public Task SendEmailAsync(string author, EmailType type, object data)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace GLTV.Services
                     MailMessage mailMessage = new MailMessage();
                     MailAddress fromAddress = new MailAddress("gltv-server@gltvslovakia.globallogic.com");
                     mailMessage.From = fromAddress;
-                    mailMessage.To.Add(senderEmail);
+                    mailMessage.To.Add(author + "@globallogic.com");
                     mailMessage.Body = string.Format("New content was inserted by [{0}]\n\n" +
                                                      "Title: {1}\n" +
                                                      "Type: {2}\n" +
