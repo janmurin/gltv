@@ -52,6 +52,14 @@ namespace GLTV.Controllers
             return View(item);
         }
 
+        [AllowAnonymous]
+        public async Task<IActionResult> DetailsAnonymous(int id)
+        {
+            TvItem item = _tvItemService.FetchTvItem(id);
+
+            return View(item);
+        }
+
         // GET: TvItems/Create
         public IActionResult Create()
         {
@@ -123,7 +131,7 @@ namespace GLTV.Controllers
                     }
                 }
 
-                await _emailSender.SendEmailAsync("jan.murin@globallogic.com", "gltv insert", "tvitem was inserted: " + item.Title);
+                await _emailSender.SendEmailAsync(item.Author, EmailType.Insert, item);
 
                 return RedirectToAction(nameof(Index));
             }

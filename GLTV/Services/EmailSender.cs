@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
 //using System.Net.Mail;
 using System.Threading.Tasks;
+using GLTV.Extensions;
 using GLTV.Models;
-using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -13,38 +14,65 @@ using MimeKit.Text;
 
 namespace GLTV.Services
 {
-    // This class is used by the application to send email for account confirmation and password reset.
-    // For more details see https://go.microsoft.com/fwlink/?LinkID=532713
+    public enum EmailType
+    {
+        Insert = 0
+    }
+
     public class EmailSender : IEmailSender
     {
-        private readonly EmailConfig ec;
-
         public EmailSender(IOptions<EmailConfig> emailConfig)
         {
-            this.ec = emailConfig.Value;
+            this.Ec = emailConfig.Value;
         }
 
-        public Task SendEmailAsync(string email, string subject, string message)
+        public EmailConfig Ec { get; set; }
+
+        public Task SendEmailAsync(string senderEmail, EmailType type, object data)
         {
             try
             {
-                Console.WriteLine("sending email to " + email);
-                var emailMessage = new MimeMessage();
-
-                emailMessage.From.Add(new MailboxAddress(ec.FromName, ec.FromAddress));
-                emailMessage.To.Add(new MailboxAddress("", email));
-                emailMessage.Subject = subject;
-                emailMessage.Body = new TextPart(TextFormat.Html) { Text = message };
-
-                using (var client = new SmtpClient())
+                if (type == EmailType.Insert)
                 {
-                    client.LocalDomain = ec.LocalDomain;
+                    TvItem o = (TvItem)data;
 
-                    client.ConnectAsync(ec.MailServerAddress, Convert.ToInt32(ec.MailServerPort), SecureSocketOptions.Auto).ConfigureAwait(false);
-                    client.AuthenticateAsync(new NetworkCredential(ec.UserId, ec.UserPassword));
-                    client.SendAsync(emailMessage).ConfigureAwait(false);
-                    client.DisconnectAsync(true).ConfigureAwait(false);
+                    MailMessage mailMessage = new MailMessage();
+                    MailAddress fromAddress = new MailAddress("gltv-server@gltvslovakia.globallogic.com");
+                    mailMessage.From = fromAddress;
+                    mailMessage.To.Add(senderEmail);
+                    mailMessage.Body = string.Format("New content was inserted by [{0}]\n\n" +
+                                                     "Title: {1}\n" +
+                                                     "Type: {2}\n" +
+                                                     "StartTime: {3}\n" +
+                                                     "EndTime: {4}\n" +
+                                                     "Duration: {5}\n" +
+                                                     "Locations: {6}\n" +
+                                                     "\n" +
+                                                     "Url: {7}\n\n" +
+                                                     "This is automated message from gltv server. In case of need, contact server administrator: {8}",
+                        o.Author, o.Title, o.Type.ToString(), o.StartTime.ToString("dd.MM.yyyy HH:mm"), o.EndTime.ToString("dd.MM.yyyy HH:mm"),
+                        Utils.GetFormattedDuration(o),
+                        Utils.GetLocationsString(o.Locations), Constants.SERVER_URL + "/TvItems/DetailsAnonymous/" + o.ID, Ec.ServerAdmins.FirstOrDefault());
+                    mailMessage.IsBodyHtml = true;
+                    mailMessage.Subject = "GLTV insert";
+                    SmtpClient smtpClient = new SmtpClient();
+                    smtpClient.Host = "localhost";
+                    smtpClient.Send(mailMessage);
+
+                    // send notification to admins as well
+                    foreach (string admin in Ec.ServerAdmins)
+                    {
+                        if (!admin.Contains(o.Author))
+                        {
+                            mailMessage.To.Clear();
+                            mailMessage.To.Add(admin);
+                            smtpClient.Send(mailMessage);
+                        }
+                    }
                 }
+
+
+
             }
             catch (Exception ex)
             {
