@@ -27,10 +27,7 @@
                 Title
             </th>
             <th>
-                Start Time
-            </th>
-            <th>
-                End Time
+                Status
             </th>
             <th>
                 Author
@@ -55,10 +52,7 @@
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.StartTime)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EndTime)
+                    <p class="time-hint">@Html.Raw(Utils.GetStatusFormat(item))</p>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Author)
@@ -91,10 +85,7 @@
                 Title
             </th>
             <th>
-                Start Time
-            </th>
-            <th>
-                End Time
+                Status
             </th>
             <th>
                 Author
@@ -119,10 +110,7 @@
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.StartTime)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EndTime)
+                    <p class="time-hint">@Html.Raw(Utils.GetStatusFormat(item))</p>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Author)

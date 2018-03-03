@@ -114,3 +114,25 @@
     color: #ffffff;
     border-bottom: 1px solid #ffffff;
 }
+
+p.time-hint {
+    font-size: 9px;
+}
+
+span.time-inactive {
+    color: red;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+span.time-active {
+    color: green;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+span.time-expired {
+    color: orange;
+    font-weight: bold;
+    font-size: 14px;
+}

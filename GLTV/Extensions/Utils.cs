@@ -109,13 +109,47 @@ namespace GLTV.Extensions
 
         public static string GetFormattedDuration(TvItem item)
         {
-            long duration = item.Duration*item.Files.Count;
-            
+            long duration = item.Duration * item.Files.Count;
+
             TimeSpan time = TimeSpan.FromSeconds(duration);
 
             //here backslash is must to tell that colon is
             //not the part of format, it just a character that we want in output
             return time.ToString(@"mm\:ss");
+        }
+
+        public static string GetStatusFormat(TvItem item)
+        {
+            if (DateTime.Compare(DateTime.Now, item.StartTime) < 0)
+            {
+                return "<span class=\"time-inactive\">INACTIVE</span><br /> " +
+                       "starts in " + GetRemainingTime(item.StartTime, DateTime.Now) +
+                       "<br />startTime: " + item.StartTime.ToString("dd.MM.yyyy HH:mm") +
+                       "<br />endTime: " + item.EndTime.ToString("dd.MM.yyyy HH:mm");
+            }
+
+            if (DateTime.Compare(item.StartTime, DateTime.Now) < 0
+                && DateTime.Compare(DateTime.Now, item.EndTime) < 0)
+            {
+                return "<span class=\"time-active\">ACTIVE</span><br /> " +
+                       "ends in " + GetRemainingTime(item.StartTime, item.EndTime) +
+                       "<br />startTime: " + item.StartTime.ToString("dd.MM.yyyy HH:mm") +
+                       "<br />endTime: " + item.EndTime.ToString("dd.MM.yyyy HH:mm"); ;
+            }
+
+            return "<span class=\"time-expired\">EXPIRED</span>";
+        }
+
+        private static string GetRemainingTime(DateTime now, DateTime destTime)
+        {
+            TimeSpan time = TimeSpan.FromSeconds((destTime - now).TotalSeconds);
+
+            if (Math.Abs(time.TotalSeconds) > 3600 * 24)
+            {
+                return time.ToString(@"d' days '");
+            }
+
+            return time.ToString(@"h' h 'mm' m 'ss' s'");
         }
     }
 }
