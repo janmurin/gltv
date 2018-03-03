@@ -28,5 +28,7 @@ namespace GLTV.Data
         public DbSet<GLTV.Models.TvItemFile> TvItemFile { get; set; }
 
         public DbSet<GLTV.Models.TvItemLocation> TvItemLocation { get; set; }
+
+        public DbSet<GLTV.Models.LogEvent> LogEvent { get; set; }
     }
 }

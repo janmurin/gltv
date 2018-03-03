@@ -48,6 +48,22 @@ namespace GLTV.Models
 
         public List<TvItemLocation> Locations { get; set; }
         public List<TvItemFile> Files { get; set; }
+
+        [NotMapped]
+        public string GetAnonymousDetailUrl
+        {
+            get { return $"{Constants.SERVER_URL}/TvItems/DetailsAnonymous/{ID}"; }
+        }
+
+        public string GetDetailHyperlink(bool isAnonymous)
+        {
+            if (isAnonymous)
+            {
+                return $"<a target=\"_blank\" href=\"{Constants.SERVER_URL}/TvItems/DetailsAnonymous/{ID}\">{Title}</a>";
+            }
+
+            return $"<a target=\"_blank\" href=\"{Constants.SERVER_URL}/TvItems/Details/{ID}\">{Title}</a>"; 
+        }
     }
 
     public class TvItemLocation

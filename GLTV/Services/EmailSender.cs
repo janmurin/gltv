@@ -48,7 +48,7 @@ namespace GLTV.Services
                                                      "This is automated message from gltv server. In case of need, contact server administrator: {8}",
                         o.Author, o.Title, o.Type.ToString(), o.StartTime.ToString("dd.MM.yyyy HH:mm"), o.EndTime.ToString("dd.MM.yyyy HH:mm"),
                         Utils.GetFormattedDuration(o),
-                        Utils.GetLocationsString(o.Locations), Constants.SERVER_URL + "/TvItems/DetailsAnonymous/" + o.ID, Constants.SERVER_ADMIN);
+                        Utils.GetLocationsString(o.Locations), o.GetAnonymousDetailUrl, Constants.SERVER_ADMIN);
                     mailMessage.IsBodyHtml = false;
                     mailMessage.Subject = "GLTV insert";
                     SmtpClient smtpClient = new SmtpClient();

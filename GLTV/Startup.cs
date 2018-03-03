@@ -13,6 +13,7 @@ using GLTV.Data;
 using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Services;
+using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -87,6 +88,7 @@ namespace GLTV
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ITvItemService, TvItemService>();
             services.AddScoped<IEmailSender, EmailSender>();
+            services.AddScoped<ILogEventService, LogEventService>();
 
             services.AddMvc(config =>
             {

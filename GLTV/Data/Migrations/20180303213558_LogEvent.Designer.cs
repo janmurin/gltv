@@ -12,9 +12,10 @@ using System;
 namespace GLTV.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180303213558_LogEvent")]
+    partial class LogEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,32 +70,6 @@ namespace GLTV.Data.Migrations
                         .HasName("UserNameIndex");
 
                     b.ToTable("AspNetUsers");
-                });
-
-            modelBuilder.Entity("GLTV.Models.LogEvent", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasMaxLength(100);
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(500);
-
-                    b.Property<DateTime>("TimeInserted");
-
-                    b.Property<int?>("TvItemId");
-
-                    b.Property<int>("Type")
-                        .HasMaxLength(100);
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("TvItemId");
-
-                    b.ToTable("LogEvent");
                 });
 
             modelBuilder.Entity("GLTV.Models.TvItem", b =>
@@ -268,13 +243,6 @@ namespace GLTV.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("GLTV.Models.LogEvent", b =>
-                {
-                    b.HasOne("GLTV.Models.TvItem", "TvItem")
-                        .WithMany()
-                        .HasForeignKey("TvItemId");
                 });
 
             modelBuilder.Entity("GLTV.Models.TvItemFile", b =>

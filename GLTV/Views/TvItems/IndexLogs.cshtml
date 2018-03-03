@@ -1,0 +1,87 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using GLTV.Extensions
+@model IEnumerable<GLTV.Models.LogEvent>
+
+@{
+    ViewData["Title"] = "Log";
+    ViewBag.LogNav = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Actions Log</h2>
+
+<form class="form-inline pull-right" style="padding: 10px;">
+    <div class="form-group">
+        <label>Filter by type:</label>
+        <select class="form-control" id="typeDropdown" data-val="true" data-val-required="The Type field is required." name="TvItem.Type">
+            <option value="All">All</option>
+            @{
+                foreach (LogEventType type in Enum.GetValues(typeof(LogEventType)).Cast<LogEventType>())
+                {
+                    <option value="@(type)">@type</option>
+                }
+            }
+        </select>
+    </div>
+</form>
+
+<table class="table" id="logItemsTable">
+    <thead>
+        <tr>
+            <th>
+                Type
+            </th>
+            <th>
+                Time Inserted
+            </th>
+            <th>
+                Author
+            </th>
+            <th>
+                Message
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="type-col">
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TimeInserted)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Author)
+                </td>
+                <td>
+                    <p>@Html.Raw(item.Message)</p>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    $('#typeDropdown').change(function () {
+        var selectedType = $(this).val();
+
+        $('#logItemsTable > tbody > tr > td.type-col').each(function (index) {
+            var currentType = $(this).text().trim();
+
+            if (selectedType == "All") {
+                $(this).closest('tr').show();
+                return;
+            }
+
+            if (currentType == selectedType) {
+                $(this).closest('tr').show();
+                return;
+            } else {
+                $(this).closest('tr').hide();
+                return;
+            }
+        });
+    });
+</script>

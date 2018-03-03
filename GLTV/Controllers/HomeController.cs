@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
 using GLTV.Services;
+using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
@@ -19,12 +20,14 @@ namespace GLTV.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IFileProvider _fileProvider;
         private readonly IEmailSender _emailSender;
+        private readonly ILogEventService _logEventService;
 
-        public HomeController(SignInManager<ApplicationUser> signInManager, IFileProvider fileProvider, IEmailSender emailSender)
+        public HomeController(SignInManager<ApplicationUser> signInManager, IFileProvider fileProvider, IEmailSender emailSender, ILogEventService logEventService)
         {
             _signInManager = signInManager;
             _fileProvider = fileProvider;
             _emailSender = emailSender;
+            _logEventService = logEventService;
         }
 
         [AllowAnonymous]
@@ -66,6 +69,10 @@ namespace GLTV.Controllers
             ViewData["stackTrace"] = exception.Error.StackTrace;
 
             _emailSender.SendEmailAsync(User.Identity.Name, EmailType.Error, exception);
+            _logEventService.LogEventAsync(
+                User.Identity.Name,
+                LogEventType.Exception,
+                $"User encountered exception: [{exception.Error.Message}].", null);
 
             return View();
         }
