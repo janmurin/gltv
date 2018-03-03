@@ -16,5 +16,6 @@ namespace GLTV.Extensions
         public const int IMAGE_THUMB_HEIGHT = 133;
         public static string ANDROID_TOKEN;
         public static string SERVER_URL;
+        public static string SERVER_ADMIN;
     }
 }

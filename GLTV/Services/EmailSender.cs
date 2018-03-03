@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using GLTV.Extensions;
 using GLTV.Models;
 using MailKit.Security;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
@@ -16,18 +18,12 @@ namespace GLTV.Services
 {
     public enum EmailType
     {
-        Insert = 0
+        Insert = 0,
+        Error = 1
     }
 
     public class EmailSender : IEmailSender
     {
-        public EmailSender(IOptions<EmailConfig> emailConfig)
-        {
-            this.Ec = emailConfig.Value;
-        }
-
-        public EmailConfig Ec { get; set; }
-
         public Task SendEmailAsync(string author, EmailType type, object data)
         {
             try
@@ -52,7 +48,7 @@ namespace GLTV.Services
                                                      "This is automated message from gltv server. In case of need, contact server administrator: {8}",
                         o.Author, o.Title, o.Type.ToString(), o.StartTime.ToString("dd.MM.yyyy HH:mm"), o.EndTime.ToString("dd.MM.yyyy HH:mm"),
                         Utils.GetFormattedDuration(o),
-                        Utils.GetLocationsString(o.Locations), Constants.SERVER_URL + "/TvItems/DetailsAnonymous/" + o.ID, Ec.ServerAdmins.FirstOrDefault());
+                        Utils.GetLocationsString(o.Locations), Constants.SERVER_URL + "/TvItems/DetailsAnonymous/" + o.ID, Constants.SERVER_ADMIN);
                     mailMessage.IsBodyHtml = false;
                     mailMessage.Subject = "GLTV insert";
                     SmtpClient smtpClient = new SmtpClient();
@@ -60,16 +56,34 @@ namespace GLTV.Services
                     smtpClient.Send(mailMessage);
 
                     // send notification to admins as well
-                    foreach (string admin in Ec.ServerAdmins)
+                    if (!Constants.SERVER_ADMIN.Contains(o.Author))
                     {
-                        if (!admin.Contains(o.Author))
-                        {
-                            mailMessage.To.Clear();
-                            mailMessage.To.Add(admin);
-                            smtpClient.Send(mailMessage);
-                        }
+                        mailMessage.To.Clear();
+                        mailMessage.To.Add(Constants.SERVER_ADMIN);
+                        smtpClient.Send(mailMessage);
                     }
                 }
+                else if (type == EmailType.Error)
+                {
+                    IExceptionHandlerFeature o = (IExceptionHandlerFeature)data;
+
+                    MailMessage mailMessage = new MailMessage();
+                    MailAddress fromAddress = new MailAddress("gltv-server@gltvslovakia.globallogic.com");
+                    mailMessage.To.Add(Constants.SERVER_ADMIN);
+                    mailMessage.From = fromAddress;
+                    mailMessage.Body = string.Format("Server error occured on request by [{0}]\n\n" +
+                                                     "Message: {1}\n" +
+                                                     "StackTrace: {2}\n" +
+                                                     "\n" +
+                                                     "This is automated message from gltv server. In case of need, contact server administrator: {3}",
+                        author, o.Error.Message, o.Error.StackTrace, Constants.SERVER_ADMIN);
+                    mailMessage.IsBodyHtml = false;
+                    mailMessage.Subject = "GLTV ERROR";
+                    SmtpClient smtpClient = new SmtpClient();
+                    smtpClient.Host = "localhost";
+                    smtpClient.Send(mailMessage);
+                }
+
 
 
 

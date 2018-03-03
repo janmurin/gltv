@@ -50,6 +50,7 @@ namespace GLTV
 
             Constants.ANDROID_TOKEN = Configuration["androidToken"];
             Constants.SERVER_URL = Configuration["serverUrl"];
+            Constants.SERVER_ADMIN = Configuration["ServerAdmin"];
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -85,7 +86,6 @@ namespace GLTV
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ITvItemService, TvItemService>();
-            services.Configure<EmailConfig>(Configuration.GetSection("Email"));
             services.AddScoped<IEmailSender, EmailSender>();
 
             services.AddMvc(config =>
