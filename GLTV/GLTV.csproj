@@ -12,6 +12,10 @@
     <Compile Remove="Data\Migrations\20180103202412_TvItem.Designer.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="web.config" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />

@@ -35,8 +35,9 @@ namespace GLTV.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var contents = _fileProvider.GetDirectoryContents("");
-            return View(contents);
+            //var contents = _fileProvider.GetDirectoryContents("");
+            //return View(contents);
+            return RedirectToAction("Index", "TvItems");
         }
 
 
