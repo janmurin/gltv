@@ -40,7 +40,7 @@ namespace GLTV.Extensions
                     await eventService.AddClientEventAsync(
                         context.Connection.RemoteIpAddress.ToString(),
                         itemFile.IsVideoFile() ? ClientEventType.VideoRequest : ClientEventType.ImageRequest,
-                        $"File request",
+                        "",
                         itemFile.ID);
                 }
                 else

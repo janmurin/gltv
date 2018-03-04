@@ -95,6 +95,14 @@ namespace GLTV.Services
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
 
+            foreach (ClientEvent logEvent in events)
+            {
+                if (logEvent.Type == ClientEventType.ImageRequest || logEvent.Type == ClientEventType.VideoRequest)
+                {
+                    logEvent.Message = $"Request for file {logEvent.TvItemFile.GetDetailHyperlink(MakeFullWebPath(logEvent.TvItemFile.FileName))}";
+                }
+            }
+
             return events;
         }
     }

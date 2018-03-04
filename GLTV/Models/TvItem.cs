@@ -95,6 +95,11 @@ namespace GLTV.Models
         {
             return FileName.ToLower().EndsWith(".mp4") || FileName.ToLower().EndsWith(".mkv");
         }
+
+        public string GetDetailHyperlink(string url)
+        {
+            return $"<a target=\"_blank\" href=\"{url}\">{FileName}</a>";
+        }
     }
 
     public enum TvItemType
