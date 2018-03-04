@@ -103,7 +103,8 @@ namespace GLTV.Services
 
             foreach (TvItem tvItem in tvItems)
             {
-                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName));
+                // special ending to differentiate between web and client file requests
+                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName) + "clientRequest");
                 tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
             }
 

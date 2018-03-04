@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GLTV.Controllers
 {
-    [Produces("application/json")]
     [AllowAnonymous]
     public class GltvApiController : Controller
     {
@@ -28,6 +27,7 @@ namespace GLTV.Controllers
             _eventService = eventService;
         }
 
+        [Produces("application/json")]
         [Route("/api/read/maincontent/location/{locationID:int}/{token}")]
         public IActionResult GetById(int locationID, string token)
         {
@@ -52,6 +52,7 @@ namespace GLTV.Controllers
             return new ObjectResult(items.Select(x => new MainContentResponse(x)).ToList());
         }
 
+        [Produces("application/json")]
         [Route("/api/read/chatmessages/location/{locationID:int}/{token}")]
         public IActionResult GetChatMessages(int locationID, string token)
         {

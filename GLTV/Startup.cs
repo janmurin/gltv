@@ -120,6 +120,7 @@ namespace GLTV
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseConventionalMiddleware();
             app.UseStaticFiles();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
