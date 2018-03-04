@@ -20,7 +20,7 @@ namespace GLTV.Services
         {
         }
 
-        public Task LogEventAsync(string author, LogEventType type, string message, int? itemId)
+        public Task AddLogEventAsync(string author, LogEventType type, string message, int? itemId)
         {
             LogEvent logEvent = new LogEvent();
             logEvent.Author = author;
@@ -73,7 +73,7 @@ namespace GLTV.Services
             return events;
         }
 
-        public Task ClientEventAsync(string source, ClientEventType type, string message, int? itemId)
+        public Task AddClientEventAsync(string source, ClientEventType type, string message, int? itemId)
         {
             ClientEvent clientEvent = new ClientEvent();
             clientEvent.Source = source;

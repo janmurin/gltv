@@ -62,7 +62,7 @@ namespace GLTV.Models
                 return $"<a target=\"_blank\" href=\"{Constants.SERVER_URL}/TvItems/DetailsAnonymous/{ID}\">{Title}</a>";
             }
 
-            return $"<a target=\"_blank\" href=\"{Constants.SERVER_URL}/TvItems/Details/{ID}\">{Title}</a>"; 
+            return $"<a target=\"_blank\" href=\"{Constants.SERVER_URL}/TvItems/Details/{ID}\">{Title}</a>";
         }
     }
 
@@ -90,6 +90,11 @@ namespace GLTV.Models
         public string FullUrl { get; set; }
         [NotMapped]
         public string AbsolutePath { get; set; }
+
+        public bool IsVideoFile()
+        {
+            return FileName.ToLower().EndsWith(".mp4") || FileName.ToLower().EndsWith(".mkv");
+        }
     }
 
     public enum TvItemType

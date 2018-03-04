@@ -75,7 +75,7 @@ namespace GLTV.Controllers
         {
             TvItem item = _tvItemService.FetchTvItem(id);
 
-            await _eventService.LogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
+            await _eventService.AddLogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
 
             return View(item);
         }
@@ -152,7 +152,7 @@ namespace GLTV.Controllers
                 }
 
                 await _emailSender.SendEmailAsync(item.Author, EmailType.Insert, item);
-                await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemInsert, "", item.ID);
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemInsert, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -208,7 +208,7 @@ namespace GLTV.Controllers
                 }
 
                 _tvItemService.UpdateTvItem(item);
-                await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -231,7 +231,7 @@ namespace GLTV.Controllers
         {
             _tvItemService.DeleteTvItem(id);
 
-            await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
+            await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
 
             return RedirectToAction(nameof(Index));
         }
@@ -245,7 +245,7 @@ namespace GLTV.Controllers
             bool success = _fileService.DeleteFiles(item.Files);
             if (success)
             {
-                await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
             }
 
             return RedirectToAction(nameof(IndexDeleted));

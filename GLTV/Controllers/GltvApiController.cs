@@ -43,7 +43,7 @@ namespace GLTV.Controllers
 
             List<TvItem> items = _tvItemService.FetchActiveTvItems(location);
 
-            _eventService.ClientEventAsync(
+            _eventService.AddClientEventAsync(
                 HttpContext.Connection.RemoteIpAddress.ToString(),
                 ClientEventType.ProgramRequest,
                 $"Program request for location {location.ToString()}",
@@ -63,7 +63,7 @@ namespace GLTV.Controllers
 
             Location location = (Location)locationID;
 
-            _eventService.ClientEventAsync(
+            _eventService.AddClientEventAsync(
                 HttpContext.Connection.RemoteIpAddress.ToString(),
                 ClientEventType.ChatRequest,
                 $"Chat messages request for location {location.ToString()}",

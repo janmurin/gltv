@@ -11,7 +11,7 @@ namespace GLTV.Extensions
         public static IApplicationBuilder UseConventionalMiddleware(
             this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<ConventionalMiddleware>();
+            return builder.UseMiddleware<ClientFileRequestLoggingMiddleware>();
         }
     }
 }

@@ -8,9 +8,9 @@ namespace GLTV.Services.Interfaces
 {
     public interface IEventService
     {
-        Task LogEventAsync(string author, LogEventType type, string message, int? itemId);
+        Task AddLogEventAsync(string author, LogEventType type, string message, int? itemId);
         List<LogEvent> FetchLogEventsAsync();
-        Task ClientEventAsync(string source, ClientEventType type, string message, int? itemId);
+        Task AddClientEventAsync(string source, ClientEventType type, string message, int? itemId);
         List<ClientEvent> FetchClientEventsAsync();
     }
 }

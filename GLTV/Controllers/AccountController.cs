@@ -111,7 +111,7 @@ namespace GLTV.Controllers
 
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 string username = email.Split("@")[0];
-                await _eventService.LogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+                await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
 
                 return RedirectToLocal(returnUrl);
             }

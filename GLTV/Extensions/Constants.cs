@@ -7,6 +7,7 @@ namespace GLTV.Extensions
 {
     public static class Constants
     {
+        public const string CLIENT_FILE_REQUEST_SUFFIX = "clientRequest";
         public const string KE = "KE";
         public const string ZA = "ZA";
         public const string BB = "BB";

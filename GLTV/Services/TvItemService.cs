@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -104,11 +105,16 @@ namespace GLTV.Services
             foreach (TvItem tvItem in tvItems)
             {
                 // special ending to differentiate between web and client file requests
-                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName) + "clientRequest");
+                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName) + Constants.CLIENT_FILE_REQUEST_SUFFIX);
                 tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
             }
 
             return tvItems;
+        }
+
+        public TvItemFile GetTvItemFile(string filename)
+        {
+            return _context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
         }
     }
 }
