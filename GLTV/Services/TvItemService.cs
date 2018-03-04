@@ -95,12 +95,11 @@ namespace GLTV.Services
             List<TvItem> tvItems = _context.TvItem
                 .Include(x => x.Files)
                 .Include(y => y.Locations)
-                .Where(x => x.Deleted == false
-                            && x.Locations.Select(y => y.Location).Contains(location)
-                            && DateTime.Compare(DateTime.Now, x.StartTime) > 0
-                            && DateTime.Compare(DateTime.Now, x.EndTime) < 0)
+                .Where(x => x.Deleted == false && x.Locations.Select(y => y.Location).Contains(location))
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
+
+            tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
 
             foreach (TvItem tvItem in tvItems)
             {

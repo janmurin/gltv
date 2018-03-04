@@ -64,7 +64,7 @@ namespace GLTV.Controllers
 
             _eventService.ClientEventAsync(
                 HttpContext.Connection.RemoteIpAddress.ToString(),
-                ClientEventType.ProgramRequest,
+                ClientEventType.ChatRequest,
                 $"Chat messages request for location {location.ToString()}",
                 null);
 
