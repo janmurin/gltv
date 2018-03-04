@@ -20,14 +20,14 @@ namespace GLTV.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IFileProvider _fileProvider;
         private readonly IEmailSender _emailSender;
-        private readonly ILogEventService _logEventService;
+        private readonly IEventService _eventService;
 
-        public HomeController(SignInManager<ApplicationUser> signInManager, IFileProvider fileProvider, IEmailSender emailSender, ILogEventService logEventService)
+        public HomeController(SignInManager<ApplicationUser> signInManager, IFileProvider fileProvider, IEmailSender emailSender, IEventService eventService)
         {
             _signInManager = signInManager;
             _fileProvider = fileProvider;
             _emailSender = emailSender;
-            _logEventService = logEventService;
+            _eventService = eventService;
         }
 
         [AllowAnonymous]
@@ -69,7 +69,7 @@ namespace GLTV.Controllers
             ViewData["stackTrace"] = exception.Error.StackTrace;
 
             _emailSender.SendEmailAsync(User.Identity.Name, EmailType.Error, exception);
-            _logEventService.LogEventAsync(
+            _eventService.LogEventAsync(
                 User.Identity.Name,
                 LogEventType.Exception,
                 $"User encountered exception: [{exception.Error.Message}].", null);

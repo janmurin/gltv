@@ -27,7 +27,7 @@ namespace GLTV.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly string[] _allowedEmails;
-        private readonly ILogEventService _logEventService;
+        private readonly IEventService _eventService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -35,13 +35,13 @@ namespace GLTV.Controllers
             IEmailSender emailSender,
             ILogger<AccountController> logger,
             IConfiguration configuration
-            , ILogEventService logEventService)
+            , IEventService eventService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
-            _logEventService = logEventService;
+            _eventService = eventService;
 
             _allowedEmails = configuration.GetSection("AllowedEmails").Get<string[]>();
         }
@@ -111,7 +111,7 @@ namespace GLTV.Controllers
 
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 string username = email.Split("@")[0];
-                await _logEventService.LogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+                await _eventService.LogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
 
                 return RedirectToLocal(returnUrl);
             }

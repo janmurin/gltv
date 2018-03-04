@@ -88,7 +88,7 @@ namespace GLTV
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ITvItemService, TvItemService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddScoped<ILogEventService, LogEventService>();
+            services.AddScoped<IEventService, EventService>();
 
             services.AddMvc(config =>
             {

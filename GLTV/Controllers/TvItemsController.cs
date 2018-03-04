@@ -19,14 +19,14 @@ namespace GLTV.Controllers
         private readonly IFileService _fileService;
         private readonly ITvItemService _tvItemService;
         private readonly IEmailSender _emailSender;
-        private readonly ILogEventService _logEventService;
+        private readonly IEventService _eventService;
 
-        public TvItemsController(IFileService fileService, ITvItemService tvItemService, IEmailSender emailSender, ILogEventService logEventService)
+        public TvItemsController(IFileService fileService, ITvItemService tvItemService, IEmailSender emailSender, IEventService eventService)
         {
             _fileService = fileService;
             _tvItemService = tvItemService;
             _emailSender = emailSender;
-            _logEventService = logEventService;
+            _eventService = eventService;
         }
 
         // GET: TvItems
@@ -50,7 +50,14 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> IndexLogs()
         {
-            List<LogEvent> tvItems = _logEventService.FetchLogEventsAsync();
+            List<LogEvent> tvItems = _eventService.FetchLogEventsAsync();
+
+            return View(tvItems);
+        }
+
+        public async Task<IActionResult> IndexClients()
+        {
+            List<ClientEvent> tvItems = _eventService.FetchClientEventsAsync();
 
             return View(tvItems);
         }
@@ -68,7 +75,7 @@ namespace GLTV.Controllers
         {
             TvItem item = _tvItemService.FetchTvItem(id);
 
-            await _logEventService.LogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
+            await _eventService.LogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
 
             return View(item);
         }
@@ -145,7 +152,7 @@ namespace GLTV.Controllers
                 }
 
                 await _emailSender.SendEmailAsync(item.Author, EmailType.Insert, item);
-                await _logEventService.LogEventAsync(User.Identity.Name, LogEventType.ItemInsert, "", item.ID);
+                await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemInsert, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -201,7 +208,7 @@ namespace GLTV.Controllers
                 }
 
                 _tvItemService.UpdateTvItem(item);
-                await _logEventService.LogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
+                await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -224,7 +231,7 @@ namespace GLTV.Controllers
         {
             _tvItemService.DeleteTvItem(id);
 
-            await _logEventService.LogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
+            await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
 
             return RedirectToAction(nameof(Index));
         }
@@ -238,7 +245,7 @@ namespace GLTV.Controllers
             bool success = _fileService.DeleteFiles(item.Files);
             if (success)
             {
-                await _logEventService.LogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
+                await _eventService.LogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
             }
 
             return RedirectToAction(nameof(IndexDeleted));

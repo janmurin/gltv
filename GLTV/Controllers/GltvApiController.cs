@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Services;
+using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,13 @@ namespace GLTV.Controllers
     {
         private readonly IFileService _fileService;
         private readonly ITvItemService _tvItemService;
+        private readonly IEventService _eventService;
 
-        public GltvApiController(IFileService fileService, ITvItemService tvItemService)
+        public GltvApiController(IFileService fileService, ITvItemService tvItemService, IEventService eventService)
         {
             _fileService = fileService;
             _tvItemService = tvItemService;
+            _eventService = eventService;
         }
 
         [Route("/api/read/maincontent/location/{locationID:int}/{token}")]
@@ -40,12 +43,31 @@ namespace GLTV.Controllers
 
             List<TvItem> items = _tvItemService.FetchActiveTvItems(location);
 
+            _eventService.ClientEventAsync(
+                HttpContext.Connection.RemoteIpAddress.ToString(),
+                ClientEventType.ProgramRequest,
+                $"Program request for location {location.ToString()}",
+                null);
+
             return new ObjectResult(items.Select(x => new MainContentResponse(x)).ToList());
         }
 
         [Route("/api/read/chatmessages/location/{locationID:int}/{token}")]
         public IActionResult GetChatMessages(int locationID, string token)
         {
+            if (!string.Equals(token, Constants.ANDROID_TOKEN))
+            {
+                throw new AuthenticationException("Bad token used.");
+            }
+
+            Location location = (Location)locationID;
+
+            _eventService.ClientEventAsync(
+                HttpContext.Connection.RemoteIpAddress.ToString(),
+                ClientEventType.ProgramRequest,
+                $"Chat messages request for location {location.ToString()}",
+                null);
+
             return new ObjectResult(new List<MainContentResponse>());
         }
     }

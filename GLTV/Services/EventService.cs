@@ -13,9 +13,9 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace GLTV.Services
 {
-    public class LogEventService : ServiceBase, ILogEventService
+    public class EventService : ServiceBase, IEventService
     {
-        public LogEventService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
+        public EventService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
             : base(context, env, signInManager)
         {
         }
@@ -69,6 +69,31 @@ namespace GLTV.Services
                     logEvent.Message = $"Displayed anonymous details for item [{logEvent.TvItem.GetDetailHyperlink(false)}] with id [{logEvent.TvItemId}].";
                 }
             }
+
+            return events;
+        }
+
+        public Task ClientEventAsync(string source, ClientEventType type, string message, int? itemId)
+        {
+            ClientEvent clientEvent = new ClientEvent();
+            clientEvent.Source = source;
+            clientEvent.Message = message;
+            clientEvent.TvItemFileId = itemId;
+            clientEvent.TimeInserted = DateTime.Now;
+            clientEvent.Type = type;
+
+            _context.Add(clientEvent);
+            _context.SaveChanges();
+
+            return Task.CompletedTask;
+        }
+
+        public List<ClientEvent> FetchClientEventsAsync()
+        {
+            List<ClientEvent> events = _context.ClientEvent
+                .Include(x => x.TvItemFile)
+                .OrderByDescending(x => x.TimeInserted)
+                .ToList();
 
             return events;
         }
