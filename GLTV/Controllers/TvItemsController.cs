@@ -7,6 +7,7 @@ using GLTV.Models;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 
 namespace GLTV.Controllers
@@ -67,7 +68,7 @@ namespace GLTV.Controllers
         {
             TvItem item = _tvItemService.FetchTvItem(id);
 
-            await _logEventService.LogEventAsync("server", LogEventType.AnonymousDetails, "", id);
+            await _logEventService.LogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
 
             return View(item);
         }
