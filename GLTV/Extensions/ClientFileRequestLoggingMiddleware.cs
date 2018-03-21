@@ -51,7 +51,15 @@ namespace GLTV.Extensions
                         $"File [{filename}] not found.",
                         null);
                 }
+            }
 
+            if (requestPath.Contains("/api/read/"))
+            {
+                // fix incorrect request path if necessary
+                if (requestPath.StartsWith("//"))
+                {
+                    context.Request.Path = requestPath.Substring(1);
+                }
             }
 
             await _next(context);
