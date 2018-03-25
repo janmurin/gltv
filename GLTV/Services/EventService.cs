@@ -93,6 +93,8 @@ namespace GLTV.Services
             List<ClientEvent> events = _context.ClientEvent
                 .Include(x => x.TvItemFile)
                 .OrderByDescending(x => x.TimeInserted)
+                .Skip(0)
+                .Take(200)
                 .ToList();
 
             foreach (ClientEvent logEvent in events)
