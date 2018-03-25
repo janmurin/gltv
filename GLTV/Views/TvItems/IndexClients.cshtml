@@ -1,18 +1,31 @@
-﻿@model IEnumerable<GLTV.Models.ClientEvent>
+﻿@model GLTV.Models.ViewModels.ClientEventsViewModel
 
 @{
     ViewData["Title"] = "Client Activity";
     ViewBag.ClientNav = true;
     Layout = "~/Views/Shared/_Layout.cshtml";
+    string ALL_VALUE = "All";
 }
 
 <h2>Actions Log</h2>
 
 <form class="form-inline pull-right" style="padding: 10px;">
     <div class="form-group">
+        <label>Filter by source:</label>
+        <select class="form-control" id="sourceDropdown">
+            <option value="All">@(ALL_VALUE)</option>
+            @{
+                foreach (string type in Model.Sources)
+                {
+                    <option value="@(type)">@type</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
         <label>Filter by type:</label>
-        <select class="form-control" id="typeDropdown" data-val="true" data-val-required="The Type field is required." name="TvItem.Type">
-            <option value="All">All</option>
+        <select class="form-control" id="typeDropdown">
+            <option value="All">@(ALL_VALUE)</option>
             @{
                 foreach (ClientEventType type in Enum.GetValues(typeof(ClientEventType)).Cast<ClientEventType>())
                 {
@@ -41,7 +54,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.ClientEvents)
         {
             <tr>
                 <td class="type-col">
@@ -50,7 +63,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.TimeInserted)
                 </td>
-                <td>
+                <td class="source-col">
                     @Html.DisplayFor(modelItem => item.Source)
                 </td>
                 <td>
@@ -62,24 +75,54 @@
 </table>
 
 <script>
-    $('#typeDropdown').change(function () {
-        var selectedType = $(this).val();
+    $(function() {
+        var selectedSource = $('#sourceDropdown').val();
+        var selectedType = $('#typeDropdown').val();
 
-        $('#clientItemsTable > tbody > tr > td.type-col').each(function (index) {
-            var currentType = $(this).text().trim();
+        $('#sourceDropdown').change(function () {
+            selectedSource = $(this).val();
+            filterTable(selectedSource, selectedType);
+        });
 
-            if (selectedType == "All") {
-                $(this).closest('tr').show();
-                return;
-            }
-
-            if (currentType == selectedType) {
-                $(this).closest('tr').show();
-                return;
-            } else {
-                $(this).closest('tr').hide();
-                return;
-            }
+        $('#typeDropdown').change(function () {
+            selectedType = $(this).val();
+            filterTable(selectedSource, selectedType);
         });
     });
+    
+    function filterTable(selectedSource, selectedType) {
+        $('#clientItemsTable > tbody > tr').each(function (index) {
+            var currentSource = $(this).find('td.source-col').text().trim();
+            var currentType = $(this).find('td.type-col').text().trim();
+
+            var sourceOk = false;
+            var typeOk = false;
+
+            if (selectedSource == "@(ALL_VALUE)") {
+                sourceOk = true;
+            } else {
+                if (currentSource == selectedSource) {
+                    sourceOk = true;
+                } else {
+                    sourceOk = false;
+                }
+            }
+            if (selectedType == "@(ALL_VALUE)") {
+                typeOk = true;
+            } else {
+                if (currentType == selectedType) {
+                    typeOk = true;
+                } else {
+                    typeOk = false;
+                }
+            }
+
+            if (typeOk && sourceOk) {
+                $(this).show();
+            } else
+            {
+                $(this).hide();
+            }
+        });
+    }
 </script>

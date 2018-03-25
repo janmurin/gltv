@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
+using GLTV.Models.ViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Internal;
 
 
 namespace GLTV.Controllers
@@ -59,7 +61,11 @@ namespace GLTV.Controllers
         {
             List<ClientEvent> tvItems = _eventService.FetchClientEventsAsync();
 
-            return View(tvItems);
+            ClientEventsViewModel model=new ClientEventsViewModel();
+            model.ClientEvents = tvItems;
+            model.Sources = tvItems.Select(x => x.Source).Distinct().ToList();
+
+            return View(model);
         }
 
         // GET: TvItems/Details/5
