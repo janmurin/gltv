@@ -35,15 +35,16 @@ namespace GLTV.Extensions
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
                 TvItemFile itemFile = tvItemService.GetTvItemFile(filename);
 
-                string headers = "";
-                foreach (var key in context.Request.Headers.Keys)
-                    headers += key + "=" + context.Request.Headers[key] + Environment.NewLine;
-                Console.WriteLine(headers);
+                //string headers = "";
+                //foreach (var key in context.Request.Headers.Keys)
+                //    headers += key + "=" + context.Request.Headers[key] + Environment.NewLine;
+                //Console.WriteLine(headers);
 
                 if (itemFile != null)
                 {
                     await eventService.AddClientEventAsync(
-                        context.Connection.RemoteIpAddress.ToString(),
+                        //context.Connection.RemoteIpAddress.ToString(),
+                        context.Request.Headers["X-Forwarded-For"],
                         itemFile.IsVideoFile() ? ClientEventType.VideoRequest : ClientEventType.ImageRequest,
                         "",
                         itemFile.ID);
@@ -51,7 +52,8 @@ namespace GLTV.Extensions
                 else
                 {
                     await eventService.AddClientEventAsync(
-                        context.Connection.RemoteIpAddress.ToString(),
+                        //context.Connection.RemoteIpAddress.ToString(),
+                        context.Request.Headers["X-Forwarded-For"],
                         ClientEventType.Exception,
                         $"File [{filename}] not found.",
                         null);
