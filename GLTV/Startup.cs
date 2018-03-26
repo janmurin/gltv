@@ -132,7 +132,7 @@ namespace GLTV
                 ForwardedHeaders = ForwardedHeaders.All,
                 RequireHeaderSymmetry = false,
                 ForwardLimit = null,
-                KnownProxies = { IPAddress.Parse("45.60.33.11"), IPAddress.Parse("172.17.114.36") },
+                KnownProxies = { IPAddress.Parse("172.17.114.36") },
             });
 
             app.UseAuthentication();
