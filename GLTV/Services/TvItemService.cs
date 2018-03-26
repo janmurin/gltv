@@ -100,7 +100,7 @@ namespace GLTV.Services
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
 
-            tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
+            tvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
 
             foreach (TvItem tvItem in tvItems)
             {
