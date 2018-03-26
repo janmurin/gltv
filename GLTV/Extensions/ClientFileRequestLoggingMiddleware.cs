@@ -35,6 +35,11 @@ namespace GLTV.Extensions
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
                 TvItemFile itemFile = tvItemService.GetTvItemFile(filename);
 
+                string headers = "";
+                foreach (var key in context.Request.Headers.Keys)
+                    headers += key + "=" + context.Request.Headers[key] + Environment.NewLine;
+                Console.WriteLine(headers);
+
                 if (itemFile != null)
                 {
                     await eventService.AddClientEventAsync(
