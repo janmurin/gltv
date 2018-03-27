@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -9,21 +11,28 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Services;
+using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.FileProviders;
 
 namespace GLTV
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            _hostingEnvironment = env;
         }
 
         public IConfiguration Configuration { get; }
+        private IHostingEnvironment _hostingEnvironment;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -40,6 +49,10 @@ namespace GLTV
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
             });
+
+            Constants.ANDROID_TOKEN = Configuration["androidToken"];
+            Constants.SERVER_URL = Configuration["serverUrl"];
+            Constants.SERVER_ADMIN = Configuration["ServerAdmin"];
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -73,6 +86,10 @@ namespace GLTV
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ITvItemService, TvItemService>();
+            services.AddScoped<IEmailSender, EmailSender>();
+            services.AddScoped<IEventService, EventService>();
 
             services.AddMvc(config =>
             {
@@ -81,11 +98,18 @@ namespace GLTV
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
             });
+
+            var physicalProvider = _hostingEnvironment.ContentRootFileProvider;
+            services.AddSingleton<IFileProvider>(physicalProvider);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            var cultureInfo = new CultureInfo("de-DE");
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -97,7 +121,19 @@ namespace GLTV
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseConventionalMiddleware();
             app.UseStaticFiles();
+            //app.UseForwardedHeaders(new ForwardedHeadersOptions
+            //{
+            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            //});
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All,
+                RequireHeaderSymmetry = false,
+                ForwardLimit = null,
+                KnownProxies = { IPAddress.Parse("172.17.114.36"), IPAddress.Parse("127.0.0.1") },
+            });
 
             app.UseAuthentication();
 

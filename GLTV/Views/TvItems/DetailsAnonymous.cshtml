@@ -1,0 +1,189 @@
+﻿@using GLTV.Extensions
+@model GLTV.Models.TvItem
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Details - GLTV</title>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+
+    <link rel="stylesheet" href="/css/bootstrap-datetimepicker.css" />
+
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+        </script>
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+    <script type="text/javascript" src="/js/moment-with-locales.js"></script>
+    <script type="text/javascript" src="/js/bootstrap-datetimepicker.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.16.0/jquery.validate.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.6/jquery.validate.unobtrusive.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
+    <!-- piexif.min.js is only needed for restoring exif data in resized images and when you
+        wish to resize images before upload. This must be loaded before fileinput.min.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/plugins/piexif.min.js" type="text/javascript"></script>
+    <!-- sortable.min.js is only needed if you wish to sort / rearrange files in initial preview.
+        This must be loaded before fileinput.min.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/plugins/sortable.min.js" type="text/javascript"></script>
+    <!-- purify.min.js is only needed if you wish to purify HTML content in your preview for
+        HTML files. This must be loaded before fileinput.min.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/plugins/purify.min.js" type="text/javascript"></script>
+    <!-- the main fileinput plugin file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/fileinput.min.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/locales/LANG.js"></script>*@
+
+    <link rel="stylesheet" href="/css/blueimp-gallery.min.css">
+    <script src="/js/blueimp-gallery.min.js"></script>
+    <script src="/js/jquery.blockUI.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">GLTV</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container body-content">
+
+        <h2>Details</h2>
+
+        <div>
+            <h4>TvItem</h4>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Title)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Title)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.TimeInserted)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.TimeInserted)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.StartTime)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.StartTime)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.EndTime)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.EndTime)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Author)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Author)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Duration)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Duration)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Type)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Type)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Locations)
+                </dt>
+                <dd>
+                    @Utils.GetLocationsString(Model.Locations)
+                </dd>
+            </dl>
+        </div>
+        @if (Model.Type != TvItemType.Video)
+        {
+            <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls">
+                <div class="slides"></div>
+                <h3 class="title"></h3>
+                <a class="prev">‹</a>
+                <a class="next">›</a>
+                <a class="close">×</a>
+                <a class="play-pause"></a>
+                <ol class="indicator"></ol>
+            </div>
+            <div style="padding-top: 50px;" id="links">
+                @{
+                    foreach (TvItemFile file in Model.Files)
+                    {
+                        <a href="@file.Url" title="@file.FileName">
+                            <img src="@file.Url" alt="@file.FileName" width="200">
+                        </a>
+                    }
+                }
+
+            </div>
+            <script>
+                document.getElementById('links').onclick = function (event) {
+                    event = event || window.event;
+                    var target = event.target || event.srcElement,
+                        link = target.src ? target.parentNode : target,
+                        options = { index: link, event: event },
+                        links = this.getElementsByTagName('a');
+                    blueimp.Gallery(links, options);
+                };
+            </script>
+        }
+        else
+        {
+            foreach (TvItemFile file in Model.Files)
+            {
+                <video width="640" height="480" controls>
+                    <source src="@file.Url" type="video/mp4">
+                    <source src="@file.Url" type="video/mkv">
+                    Your browser does not support the video tag.
+                </video>
+            }
+        }
+        <hr />
+        <footer>
+            <p>&copy; 2018 - GLTV</p>
+        </footer>
+    </div>
+</body>
+</html>

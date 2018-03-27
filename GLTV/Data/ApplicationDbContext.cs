@@ -22,5 +22,15 @@ namespace GLTV.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<GLTV.Models.TvItem> TvItem { get; set; }
+
+        public DbSet<GLTV.Models.TvItemFile> TvItemFile { get; set; }
+
+        public DbSet<GLTV.Models.TvItemLocation> TvItemLocation { get; set; }
+
+        public DbSet<GLTV.Models.LogEvent> LogEvent { get; set; }
+
+        public DbSet<GLTV.Models.ClientEvent> ClientEvent { get; set; }
     }
 }

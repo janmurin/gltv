@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using GLTV.Models;
 using GLTV.Models.AccountViewModels;
 using GLTV.Services;
+using GLTV.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 
 namespace GLTV.Controllers
@@ -26,18 +27,21 @@ namespace GLTV.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly string[] _allowedEmails;
+        private readonly IEventService _eventService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ILogger<AccountController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration
+            , IEventService eventService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _eventService = eventService;
 
             _allowedEmails = configuration.GetSection("AllowedEmails").Get<string[]>();
         }
@@ -55,7 +59,7 @@ namespace GLTV.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["ErrorMessage"] = ErrorMessage;
             return View();
-        }     
+        }
 
         [HttpGet]
         [AllowAnonymous]
@@ -104,6 +108,11 @@ namespace GLTV.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                string username = email.Split("@")[0];
+                await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+
                 return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
