@@ -289,5 +289,80 @@ namespace GLTV.Controllers
 
             return RedirectToAction(nameof(Edit), new { id = item.ID });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFiles(int id, [FromForm]List<IFormFile> files)
+        {
+            if (ModelState.IsValid)
+            {
+                // add item
+                TvItem item = _tvItemService.FetchTvItem(id);
+                var model = new TvItemEditViewModel();
+                model.TvItem = item;
+                model.LocationCheckboxes.LocationBanskaBystrica =
+                    item.Locations.Any(x => x.Location == Location.BanskaBystrica);
+                model.LocationCheckboxes.LocationKosice =
+                    item.Locations.Any(x => x.Location == Location.Kosice);
+                model.LocationCheckboxes.LocationZilina =
+                    item.Locations.Any(x => x.Location == Location.Zilina);
+
+                // add files
+                if (item.Type == TvItemType.Video)
+                {
+                    if (files.Count > 1)
+                    {
+                        ModelState.AddModelError("", "Only 1 file is allowed for video TV item type.");
+                        return View("Edit", model);
+                    }
+
+                    try
+                    {
+                        _fileService.ReplaceVideoFile(item, files[0]);
+                    }
+                    catch (Exception e)
+                    {
+                        ModelState.AddModelError("", e.Message);
+                        return View("Edit", model);
+                    }
+                }
+                else if (item.Type == TvItemType.Image)
+                {
+                    if (files.Count > 1)
+                    {
+                        ModelState.AddModelError("", "Only 1 file is allowed for image TV item type.");
+                        return View("Edit", model);
+                    }
+
+                    try
+                    {
+                        _fileService.ReplaceImageFile(item, files[0]);
+                    }
+                    catch (Exception e)
+                    {
+                        ModelState.AddModelError("", e.Message);
+                        return View("Edit", model);
+                    }
+                }
+                else if (item.Type == TvItemType.Gallery)
+                {
+                    try
+                    {
+                        _fileService.SaveImageFiles(item, files);
+                    }
+                    catch (Exception e)
+                    {
+                        ModelState.AddModelError("", e.Message);
+                        return View("Edit", model);
+                    }
+                }
+
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
+
+                return View("Edit", model);
+            }
+
+            return View("Edit");
+        }
     }
 }

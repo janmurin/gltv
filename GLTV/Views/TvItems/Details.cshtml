@@ -7,10 +7,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Details</h2>
+<h2>TvItem Details</h2>
 
 <div>
-    <h4>TvItem</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -47,7 +46,15 @@
             @Html.DisplayNameFor(model => model.Duration)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Duration)
+            @if (Model.Type == TvItemType.Video)
+            {
+                @(Utils.GetFormattedDuration(Model))
+                <br/><span>File size: @(Utils.GetFileSize(Model.Files[0]))</span>
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.Duration)
+            }
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Type)
@@ -105,7 +112,7 @@ else
             <source src="@file.Url" type="video/mkv">
             Your browser does not support the video tag.
         </video>
-    }   
+    }
 }
 
 <div style="padding-top: 50px;">

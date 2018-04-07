@@ -8,9 +8,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Edit</h2>
+<h2>TvItem Edit</h2>
 
-<h4>TvItem</h4>
 <hr />
 <div class="row">
     <form asp-action="Edit" id="editTvItemForm" method="post" enctype="multipart/form-data">
@@ -60,6 +59,7 @@
                 {
                     <div>
                         @(Utils.GetFormattedDuration(Model.TvItem))
+                        <br/>File size: @(Utils.GetFileSize(Model.TvItem.Files[0]))
                     </div>
                 }
                 else
@@ -104,6 +104,8 @@
         </div>
     </form>
 </div>
+
+<h4>Files</h4>
 @if (Model.TvItem.Type != TvItemType.Video)
 {
     <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls">
@@ -115,16 +117,22 @@
         <a class="play-pause"></a>
         <ol class="indicator"></ol>
     </div>
-    <div style="padding-top: 50px;" id="links">
+    <div id="links" style="padding-top: 0px;">
         @foreach (TvItemFile file in Model.TvItem.Files)
         {
-            <div style="display: inline-block;">
+            <div class="image-block">
                 <a href="@file.Url" title="@file.FileName">
                     <img src="@file.Url" alt="@file.FileName" width="200">
                 </a>
-                <form asp-controller="TvItems" asp-action="DeleteFile" asp-route-id="@file.ID" method="post">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
+                <p>
+                    Size: @Utils.GetFileSize(file)<br/>
+                </p>
+                @if (Model.TvItem.Files.Count > 1)
+                {
+                    <form asp-controller="TvItems" asp-action="DeleteFile" asp-route-id="@file.ID" method="post">
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                }
             </div>
         }
     </div>
@@ -146,12 +154,43 @@ else
 {
     foreach (TvItemFile file in Model.TvItem.Files)
     {
-        <video width="640" height="480" controls>
+        <video width="640" height="auto" controls>
             <source src="@file.Url" type="video/mp4">
             <source src="@file.Url" type="video/mkv">
             Your browser does not support the video tag.
         </video>
     }
+}
+@{
+    string buttonText = "Change Video";
+    string accept = ".mp4,.mkv";
+    string allowMultiple = "";
+    switch (Model.TvItem.Type)
+    {
+        case TvItemType.Video:
+            buttonText = "Change Video";
+            accept = ".mp4,.mkv";
+            break;
+        case TvItemType.Gallery:
+            buttonText = "Add Files";
+            accept = ".jpg,.jpeg,.png";
+            allowMultiple = "multiple";
+            break;
+        case TvItemType.Image:
+            buttonText = "Change Image";
+            accept = ".jpg,.jpeg,.png";
+            break;
+    }
+    <form asp-controller="TvItems" asp-action="AddFiles" asp-route-id="@Model.TvItem.ID" method="post" enctype="multipart/form-data" id="addFilesForm" style="padding-top: 20px;">
+        <div class="form-group" id="fileInputGroup" style="">
+            <input id="fileInput" type="file" name="files" class="file" accept="@accept" @allowMultiple
+                   data-show-upload="false" data-show-caption="true" data-msg-placeholder="Select {files} for upload...">
+            <span class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="@buttonText" class="btn btn-success"/>
+        </div>
+    </form>
 }
 
 <div style="padding-top: 50px;">
@@ -159,6 +198,7 @@ else
 </div>
 
 <script type="text/javascript">
+    var totalFileSize = 0;
 
     $(function () {
         var startTimeDp = $('#startTimeInput').datetimepicker({
@@ -172,11 +212,11 @@ else
             //minDate: new Date('@(Model.TvItem.StartTime.ToString("o", CultureInfo.InvariantCulture))')
         });
         startTimeDp.on("dp.change",
-            function (e) {
+            function(e) {
                 endTimeDp.data("DateTimePicker").minDate(e.date);
             });
         endTimeDp.on("dp.change",
-            function (e) {
+            function(e) {
                 startTimeDp.data("DateTimePicker").maxDate(e.date);
             });
         @*endTimeDp.data("DateTimePicker").minDate(new Date('@(Model.TvItem.StartTime.ToString("o", CultureInfo.InvariantCulture))'));
@@ -218,6 +258,61 @@ else
         $("#durationInput").on("change", function (slideEvt) {
             $("#durationInputSliderVal").text(slideEvt.value.newValue);
         });
+
+        $("#fileInput").fileinput({
+            minFileSize: 1
+        });
+
+        function validateFileInput() {
+            var span = $('#fileInputGroup').find('span.text-danger');
+
+            if (totalFileSize > 1073741824) {
+                span.removeClass('field-validation-valid');
+                span.addClass('field-validation-error');
+                span.text('Total file size must not be greater than 1073741824 bytes (1 GB).');
+                return false;
+            } else if (totalFileSize == 0) {
+                span.removeClass('field-validation-valid');
+                span.addClass('field-validation-error');
+                span.text('At least one file is required.');
+                return false;
+            } else {
+                span.addClass('field-validation-valid');
+                span.removeClass('field-validation-error');
+                span.text('');
+                return true;
+            }
+        }
+
+        $("#fileInput").change(function() {
+            var nBytes = 0,
+                oFiles = document.getElementById("fileInput").files,
+                nFiles = oFiles.length;
+            for (var nFileId = 0; nFileId < nFiles; nFileId++) {
+                nBytes += oFiles[nFileId].size;
+            }
+            var sOutput = nBytes + " bytes";
+            // optional code for multiples approximation
+            for (var aMultiples = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"], nMultiple = 0, nApprox = nBytes / 1024; nApprox > 1; nApprox /= 1024, nMultiple++) {
+                sOutput = nApprox.toFixed(3) + " " + aMultiples[nMultiple] + " (" + nBytes + " bytes)";
+            }
+            // end of optional code
+            totalFileSize = nBytes;
+            validateFileInput();
+        });
+
+        $('#addFilesForm').submit(function (ev) {
+            ev.preventDefault(); // to stop the form from submitting
+            /* Validations go here */
+            if (!validateFileInput()) {
+                $.unblockUI();
+                return false;
+            }
+
+            this.submit(); // If all the validations succeeded
+        });
+
+
 
     });
 </script>

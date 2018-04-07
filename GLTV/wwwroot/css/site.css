@@ -136,3 +136,8 @@ span.time-expired {
     font-weight: bold;
     font-size: 14px;
 }
+
+.image-block {
+    display: inline-block;
+    padding: 10px 0;
+}

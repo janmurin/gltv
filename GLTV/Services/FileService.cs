@@ -51,6 +51,48 @@ namespace GLTV.Services
             return true;
         }
 
+        public bool ReplaceVideoFile(TvItem tvItem, IFormFile file)
+        {
+            string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
+            TvItemFile newItemFile = new TvItemFile()
+            {
+                FileName = filename,
+                Length = file.Length
+            };
+
+            using (var fileStream = new FileStream(newItemFile.AbsolutePath, FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
+
+            IMediaInfo mediaInfo = new MediaInfo(newItemFile.AbsolutePath);
+            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
+            if (tvItem.Duration == 0)
+            {
+                throw new Exception("Video duration is 0s.");
+            }
+
+            TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
+            if (tvItemFile != null)
+            {
+                bool success = DeleteFile(tvItemFile.FileName);
+                // if not successfull delete, then new zombie file 
+
+                tvItemFile.FileName = newItemFile.FileName;
+                tvItemFile.Length = newItemFile.Length;
+
+                _context.Update(tvItemFile);
+                _context.Update(tvItem);
+                _context.SaveChanges();
+
+                return true;
+            }
+            else
+            {
+                throw new Exception($"TvItem with id {tvItem.ID} does not have any files.");
+            }
+        }
+
         public bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles)
         {
             foreach (IFormFile formFile in modelFiles)
@@ -98,6 +140,7 @@ namespace GLTV.Services
                         throw new Exception($"Unsupported image file extension [{extension}].");
                     }
 
+                    itemFile.Length = fileStream.Length;
                     _context.Add(itemFile);
                 }
             }
@@ -105,6 +148,73 @@ namespace GLTV.Services
             _context.SaveChanges();
 
             return true;
+        }
+
+        public bool ReplaceImageFile(TvItem tvItem, IFormFile formFile)
+        {
+            Image<Rgba32> image = null;
+            Stream inputStream = formFile.OpenReadStream();
+            image = Image.Load(inputStream);
+
+            double height = image.Height;
+            double width = image.Width;
+            double k1 = width / Constants.MAX_IMAGE_WIDTH;
+            double k2 = height / Constants.MAX_IMAGE_HEIGHT;
+            if (k1 > k2 && k1 > 1)
+            {
+                image.Mutate(x => x.Resize(Constants.MAX_IMAGE_WIDTH, (int)(height / k1)));
+            }
+
+            if (k1 < k2 && k2 > 1)
+            {
+                image.Mutate(x => x.Resize((int)(width / k2), Constants.MAX_IMAGE_HEIGHT));
+            }
+
+            string extension = Path.GetExtension(formFile.FileName) ?? "";
+            string filename = tvItem.ID + "_" + Guid.NewGuid() + extension;
+            TvItemFile newItemFile = new TvItemFile()
+            {
+                FileName = filename,
+                Length = formFile.Length,
+                TvItemId = tvItem.ID
+            };
+
+            using (var fileStream = new FileStream(newItemFile.AbsolutePath, FileMode.Create))
+            {
+                if (extension.ToLower().EndsWith("jpg") || extension.ToLower().EndsWith("jpeg"))
+                {
+                    image.SaveAsJpeg(fileStream);
+                }
+                else if (extension.ToLower().EndsWith("png"))
+                {
+                    image.SaveAsPng(fileStream);
+                }
+                else
+                {
+                    throw new Exception($"Unsupported image file extension [{extension}].");
+                }
+                newItemFile.Length = fileStream.Length;
+            }
+
+            TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
+            if (tvItemFile != null)
+            {
+                bool success = DeleteFile(tvItemFile.FileName);
+                // if not successfull delete, then new zombie file 
+
+                tvItemFile.FileName = newItemFile.FileName;
+                tvItemFile.Length = newItemFile.Length;
+
+                _context.Update(tvItemFile);
+                _context.Update(tvItem);
+                _context.SaveChanges();
+
+                return true;
+            }
+            else
+            {
+                throw new Exception($"TvItem with id {tvItem.ID} does not have any files.");
+            }
         }
 
         public bool DeleteFile(string filename)
