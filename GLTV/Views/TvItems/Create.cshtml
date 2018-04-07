@@ -45,8 +45,11 @@
             </div>
             <div class="form-group" id="durationGroup" style="@(Model.TvItem?.Type == TvItemType.Video ? "display:none;" : "")">
                 <label asp-for="TvItem.Duration" class="control-label"></label>
-                <input asp-for="TvItem.Duration" class="form-control" />
-                <span asp-validation-for="TvItem.Duration" class="text-danger"></span>
+                <div>
+                    <input id="durationInput" asp-for="TvItem.Duration" type="text"
+                           data-slider-min="3" data-slider-max="120" data-slider-step="1" data-slider-value="@(Model.TvItem?.Duration ?? 3)" />
+                </div>
+                <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">@(Model.TvItem?.Duration ?? 3)</span></span>
             </div>
             <div class="form-group" id="locationsGroup">
                 <label asp-for="LocationCheckboxes" class="control-label"></label>
@@ -227,5 +230,10 @@
         });
 
         initFileInput();
+
+        $("#durationInput").slider();
+        $("#durationInput").on("change", function (slideEvt) {
+            $("#durationInputSliderVal").text(slideEvt.value.newValue);
+        });
     });
 </script>

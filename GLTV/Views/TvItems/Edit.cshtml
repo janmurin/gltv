@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using GLTV.Extensions
 @model GLTV.Models.TvItemEditViewModel
 
 @{
@@ -56,13 +57,18 @@
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 @if (Model.TvItem.Type == TvItemType.Video)
                 {
-                    <input asp-for="TvItem.Duration" class="form-control" readonly />
+                <div>
+                    @(Utils.GetFormattedDuration(Model.TvItem))
+                </div>
                 }
                 else
                 {
-                    <input asp-for="TvItem.Duration" class="form-control" />
+                    <div>
+                        <input id="durationInput" asp-for="TvItem.Duration" type="text" 
+                               data-slider-min="3" data-slider-max="120" data-slider-step="1" data-slider-value="@(Model.TvItem.Duration)" />
+                    </div>
+                    <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">@(Model.TvItem.Duration)</span></span>
                 }
-                <span asp-validation-for="TvItem.Duration" class="text-danger"></span>
             </div>
             <div class="form-group" id="locationsGroup">
                 <label asp-for="LocationCheckboxes" class="control-label"></label>
@@ -200,6 +206,11 @@ else
             }
 
             this.submit(); // If all the validations succeeded
+        });
+
+        $("#durationInput").slider();
+        $("#durationInput").on("change", function (slideEvt) {
+            $("#durationInputSliderVal").text(slideEvt.value.newValue);
         });
 
     });
