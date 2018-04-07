@@ -53,6 +53,7 @@ namespace GLTV
             Constants.ANDROID_TOKEN = Configuration["androidToken"];
             Constants.SERVER_URL = Configuration["serverUrl"];
             Constants.SERVER_ADMIN = Configuration["ServerAdmin"];
+            Constants.WEB_ROOT_PATH = _hostingEnvironment.WebRootPath;
 
             services.Configure<IdentityOptions>(options =>
             {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using GLTV.Models.ViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
@@ -61,7 +62,7 @@ namespace GLTV.Controllers
         {
             List<ClientEvent> tvItems = _eventService.FetchClientEventsAsync();
 
-            ClientEventsViewModel model=new ClientEventsViewModel();
+            ClientEventsViewModel model = new ClientEventsViewModel();
             model.ClientEvents = tvItems;
             model.Sources = tvItems.Select(x => x.Source).Distinct().ToList();
 
@@ -255,6 +256,38 @@ namespace GLTV.Controllers
             }
 
             return RedirectToAction(nameof(IndexDeleted));
+        }
+
+        [HttpPost, ActionName("DeleteFile")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFile(int id)
+        {
+            TvItemFile itemFile = _tvItemService.FetchTvItemFile(id);
+            TvItem item = _tvItemService.FetchTvItem(itemFile.TvItemId);
+
+            bool success = _fileService.DeleteFile(itemFile.FileName);
+            if (success)
+            {
+                await _eventService.AddLogEventAsync(
+                    User.Identity.Name,
+                    LogEventType.ItemDeleteSingleFile,
+                    $"User deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
+                    item.ID);
+            }
+            else
+            {
+                // if file deletion is not successful, it will stay in the file system as a zombie file
+                await _eventService.AddLogEventAsync(
+                    User.Identity.Name,
+                    LogEventType.Exception,
+                    $"User NOT SUCCESSFULLY deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
+                    item.ID);
+            }
+
+            item.Files.Remove(itemFile);
+            _tvItemService.UpdateTvItem(item);
+
+            return RedirectToAction(nameof(Edit), new { id = item.ID });
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace GLTV.Extensions
+﻿namespace GLTV.Extensions
 {
     public static class Constants
     {
@@ -18,5 +13,7 @@ namespace GLTV.Extensions
         public static string ANDROID_TOKEN;
         public static string SERVER_URL;
         public static string SERVER_ADMIN;
+        public static string WEB_ROOT_PATH;
+        public static string FILES_DIR = "files";
     }
 }

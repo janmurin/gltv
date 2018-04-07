@@ -16,71 +16,17 @@ namespace GLTV.Services
 {
     public class ServiceBase
     {
-        private readonly string _webRootPath;
-        private readonly string _webPath;
-        private readonly List<string> _allowedExtensions;
         protected readonly ApplicationDbContext _context;
-        private ClaimsPrincipal _currentUser;
 
-        public ServiceBase(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
+        public ServiceBase(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
-            _webPath = "files";
-            _webRootPath = Path.Combine(env.WebRootPath, _webPath);
-            _allowedExtensions = new List<string> { "jpg", "jpe", "bmp", "jpeg", "png", "mkv", "mp4" };
-            _currentUser = signInManager.Context.User;
+            AllowedExtensions = new List<string> { "jpg", "jpe", "bmp", "jpeg", "png", "mkv", "mp4" };
+            CurrentUser = signInManager.Context.User;
         }
 
-        protected ClaimsPrincipal CurrentUser
-        {
-            get
-            {
-                return _currentUser;
-            }
-        }
+        protected ClaimsPrincipal CurrentUser { get; }
 
-        protected string WebRootPath
-        {
-            get
-            {
-                return _webRootPath;
-            }
-        }
-
-        protected string WebPath
-        {
-            get
-            {
-                return _webPath;
-            }
-        }
-
-        protected List<string> AllowedExtensions
-        {
-            get
-            {
-                return _allowedExtensions;
-            }
-        }
-
-        protected string MakeWebPath(string filename)
-        {
-            return MakeWebPath(Path.Combine(WebPath,filename), true);
-        }
-
-        protected string MakeWebPath(string path, bool addSeperatorToBegin = false, bool addSeperatorToLast = false)
-        {
-            path = path.Replace("\\", "/");
-
-            if (addSeperatorToBegin) path = "/" + path;
-            if (addSeperatorToLast) path = path + "/";
-
-            return path;
-        }
-
-        protected string MakeFullWebPath(string filename)
-        {
-            return string.Concat(Constants.SERVER_URL, MakeWebPath(filename));
-        }
+        protected List<string> AllowedExtensions { get; }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Extensions;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -17,34 +18,32 @@ namespace GLTV.Services
 {
     public class FileService : ServiceBase, IFileService
     {
-        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
-            : base(context, env, signInManager)
+        public FileService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+            : base(context, signInManager)
         {
         }
 
         public bool SaveVideoFile(TvItem tvItem, IFormFile file)
         {
             string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
-            string path = Path.Combine(WebRootPath, filename);
-
-            using (var fileStream = new FileStream(path, FileMode.Create))
-            {
-                file.CopyTo(fileStream);
-            }
-
-            IMediaInfo mediaInfo = new MediaInfo(path);
-            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
-            if (tvItem.Duration == 0)
-            {
-                throw new Exception("Video duration is 0s.");
-            }
-
             TvItemFile itemFile = new TvItemFile()
             {
                 FileName = filename,
                 Length = file.Length,
                 TvItemId = tvItem.ID
             };
+
+            using (var fileStream = new FileStream(itemFile.AbsolutePath, FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
+
+            IMediaInfo mediaInfo = new MediaInfo(itemFile.AbsolutePath);
+            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
+            if (tvItem.Duration == 0)
+            {
+                throw new Exception("Video duration is 0s.");
+            }
 
             _context.Add(itemFile);
             _context.SaveChanges();
@@ -77,9 +76,14 @@ namespace GLTV.Services
 
                 string extension = Path.GetExtension(formFile.FileName) ?? "";
                 string filename = item.ID + "_" + Guid.NewGuid() + extension;
-                string path = Path.Combine(WebRootPath, filename);
+                TvItemFile itemFile = new TvItemFile()
+                {
+                    FileName = filename,
+                    Length = formFile.Length,
+                    TvItemId = item.ID
+                };
 
-                using (var fileStream = new FileStream(path, FileMode.Create))
+                using (var fileStream = new FileStream(itemFile.AbsolutePath, FileMode.Create))
                 {
                     if (extension.ToLower().EndsWith("jpg") || extension.ToLower().EndsWith("jpeg"))
                     {
@@ -93,13 +97,6 @@ namespace GLTV.Services
                     {
                         throw new Exception($"Unsupported image file extension [{extension}].");
                     }
-
-                    TvItemFile itemFile = new TvItemFile()
-                    {
-                        FileName = filename,
-                        Length = formFile.Length,
-                        TvItemId = item.ID
-                    };
 
                     _context.Add(itemFile);
                 }
@@ -118,12 +115,11 @@ namespace GLTV.Services
                 throw new Exception($"TvItemFile not found with filename[{filename}].");
             }
 
-            string path = Path.Combine(WebRootPath, filename);
             try
             {
-                if (File.Exists(path))
+                if (File.Exists(tvItemFile.AbsolutePath))
                 {
-                    File.Delete(path);
+                    File.Delete(tvItemFile.AbsolutePath);
                 }
             }
             catch (Exception e)
@@ -140,12 +136,11 @@ namespace GLTV.Services
             foreach (TvItemFile file in files)
             {
                 Console.WriteLine("deleting files: " + String.Join(", ", files.Select(x => x.FileName)));
-                string path = Path.Combine(WebRootPath, file.FileName);
                 try
                 {
-                    if (File.Exists(path))
+                    if (File.Exists(file.AbsolutePath))
                     {
-                        File.Delete(path);
+                        File.Delete(file.AbsolutePath);
                     }
 
                     file.Deleted = true;

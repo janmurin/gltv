@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+using System.IO;
 using GLTV.Extensions;
 
-namespace GLTV.Models
+namespace GLTV.Models.Objects
 {
     public class TvItem
     {
@@ -50,10 +48,7 @@ namespace GLTV.Models
         public List<TvItemFile> Files { get; set; }
 
         [NotMapped]
-        public string GetAnonymousDetailUrl
-        {
-            get { return $"{Constants.SERVER_URL}/TvItems/DetailsAnonymous/{ID}"; }
-        }
+        public string GetAnonymousDetailUrl => $"{Constants.SERVER_URL}/TvItems/DetailsAnonymous/{ID}";
 
         public string GetDetailHyperlink(bool isAnonymous)
         {
@@ -85,20 +80,28 @@ namespace GLTV.Models
         public bool Deleted { get; set; }
 
         [NotMapped]
-        public string Url { get; set; }
+        public string Url => Utils.MakeWebPath(Path.Combine(Constants.FILES_DIR, FileName), true);
+
+        public string FullUrl(bool isClient = false)
+        {
+            if (isClient)
+            {
+                return string.Concat(Constants.SERVER_URL, Url, Constants.CLIENT_FILE_REQUEST_SUFFIX);
+            }
+            return string.Concat(Constants.SERVER_URL, Url);
+        }
+
         [NotMapped]
-        public string FullUrl { get; set; }
-        [NotMapped]
-        public string AbsolutePath { get; set; }
+        public string AbsolutePath => Path.Combine(Constants.WEB_ROOT_PATH, Constants.FILES_DIR, FileName);
 
         public bool IsVideoFile()
         {
             return FileName.ToLower().EndsWith(".mp4") || FileName.ToLower().EndsWith(".mkv");
         }
 
-        public string GetDetailHyperlink(string url)
+        public string GetDetailHyperlink()
         {
-            return $"<a target=\"_blank\" href=\"{url}\">{FileName}</a>";
+            return $"<a target=\"_blank\" href=\"{Url}\">{FileName}</a>";
         }
     }
 

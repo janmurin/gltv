@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using GLTV.Extensions;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using MailKit.Security;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;

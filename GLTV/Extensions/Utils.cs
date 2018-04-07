@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GLTV.Extensions
@@ -151,5 +152,16 @@ namespace GLTV.Extensions
 
             return time.ToString(@"h' h 'mm' m 'ss' s'");
         }
+
+        public static string MakeWebPath(string path, bool addSeperatorToBegin = false, bool addSeperatorToLast = false)
+        {
+            path = path.Replace("\\", "/");
+
+            if (addSeperatorToBegin) path = "/" + path;
+            if (addSeperatorToLast) path = path + "/";
+
+            return path;
+        }
+
     }
 }

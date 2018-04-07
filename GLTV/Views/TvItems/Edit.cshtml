@@ -1,5 +1,6 @@
 ﻿@using System.Globalization
 @using GLTV.Extensions
+@using GLTV.Models.Objects
 @model GLTV.Models.TvItemEditViewModel
 
 @{
@@ -57,14 +58,14 @@
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 @if (Model.TvItem.Type == TvItemType.Video)
                 {
-                <div>
-                    @(Utils.GetFormattedDuration(Model.TvItem))
-                </div>
+                    <div>
+                        @(Utils.GetFormattedDuration(Model.TvItem))
+                    </div>
                 }
                 else
                 {
                     <div>
-                        <input id="durationInput" asp-for="TvItem.Duration" type="text" 
+                        <input id="durationInput" asp-for="TvItem.Duration" type="text"
                                data-slider-min="3" data-slider-max="120" data-slider-step="1" data-slider-value="@(Model.TvItem.Duration)" />
                     </div>
                     <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">@(Model.TvItem.Duration)</span></span>
@@ -115,25 +116,30 @@
         <ol class="indicator"></ol>
     </div>
     <div style="padding-top: 50px;" id="links">
-        @{
-            foreach (TvItemFile file in Model.TvItem.Files)
-            {
+        @foreach (TvItemFile file in Model.TvItem.Files)
+        {
+            <div style="display: inline-block;">
                 <a href="@file.Url" title="@file.FileName">
                     <img src="@file.Url" alt="@file.FileName" width="200">
                 </a>
-            }
+                <form asp-controller="TvItems" asp-action="DeleteFile" asp-route-id="@file.ID" method="post">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </div>
         }
-
     </div>
     <script>
-        document.getElementById('links').onclick = function (event) {
-            event = event || window.event;
-            var target = event.target || event.srcElement,
-                link = target.src ? target.parentNode : target,
-                options = { index: link, event: event },
-                links = this.getElementsByTagName('a');
-            blueimp.Gallery(links, options);
-        };
+        $(function () {
+            $('#links img').on('click',
+                function (event) {
+                    event = event || window.event;
+                    var target = event.target || event.srcElement,
+                        link = target.src ? target.parentNode : target,
+                        options = { index: link, event: event },
+                        links = $('#links a');
+                    blueimp.Gallery(links, options);
+                });
+        });
     </script>
 }
 else

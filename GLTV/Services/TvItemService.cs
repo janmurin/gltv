@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Extensions;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,12 +16,9 @@ namespace GLTV.Services
 {
     public class TvItemService : ServiceBase, ITvItemService
     {
-        private readonly IFileService _fileService;
-
-        public TvItemService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager, IFileService fileService)
-            : base(context, env, signInManager)
+        public TvItemService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+            : base(context, signInManager)
         {
-            _fileService = fileService;
         }
 
         public TvItem FetchTvItem(int id)
@@ -34,9 +32,6 @@ namespace GLTV.Services
             {
                 throw new Exception($"Item not found with id {id}.");
             }
-
-            tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
-            tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
 
             return tvItem;
         }
@@ -65,12 +60,6 @@ namespace GLTV.Services
                 .Where(x => x.Deleted == deleted)
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
-
-            foreach (TvItem tvItem in tvItems)
-            {
-                tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
-                tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
-            }
 
             return tvItems;
         }
@@ -102,19 +91,29 @@ namespace GLTV.Services
 
             tvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
 
-            foreach (TvItem tvItem in tvItems)
-            {
-                // special ending to differentiate between web and client file requests
-                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName) + Constants.CLIENT_FILE_REQUEST_SUFFIX);
-                tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
-            }
-
             return tvItems;
         }
 
-        public TvItemFile GetTvItemFile(string filename)
+        public TvItemFile FetchTvItemFile(string filename)
         {
-            return _context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
+            TvItemFile itemFile = _context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
+            if (itemFile == null)
+            {
+                throw new Exception($"Item not found with filename {filename}.");
+            }
+
+            return itemFile;
+        }
+
+        public TvItemFile FetchTvItemFile(int fileId)
+        {
+            TvItemFile itemFile = _context.TvItemFile.FirstOrDefault(x => x.ID == fileId);
+            if (itemFile == null)
+            {
+                throw new Exception($"Item not found with fileId {fileId}.");
+            }
+
+            return itemFile;
         }
     }
 }

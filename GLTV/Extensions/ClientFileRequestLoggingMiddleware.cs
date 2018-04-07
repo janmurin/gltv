@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -33,7 +34,7 @@ namespace GLTV.Extensions
                 //Console.WriteLine("file request url changed to: " + context.Request.Path.ToString());
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
-                TvItemFile itemFile = tvItemService.GetTvItemFile(filename);
+                TvItemFile itemFile = tvItemService.FetchTvItemFile(filename);
 
                 //string headers = "";
                 //foreach (var key in context.Request.Headers.Keys)

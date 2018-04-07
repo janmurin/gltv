@@ -15,8 +15,8 @@ namespace GLTV.Services
 {
     public class EventService : ServiceBase, IEventService
     {
-        public EventService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
-            : base(context, env, signInManager)
+        public EventService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+            : base(context, signInManager)
         {
         }
 
@@ -101,7 +101,7 @@ namespace GLTV.Services
             {
                 if (logEvent.Type == ClientEventType.ImageRequest || logEvent.Type == ClientEventType.VideoRequest)
                 {
-                    logEvent.Message = $"Request for file {logEvent.TvItemFile.GetDetailHyperlink(MakeFullWebPath(logEvent.TvItemFile.FileName))}";
+                    logEvent.Message = $"Request for file {logEvent.TvItemFile.GetDetailHyperlink()}";
                 }
             }
 
