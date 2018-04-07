@@ -17,5 +17,7 @@ namespace GLTV.Services
         byte[] GetBytes(string filename);
         bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles);
         bool ReplaceImageFile(TvItem tvItem, IFormFile formFile);
+        List<TvItemFile> FindZombieFiles();
+        bool DeleteZombieFile(string filename);
     }
 }

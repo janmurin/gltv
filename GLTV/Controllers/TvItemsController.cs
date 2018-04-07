@@ -46,9 +46,11 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> IndexDeleted()
         {
-            List<TvItem> tvItems = _tvItemService.FetchTvItems(true);
+            DeletedViewModel model = new DeletedViewModel();
+            model.TvItems = _tvItemService.FetchTvItems(true);
+            model.ZombieFiles = _fileService.FindZombieFiles();
 
-            return View(tvItems);
+            return View(model);
         }
 
         public async Task<IActionResult> IndexLogs()
@@ -288,6 +290,24 @@ namespace GLTV.Controllers
             _tvItemService.UpdateTvItem(item);
 
             return RedirectToAction(nameof(Edit), new { id = item.ID });
+        }
+
+        [HttpPost, ActionName("DeleteZombieFile")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteZombieFile([FromForm]string fileName)
+        {
+            bool success = _fileService.DeleteZombieFile(fileName);
+            if (success)
+            {
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);
+            }
+            else
+            {
+                // if file deletion is not successful, it will stay in the file system as a zombie file
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.Exception, $"User NOT SUCCESSFULLY deleted zombie file[{fileName}].", null);
+            }
+
+            return RedirectToAction(nameof(IndexDeleted));
         }
 
         [HttpPost]

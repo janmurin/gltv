@@ -1,12 +1,49 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using GLTV.Extensions
 @using GLTV.Models.Objects
-@model IEnumerable<GLTV.Models.Objects.TvItem>
+@model GLTV.Models.ViewModels.DeletedViewModel
 
 @{
     ViewData["Title"] = "Deleted Items";
     ViewBag.DeletedNav = true;
     Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (Model.ZombieFiles.Any())
+{
+    <h2>Zombie files:</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>
+                Filename
+            </th>
+            <th>
+                Size
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (TvItemFile item in Model.ZombieFiles)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FileName)
+                </td>
+                <td>
+                    @Utils.GetFileSize(item)
+                </td>
+                <td>
+                    <form asp-controller="TvItems" asp-action="DeleteZombieFile">
+                        <input type="hidden" name="FileName" value="@item.FileName"/>
+                        <input type="submit" value="Delete" class="btn btn-warning"/>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }
 
 <h2>Deleted Tv Items</h2>
@@ -15,16 +52,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                Title
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TimeInserted)
+                Time Inserted
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Author)
+                Author
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Type)
+                Type
             </th>
             <th>
                 Files
@@ -36,7 +73,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.TvItems)
         {
             <tr>
                 <td>
@@ -64,8 +101,8 @@
                             <input type="submit" value="Delete Files" class="btn btn-warning" />
                         </form>
                     }
-            </td>
-        </tr>
-    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

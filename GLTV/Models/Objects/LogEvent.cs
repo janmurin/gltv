@@ -44,6 +44,7 @@ namespace GLTV.Models
         ServerStartUp = 6,
         ServerShutdown = 7,
         ItemDeleteFiles = 8,
-        ItemDeleteSingleFile = 9
+        ItemDeleteSingleFile = 9,
+        ItemDeleteZombieFile = 10
     }
 }

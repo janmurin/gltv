@@ -217,6 +217,24 @@ namespace GLTV.Services
             }
         }
 
+        public List<TvItemFile> FindZombieFiles()
+        {
+            DirectoryInfo d = new DirectoryInfo(Path.Combine(Constants.WEB_ROOT_PATH, Constants.FILES_DIR));
+            FileInfo[] files = d.GetFiles();
+            List<string> tvItemFiles = _context.TvItemFile.Select(x => x.FileName).ToList();
+
+            List<TvItemFile> zombieFiles = new List<TvItemFile>();
+            foreach (FileInfo file in files)
+            {
+                if (!tvItemFiles.Contains(file.Name))
+                {
+                    zombieFiles.Add(new TvItemFile() { FileName = file.Name, Length = file.Length });
+                }
+            }
+
+            return zombieFiles;
+        }
+
         public bool DeleteFile(string filename)
         {
             TvItemFile tvItemFile = _context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
@@ -230,6 +248,25 @@ namespace GLTV.Services
                 if (File.Exists(tvItemFile.AbsolutePath))
                 {
                     File.Delete(tvItemFile.AbsolutePath);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool DeleteZombieFile(string filename)
+        {
+            TvItemFile file = new TvItemFile() { FileName = filename };
+            try
+            {
+                if (File.Exists(file.AbsolutePath))
+                {
+                    File.Delete(file.AbsolutePath);
                 }
             }
             catch (Exception e)
