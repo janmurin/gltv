@@ -1,4 +1,5 @@
-﻿@model GLTV.Models.ViewModels.ClientEventsViewModel
+﻿@using GLTV.Extensions
+@model GLTV.Models.ViewModels.ClientEventsViewModel
 
 @{
     ViewData["Title"] = "Client Activity";
@@ -8,6 +9,33 @@
 }
 
 <h2>Actions Log</h2>
+
+<h3>Last program requests</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            Source
+        </th>
+        <th>
+            Time
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.LastProgramClientEvents)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Source)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TimeInserted) (@Utils.GetElapsedTime(item.TimeInserted))
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
 
 <form class="form-inline pull-right" style="padding: 10px;">
     <div class="form-group">

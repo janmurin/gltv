@@ -62,10 +62,12 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> IndexClients()
         {
-            List<ClientEvent> tvItems = _eventService.FetchClientEventsAsync();
+            List<ClientEvent> tvItems = _eventService.FetchClientEvents();
+            List<ClientEvent> clientsLastProgramRequest = _eventService.FetchClientsLastProgramRequest();
 
             ClientEventsViewModel model = new ClientEventsViewModel();
             model.ClientEvents = tvItems;
+            model.LastProgramClientEvents = clientsLastProgramRequest;
             model.Sources = tvItems.Select(x => x.Source).Distinct().ToList();
 
             return View(model);

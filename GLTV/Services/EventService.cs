@@ -88,10 +88,11 @@ namespace GLTV.Services
             return Task.CompletedTask;
         }
 
-        public List<ClientEvent> FetchClientEventsAsync()
+        public List<ClientEvent> FetchClientEvents()
         {
             List<ClientEvent> events = _context.ClientEvent
                 .Include(x => x.TvItemFile)
+                .Where(x => x.Type != ClientEventType.ProgramRequest)
                 .OrderByDescending(x => x.TimeInserted)
                 .Skip(0)
                 .Take(200)
@@ -106,6 +107,29 @@ namespace GLTV.Services
             }
 
             return events;
+        }
+
+        public List<ClientEvent> FetchClientsLastProgramRequest()
+        {
+            List<ClientEvent> events = _context.ClientEvent
+                .Include(x => x.TvItemFile)
+                .Where(x => x.Type == ClientEventType.ProgramRequest)
+                .OrderByDescending(x => x.TimeInserted)
+                .Skip(0)
+                .Take(20000)
+                .ToList();
+
+            IEnumerable<string> sources = events.Select(x => x.Source).ToList().Distinct();
+            List<ClientEvent> requestEvents = new List<ClientEvent>();
+
+            foreach (string source in sources)
+            {
+                requestEvents.Add(events.First(x => x.Source.Equals(source)));
+            }
+
+
+            return requestEvents;
+
         }
     }
 }

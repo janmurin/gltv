@@ -11,6 +11,7 @@ namespace GLTV.Services.Interfaces
         Task AddLogEventAsync(string author, LogEventType type, string message, int? itemId);
         List<LogEvent> FetchLogEventsAsync();
         Task AddClientEventAsync(string source, ClientEventType type, string message, int? itemId);
-        List<ClientEvent> FetchClientEventsAsync();
+        List<ClientEvent> FetchClientEvents();
+        List<ClientEvent> FetchClientsLastProgramRequest();
     }
 }

@@ -119,6 +119,15 @@ namespace GLTV.Extensions
             return time.ToString(@"mm\:ss");
         }
 
+        public static string GetElapsedTime(DateTime timeStamp)
+        {
+            TimeSpan time = DateTime.Now-timeStamp;
+
+            //here backslash is must to tell that colon is
+            //not the part of format, it just a character that we want in output
+            return time.ToString(@"d' days 'h' h 'mm' m 'ss' s'");
+        }
+
         public static string GetStatusFormat(TvItem item)
         {
             if (DateTime.Compare(DateTime.Now, item.StartTime) < 0)
