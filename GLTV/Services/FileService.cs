@@ -38,8 +38,8 @@ namespace GLTV.Services
                 file.CopyTo(fileStream);
             }
 
-            IMediaInfo mediaInfo = new MediaInfo(itemFile.AbsolutePath);
-            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
+            //IMediaInfo mediaInfo = new MediaInfo(itemFile.AbsolutePath);
+            //tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
             if (tvItem.Duration == 0)
             {
                 throw new Exception("Video duration is 0s.");
@@ -65,8 +65,8 @@ namespace GLTV.Services
                 file.CopyTo(fileStream);
             }
 
-            IMediaInfo mediaInfo = new MediaInfo(newItemFile.AbsolutePath);
-            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
+            //IMediaInfo mediaInfo = new MediaInfo(newItemFile.AbsolutePath);
+            //tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
             if (tvItem.Duration == 0)
             {
                 throw new Exception("Video duration is 0s.");

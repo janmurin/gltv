@@ -57,11 +57,16 @@
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 @if (Model.TvItem.Type == TvItemType.Video)
                 {
-                    <div>
+                    @*<div>
                         @(Utils.GetFormattedDuration(Model.TvItem))
                         <br />File size: @(Utils.GetFileSize(Model.TvItem.Files[0]))
+                    </div>*@
+                    @*@Html.HiddenFor(model => model.TvItem.Duration)*@
+                    <div>
+                        <input id="durationInput" asp-for="TvItem.Duration" type="text"
+                               data-slider-min="3" data-slider-max="120" data-slider-step="1" data-slider-value="@(Model.TvItem.Duration)" />
                     </div>
-                    @Html.HiddenFor(model => model.TvItem.Duration)
+                    <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">@(Model.TvItem.Duration)</span></span>
                 }
                 else
                 {

@@ -197,7 +197,7 @@
                 $('#fileInput').removeAttr("multiple");
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".mp4,.mkv");
-                $('#durationGroup').hide();
+                //$('#durationGroup').hide();
                 $('#@(Html.IdFor(model=>model.TvItem.Duration))').val(3);
             } else if (value == "@((int)TvItemType.Gallery)") {
                 $('#fileInput').attr("multiple", true);
