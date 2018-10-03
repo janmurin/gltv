@@ -59,8 +59,9 @@
                 {
                     <div>
                         @(Utils.GetFormattedDuration(Model.TvItem))
-                        <br/>File size: @(Utils.GetFileSize(Model.TvItem.Files[0]))
+                        <br />File size: @(Utils.GetFileSize(Model.TvItem.Files[0]))
                     </div>
+                    @Html.HiddenFor(model => model.TvItem.Duration)
                 }
                 else
                 {
