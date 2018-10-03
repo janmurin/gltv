@@ -36,7 +36,7 @@ namespace GLTV.Models.Objects
         public bool Deleted { get; set; }
 
         [Required]
-        [Range(3, 120)]
+        [Range(3, 900)]
         [RegularExpression(@"^\d{1,3}$", ErrorMessage = "Required integer with max 3 digits.")]
         [Display(Name = "Duration (s)")]
         public int Duration { get; set; }
