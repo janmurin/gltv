@@ -43,11 +43,11 @@
                 </div>
                 <span asp-validation-for="TvItem.EndTime" class="text-danger"></span>
             </div>
-            <div class="form-group" id="durationGroup" style="@(Model.TvItem?.Type == TvItemType.Video ? "display:none;" : "")">
+            <div class="form-group" id="durationGroup" style="@(Model.TvItem?.Type == TvItemType.Video ? "" : "")">
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 <div>
                     <input id="durationInput" asp-for="TvItem.Duration" type="text"
-                           data-slider-min="3" data-slider-max="120" data-slider-step="1" data-slider-value="@(Model.TvItem?.Duration ?? 3)" />
+                           data-slider-min="3" data-slider-max="900" data-slider-step="1" data-slider-value="@(Model.TvItem?.Duration ?? 3)" />
                 </div>
                 <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">@(Model.TvItem?.Duration ?? 3)</span></span>
             </div>
