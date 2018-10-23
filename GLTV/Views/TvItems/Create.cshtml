@@ -140,10 +140,10 @@
         function validateFileInput() {
             var span = $('#fileInputGroup').find('span.text-danger');
 
-            if (totalFileSize > 1073741824) {
+            if (totalFileSize > 134217728) {
                 span.removeClass('field-validation-valid');
                 span.addClass('field-validation-error');
-                span.text('Total file size must not be greater than 1073741824 bytes (1 GB).');
+                span.text('Total file size must not be greater than 134217728 bytes (128 MB).');
                 return false;
             } else if (totalFileSize == 0) {
                 span.removeClass('field-validation-valid');
