@@ -124,7 +124,15 @@ namespace GLTV.Services
 
             foreach (string source in sources)
             {
-                requestEvents.Add(events.First(x => x.Source.Equals(source)));
+                ClientEvent clientEvent = events.First(x => x.Source.Equals(source));
+                var location = "unknown";
+                if (clientEvent.Message.LastIndexOf(" ", StringComparison.Ordinal) > 0)
+                {
+                    location = clientEvent.Message.Substring(
+                        clientEvent.Message.LastIndexOf(" ", StringComparison.Ordinal)).Trim();
+                }
+                clientEvent.Source += " (" + location +")";
+                requestEvents.Add(clientEvent);
             }
 
 
