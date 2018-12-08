@@ -173,16 +173,7 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            TvItem item = _tvItemService.FetchTvItem(id);
-
-            var model = new TvItemEditViewModel();
-            model.TvItem = item;
-            model.LocationCheckboxes.LocationBanskaBystrica =
-                item.Locations.Any(x => x.Location == Location.BanskaBystrica);
-            model.LocationCheckboxes.LocationKosice =
-                item.Locations.Any(x => x.Location == Location.Kosice);
-            model.LocationCheckboxes.LocationZilina =
-                item.Locations.Any(x => x.Location == Location.Zilina);
+            var model = new TvItemEditViewModel(_tvItemService.FetchTvItem(id));
 
             return View(model);
         }
@@ -319,20 +310,12 @@ namespace GLTV.Controllers
             if (ModelState.IsValid)
             {
                 // add item
-                TvItem item = _tvItemService.FetchTvItem(id);
-                var model = new TvItemEditViewModel();
-                model.TvItem = item;
-                model.LocationCheckboxes.LocationBanskaBystrica =
-                    item.Locations.Any(x => x.Location == Location.BanskaBystrica);
-                model.LocationCheckboxes.LocationKosice =
-                    item.Locations.Any(x => x.Location == Location.Kosice);
-                model.LocationCheckboxes.LocationZilina =
-                    item.Locations.Any(x => x.Location == Location.Zilina);
+                var model = new TvItemEditViewModel(_tvItemService.FetchTvItem(id));
 
                 // add files
                 try
                 {
-                    if (item.Type == TvItemType.Video)
+                    if (model.TvItem.Type == TvItemType.Video)
                     {
                         if (files.Count > 1)
                         {
@@ -349,10 +332,10 @@ namespace GLTV.Controllers
                             return View("Edit", model);
                         }
 
-                        item.Duration = duration;
-                        _fileService.ReplaceVideoFile(item, files[0]);
+                        model.TvItem.Duration = duration;
+                        _fileService.ReplaceVideoFile(model.TvItem, files[0]);
                     }
-                    else if (item.Type == TvItemType.Image)
+                    else if (model.TvItem.Type == TvItemType.Image)
                     {
                         if (files.Count > 1)
                         {
@@ -360,11 +343,11 @@ namespace GLTV.Controllers
                             return View("Edit", model);
                         }
 
-                        _fileService.ReplaceImageFile(item, files[0]);
+                        _fileService.ReplaceImageFile(model.TvItem, files[0]);
                     }
-                    else if (item.Type == TvItemType.Gallery)
+                    else if (model.TvItem.Type == TvItemType.Gallery)
                     {
-                        _fileService.SaveImageFiles(item, files);
+                        _fileService.SaveImageFiles(model.TvItem, files);
                     }
                 }
                 catch (Exception e)
@@ -373,7 +356,7 @@ namespace GLTV.Controllers
                     return View("Edit", model);
                 }
 
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", model.TvItem.ID);
 
                 return View("Edit", model);
             }

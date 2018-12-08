@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Transactions;
 using GLTV.Extensions;
 using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,17 @@ namespace GLTV.Models
         {
             TypeDropdownItems = Utils.Types;
             LocationCheckboxes = new CheckBoxList();
+        }
+
+        public TvItemEditViewModel(TvItem item) : this()
+        {
+            TvItem = item;
+            LocationCheckboxes.LocationBanskaBystrica =
+                item.Locations.Any(x => x.Location == Location.BanskaBystrica);
+            LocationCheckboxes.LocationKosice =
+                item.Locations.Any(x => x.Location == Location.Kosice);
+            LocationCheckboxes.LocationZilina =
+                item.Locations.Any(x => x.Location == Location.Zilina);
         }
 
         [TvItemValidation(ErrorMessage = "StartTime is after EndTime")]

@@ -106,7 +106,8 @@
         });
         var endTimeDp = $('#endTimeInput').datetimepicker({
             useCurrent: false, //Important! See issue #1075
-            locale: 'sk'
+            locale: 'sk',
+            minDate: new Date()
         });
         startTimeDp.on("dp.change",
             function (e) {
@@ -227,21 +228,21 @@
             }
 
             totalFileSize = nBytes;
-            validateFileInput();
+            if (validateFileInput()) {
+                var value = $('#typeDropdown').val();
+                if (value == "@((int) TvItemType.Video)") {
+                    var files = document.getElementById("fileInput").files;
+                    var video = document.createElement('video');
+                    video.preload = 'metadata';
 
-            var value = $('#typeDropdown').val();
-            if (value == "@((int) TvItemType.Video)") {
-                var files = document.getElementById("fileInput").files;
-                var video = document.createElement('video');
-                video.preload = 'metadata';
+                    video.onloadedmetadata = function() {
+                        window.URL.revokeObjectURL(video.src);
+                        var duration = video.duration;
+                        $("#durationInput").slider('setAttribute', 'max', duration).slider('setValue', parseInt(duration), true, true);
+                    }
 
-                video.onloadedmetadata = function() {
-                    window.URL.revokeObjectURL(video.src);
-                    var duration = video.duration;
-                    $("#durationInput").slider('setAttribute', 'max', duration).slider('setValue', parseInt(duration), true, true);
+                    video.src = URL.createObjectURL(files[0]);
                 }
-
-                video.src = URL.createObjectURL(files[0]);
             }
         });
 

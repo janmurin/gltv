@@ -213,12 +213,12 @@ else
         var startTimeDp = $('#startTimeInput').datetimepicker({
             locale: 'sk',
             useCurrent: false,
-            //maxDate: new Date('@(Model.TvItem.EndTime.ToString("o", CultureInfo.InvariantCulture))')
+            maxDate: new Date('@(Model.TvItem.EndTime.ToString("o", CultureInfo.InvariantCulture))')
         });
         var endTimeDp = $('#endTimeInput').datetimepicker({
             useCurrent: false, //Important! See issue #1075
             locale: 'sk',
-            //minDate: new Date('@(Model.TvItem.StartTime.ToString("o", CultureInfo.InvariantCulture))')
+            minDate: new Date('@(Model.TvItem.StartTime.ToString("o", CultureInfo.InvariantCulture))')
         });
         startTimeDp.on("dp.change",
             function(e) {
@@ -275,10 +275,10 @@ else
         function validateFileInput() {
             var span = $('#fileInputGroup').find('span.text-danger');
 
-            if (totalFileSize > 1073741824) {
+            if (totalFileSize > @Constants.MULTIPART_BODY_LENGTH_LIMIT) {
                 span.removeClass('field-validation-valid');
                 span.addClass('field-validation-error');
-                span.text('Total file size must not be greater than 1073741824 bytes (1 GB).');
+                span.text('Total file size must not be greater than @Constants.MULTIPART_BODY_LENGTH_LIMIT bytes (@Utils.GetFileSize(Constants.MULTIPART_BODY_LENGTH_LIMIT)).');
                 return false;
             } else if (totalFileSize == 0) {
                 span.removeClass('field-validation-valid');
@@ -304,24 +304,24 @@ else
             }
 
             totalFileSize = nBytes;
-            validateFileInput();
+            if (validateFileInput()) {
+                @if (Model.TvItem.Type == TvItemType.Video)
+                {
+                    <text>
+                        var files = document.getElementById("fileInput").files;
+                        var video = document.createElement('video');
+                        video.preload = 'metadata';
 
-            @if (Model.TvItem.Type == TvItemType.Video)
-            {
-                <text>
-                var files = document.getElementById("fileInput").files;
-                var video = document.createElement('video');
-                video.preload = 'metadata';
+                        video.onloadedmetadata = function() {
+                            window.URL.revokeObjectURL(video.src);
+                            var duration = parseInt(video.duration);
+                            $("#durationInput").slider('setAttribute', 'max', duration).slider('setValue', duration, true, true);
+                            $("#durationInput2").val(duration);
+                        }
 
-                video.onloadedmetadata = function() {
-                    window.URL.revokeObjectURL(video.src);
-                    var duration = parseInt(video.duration);
-                    $("#durationInput").slider('setAttribute', 'max', duration).slider('setValue', duration, true, true);
-                    $("#durationInput2").val(duration);
+                        video.src = URL.createObjectURL(files[0]);
+                    </text>
                 }
-
-                video.src = URL.createObjectURL(files[0]);
-                </text>
             }
         });
 
