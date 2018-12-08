@@ -314,7 +314,7 @@ namespace GLTV.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddFiles(int id, [FromForm]List<IFormFile> files)
+        public async Task<IActionResult> AddFiles(int id, [FromForm]List<IFormFile> files, [FromForm]int duration)
         {
             if (ModelState.IsValid)
             {
@@ -330,61 +330,56 @@ namespace GLTV.Controllers
                     item.Locations.Any(x => x.Location == Location.Zilina);
 
                 // add files
-                if (item.Type == TvItemType.Video)
+                try
                 {
-                    if (files.Count > 1)
+                    if (item.Type == TvItemType.Video)
                     {
-                        ModelState.AddModelError("", "Only 1 file is allowed for video TV item type.");
-                        return View("Edit", model);
-                    }
+                        if (files.Count > 1)
+                        {
+                            ModelState.AddModelError("", "Only 1 file is allowed for video TV item type.");
+                        }
 
-                    try
-                    {
+                        if (duration < 3)
+                        {
+                            ModelState.AddModelError("", $"Incorrect video duration [{duration}]. Must be at least 4 seconds.");
+                        }
+
+                        if (ModelState.ErrorCount > 0)
+                        {
+                            return View("Edit", model);
+                        }
+
+                        item.Duration = duration;
                         _fileService.ReplaceVideoFile(item, files[0]);
                     }
-                    catch (Exception e)
+                    else if (item.Type == TvItemType.Image)
                     {
-                        ModelState.AddModelError("", e.Message);
-                        return View("Edit", model);
-                    }
-                }
-                else if (item.Type == TvItemType.Image)
-                {
-                    if (files.Count > 1)
-                    {
-                        ModelState.AddModelError("", "Only 1 file is allowed for image TV item type.");
-                        return View("Edit", model);
-                    }
+                        if (files.Count > 1)
+                        {
+                            ModelState.AddModelError("", "Only 1 file is allowed for image TV item type.");
+                            return View("Edit", model);
+                        }
 
-                    try
-                    {
                         _fileService.ReplaceImageFile(item, files[0]);
                     }
-                    catch (Exception e)
-                    {
-                        ModelState.AddModelError("", e.Message);
-                        return View("Edit", model);
-                    }
-                }
-                else if (item.Type == TvItemType.Gallery)
-                {
-                    try
+                    else if (item.Type == TvItemType.Gallery)
                     {
                         _fileService.SaveImageFiles(item, files);
                     }
-                    catch (Exception e)
-                    {
-                        ModelState.AddModelError("", e.Message);
-                        return View("Edit", model);
-                    }
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError("", e.Message);
+                    return View("Edit", model);
                 }
 
                 await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
 
                 return View("Edit", model);
             }
+            // todo: log model state error
 
-            return View("Edit");
+            return RedirectToAction("Edit", new { id });
         }
     }
 }

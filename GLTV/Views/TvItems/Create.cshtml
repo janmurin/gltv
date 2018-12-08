@@ -44,13 +44,13 @@
                 </div>
                 <span asp-validation-for="TvItem.EndTime" class="text-danger"></span>
             </div>
-            <div class="form-group" id="durationGroup" style="@(Model.TvItem?.Type == TvItemType.Video ? "" : "")">
+            <div class="form-group" id="durationGroup">
                 <label asp-for="TvItem.Duration" class="control-label"></label>
                 <div>
                     <input id="durationInput" asp-for="TvItem.Duration" type="text"
-                           data-slider-min="3" data-slider-max="900" data-slider-step="1" data-slider-value="@(Model.TvItem?.Duration ?? 3)" />
+                           data-slider-min="3" data-slider-max="120" data-slider-step="1" data-slider-value="3" />
                 </div>
-                <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">@(Model.TvItem?.Duration ?? 3)</span></span>
+                <span id="durationInputCurrentSliderValLabel">Seconds: <span id="durationInputSliderVal">3</span></span>
             </div>
             <div class="form-group" id="locationsGroup">
                 <label asp-for="LocationCheckboxes" class="control-label"></label>
@@ -106,7 +106,6 @@
         });
         var endTimeDp = $('#endTimeInput').datetimepicker({
             useCurrent: false, //Important! See issue #1075
-
             locale: 'sk'
         });
         startTimeDp.on("dp.change",
@@ -199,18 +198,23 @@
                 $('#fileInput').removeAttr("multiple");
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".mp4,.mkv");
-                //$('#durationGroup').hide();
-                $('#@(Html.IdFor(model=>model.TvItem.Duration))').val(3);
+                $("#durationInput").slider("disable");
+                $("#durationInput").slider({ max: 9000 });
+                $("#durationInput").slider('setValue', 3, true, true);
             } else if (value == "@((int)TvItemType.Gallery)") {
                 $('#fileInput').attr("multiple", true);
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".jpg,.jpeg,.png");
-                $('#durationGroup').show();
+                $("#durationInput").slider("enable");
+                $("#durationInput").slider({ max: 120 });
+                $("#durationInput").slider('setValue', 10, true, true);
             } else {
                 $('#fileInput').removeAttr("multiple");
                 $('#fileInput').fileinput('clear');
                 $('#fileInput').attr("accept", ".jpg,.jpeg,.png");
-                $('#durationGroup').show();
+                $("#durationInput").slider("enable");
+                $("#durationInput").slider({ max: 120 });
+                $("#durationInput").slider('setValue', 30, true, true);
             }
         }
 
@@ -221,21 +225,34 @@
             for (var nFileId = 0; nFileId < nFiles; nFileId++) {
                 nBytes += oFiles[nFileId].size;
             }
-            var sOutput = nBytes + " bytes";
-            // optional code for multiples approximation
-            for (var aMultiples = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"], nMultiple = 0, nApprox = nBytes / 1024; nApprox > 1; nApprox /= 1024, nMultiple++) {
-                sOutput = nApprox.toFixed(3) + " " + aMultiples[nMultiple] + " (" + nBytes + " bytes)";
-            }
-            // end of optional code
+
             totalFileSize = nBytes;
             validateFileInput();
-        });
 
-        initFileInput();
+            var value = $('#typeDropdown').val();
+            if (value == "@((int) TvItemType.Video)") {
+                var files = document.getElementById("fileInput").files;
+                var video = document.createElement('video');
+                video.preload = 'metadata';
+
+                video.onloadedmetadata = function() {
+                    window.URL.revokeObjectURL(video.src);
+                    var duration = video.duration;
+                    $("#durationInput").slider('setAttribute', 'max', duration).slider('setValue', parseInt(duration), true, true);
+                }
+
+                video.src = URL.createObjectURL(files[0]);
+            }
+        });
 
         $("#durationInput").slider();
         $("#durationInput").on("change", function (slideEvt) {
             $("#durationInputSliderVal").text(slideEvt.value.newValue);
         });
+        initFileInput();
+
+        window.URL = window.URL || window.webkitURL;
+
+
     });
 </script>
