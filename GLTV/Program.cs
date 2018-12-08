@@ -43,7 +43,6 @@ namespace GLTV
                 .UseStartup<Startup>()
                 .UseKestrel(options =>
                 {
-                    options.Limits.MaxRequestBodySize = 1073741824;
                     options.Listen(IPAddress.Any, 8080);
                 })
                 .Build();

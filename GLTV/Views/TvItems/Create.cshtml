@@ -1,4 +1,5 @@
-﻿@using GLTV.Models.Objects
+﻿@using GLTV.Extensions
+@using GLTV.Models.Objects
 @model GLTV.Models.TvItemCreateViewModel
 
 @{
@@ -105,6 +106,7 @@
         });
         var endTimeDp = $('#endTimeInput').datetimepicker({
             useCurrent: false, //Important! See issue #1075
+
             locale: 'sk'
         });
         startTimeDp.on("dp.change",
@@ -140,10 +142,10 @@
         function validateFileInput() {
             var span = $('#fileInputGroup').find('span.text-danger');
 
-            if (totalFileSize > 134217728) {
+            if (totalFileSize > @Constants.MULTIPART_BODY_LENGTH_LIMIT) {
                 span.removeClass('field-validation-valid');
                 span.addClass('field-validation-error');
-                span.text('Total file size must not be greater than 134217728 bytes (128 MB).');
+                span.text('Total file size must not be greater than @Constants.MULTIPART_BODY_LENGTH_LIMIT bytes (@Utils.GetFileSize(Constants.MULTIPART_BODY_LENGTH_LIMIT)).');
                 return false;
             } else if (totalFileSize == 0) {
                 span.removeClass('field-validation-valid');

@@ -99,6 +99,11 @@ namespace GLTV
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
             });
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = Constants.MULTIPART_BODY_LENGTH_LIMIT;
+                x.MultipartBodyLengthLimit = Constants.MULTIPART_BODY_LENGTH_LIMIT;
+            });
 
             var physicalProvider = _hostingEnvironment.ContentRootFileProvider;
             services.AddSingleton<IFileProvider>(physicalProvider);
