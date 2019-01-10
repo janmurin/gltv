@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GLTV.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
 using GLTV.Models.Objects;
@@ -49,6 +50,7 @@ namespace GLTV.Controllers
             DeletedViewModel model = new DeletedViewModel();
             model.TvItems = _tvItemService.FetchTvItems(true);
             model.ZombieFiles = _fileService.FindZombieFiles();
+            model.TotalUndeletedFileSize = model.TvItems.Sum(x => Utils.GetTotalFileSizeLong(x));
 
             return View(model);
         }

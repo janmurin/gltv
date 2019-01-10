@@ -51,6 +51,17 @@ namespace GLTV.Extensions
             new SelectListItem {Value = "" + (int)TvItemType.Video, Text = "Video"},
         };
 
+        public static long GetTotalFileSizeLong(TvItem item)
+        {
+            long size = 0;
+            foreach (TvItemFile itemFile in item.Files)
+            {
+                size += itemFile.Deleted ? 0 : itemFile.Length;
+            }
+
+            return size;
+        }
+
         public static string GetTotalFileSize(TvItem item)
         {
             long size = 0;
