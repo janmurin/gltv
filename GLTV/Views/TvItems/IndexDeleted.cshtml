@@ -14,60 +14,48 @@
     <h2>Zombie files:</h2>
     <table class="table">
         <thead>
-        <tr>
-            <th>
-                Filename
-            </th>
-            <th>
-                Size
-            </th>
-            <th></th>
-        </tr>
+            <tr>
+                <th>
+                    Filename
+                </th>
+                <th>
+                    Size
+                </th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (TvItemFile item in Model.ZombieFiles)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FileName)
-                </td>
-                <td>
-                    @Utils.GetFileSize(item)
-                </td>
-                <td>
-                    <form asp-controller="TvItems" asp-action="DeleteZombieFile">
-                        <input type="hidden" name="FileName" value="@item.FileName"/>
-                        <input type="submit" value="Delete" class="btn btn-warning"/>
-                    </form>
-                </td>
-            </tr>
-        }
+            @foreach (TvItemFile item in Model.ZombieFiles)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FileName)
+                    </td>
+                    <td>
+                        @Utils.GetFileSize(item)
+                    </td>
+                    <td>
+                        <form asp-controller="TvItems" asp-action="DeleteZombieFile">
+                            <input type="hidden" name="FileName" value="@item.FileName" />
+                            <input type="submit" value="Delete" class="btn btn-warning" />
+                        </form>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 }
 
 <h2>Deleted Tv Items</h2>
 
-<table class="table">
+<table class="table deleted-items-table">
     <thead>
         <tr>
             <th>
-                Title
-            </th>
-            <th>
-                Time Inserted
-            </th>
-            <th>
-                Author
-            </th>
-            <th>
-                Type
+                Info
             </th>
             <th>
                 Files
-            </th>
-            <th>
-                Total file size
             </th>
             <th></th>
         </tr>
@@ -77,22 +65,34 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Title)
+                    @*<label>Title:</label><br />
+                    <label>Time Inserted: </label><br />
+                    <label>Author: </label><br />
+                    <label>Type:</label><br />*@
+                    <table class="inner-table">
+                        <tbody>
+                            <tr>
+                                <th>Title</th>
+                                <th>Time Inserted</th>
+                            </tr>
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td>@Html.DisplayFor(modelItem => item.TimeInserted)</td>
+                        </tr>
+                        <tr>
+                            <th>Author</th>
+                            <th>Type</th>
+                        </tr>
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.TimeInserted)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Author)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Type)
-                </td>
-                <td>
+                    <label>Total file size:</label>@Utils.GetTotalFileSize(item)<br />
                     <p>@Html.Raw(Utils.GetFilesList(item))</p>
-                </td>
-                <td>
-                    @Utils.GetTotalFileSize(item)
                 </td>
                 <td>
                     @if (item.Files.Any(x => x.Deleted == false))

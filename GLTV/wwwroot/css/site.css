@@ -141,3 +141,13 @@ span.time-expired {
     display: inline-block;
     padding: 10px 0;
 }
+
+.deleted-items-table .inner-table td,
+.deleted-items-table .inner-table th {
+    padding: 0 20px 0 0;
+}
+
+.deleted-items-table tr th:nth-child(2),
+.deleted-items-table tr td:nth-child(2) {
+    min-width: 400px;
+}
