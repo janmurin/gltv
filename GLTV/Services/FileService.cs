@@ -23,7 +23,7 @@ namespace GLTV.Services
         {
         }
 
-        public bool SaveVideoFile(TvItem tvItem, IFormFile file)
+        public Task<bool> SaveVideoFileAsync(TvItem tvItem, IFormFile file)
         {
             string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
             TvItemFile itemFile = new TvItemFile()
@@ -43,13 +43,13 @@ namespace GLTV.Services
                 throw new Exception("Video duration is 0s.");
             }
 
-            _context.Add(itemFile);
-            _context.SaveChanges();
+            Context.Add(itemFile);
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool ReplaceVideoFile(TvItem tvItem, IFormFile file)
+        public Task<bool> ReplaceVideoFileAsync(TvItem tvItem, IFormFile file)
         {
             string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
             TvItemFile newItemFile = new TvItemFile()
@@ -71,17 +71,17 @@ namespace GLTV.Services
             TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
             if (tvItemFile != null)
             {
-                bool success = DeleteFile(tvItemFile.FileName);
+                bool success = DeleteFileAsync(tvItemFile.FileName).Result;
                 // if not successfull delete, then new zombie file 
 
                 tvItemFile.FileName = newItemFile.FileName;
                 tvItemFile.Length = newItemFile.Length;
 
-                _context.Update(tvItemFile);
-                _context.Update(tvItem);
-                _context.SaveChanges();
+                Context.Update(tvItemFile);
+                Context.Update(tvItem);
+                Context.SaveChanges();
 
-                return true;
+                return Task.FromResult(true);
             }
             else
             {
@@ -89,7 +89,7 @@ namespace GLTV.Services
             }
         }
 
-        public bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles)
+        public Task<bool> SaveImageFilesAsync(TvItem item, List<IFormFile> modelFiles)
         {
             foreach (IFormFile formFile in modelFiles)
             {
@@ -137,16 +137,16 @@ namespace GLTV.Services
                     }
 
                     itemFile.Length = fileStream.Length;
-                    _context.Add(itemFile);
+                    Context.Add(itemFile);
                 }
             }
 
-            _context.SaveChanges();
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool ReplaceImageFile(TvItem tvItem, IFormFile formFile)
+        public Task<bool> ReplaceImageFileAsync(TvItem tvItem, IFormFile formFile)
         {
             Image<Rgba32> image = null;
             Stream inputStream = formFile.OpenReadStream();
@@ -195,17 +195,17 @@ namespace GLTV.Services
             TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
             if (tvItemFile != null)
             {
-                bool success = DeleteFile(tvItemFile.FileName);
+                bool success = DeleteFileAsync(tvItemFile.FileName).Result;
                 // if not successfull delete, then new zombie file 
 
                 tvItemFile.FileName = newItemFile.FileName;
                 tvItemFile.Length = newItemFile.Length;
 
-                _context.Update(tvItemFile);
-                _context.Update(tvItem);
-                _context.SaveChanges();
+                Context.Update(tvItemFile);
+                Context.Update(tvItem);
+                Context.SaveChanges();
 
-                return true;
+                return Task.FromResult(true);
             }
             else
             {
@@ -213,11 +213,11 @@ namespace GLTV.Services
             }
         }
 
-        public List<TvItemFile> FindZombieFiles()
+        public Task<List<TvItemFile>> FindZombieFilesAsync()
         {
             DirectoryInfo d = new DirectoryInfo(Path.Combine(Constants.WEB_ROOT_PATH, Constants.FILES_DIR));
             FileInfo[] files = d.GetFiles();
-            List<string> tvItemFiles = _context.TvItemFile.Select(x => x.FileName).ToList();
+            List<string> tvItemFiles = Context.TvItemFile.Select(x => x.FileName).ToList();
 
             List<TvItemFile> zombieFiles = new List<TvItemFile>();
             foreach (FileInfo file in files)
@@ -228,12 +228,12 @@ namespace GLTV.Services
                 }
             }
 
-            return zombieFiles;
+            return Task.FromResult(zombieFiles);
         }
 
-        public bool DeleteFile(string filename)
+        public Task<bool> DeleteFileAsync(string filename)
         {
-            TvItemFile tvItemFile = _context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
+            TvItemFile tvItemFile = Context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
             if (tvItemFile == null)
             {
                 throw new Exception($"TvItemFile not found with filename[{filename}].");
@@ -249,13 +249,13 @@ namespace GLTV.Services
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return false;
+                return Task.FromResult(false);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool DeleteZombieFile(string filename)
+        public Task<bool> DeleteZombieFileAsync(string filename)
         {
             TvItemFile file = new TvItemFile() { FileName = filename };
             try
@@ -268,13 +268,13 @@ namespace GLTV.Services
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return false;
+                return Task.FromResult(false);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool DeleteFiles(List<TvItemFile> files)
+        public Task<bool> DeleteFilesAsync(List<TvItemFile> files)
         {
             foreach (TvItemFile file in files)
             {
@@ -287,7 +287,7 @@ namespace GLTV.Services
                     }
 
                     file.Deleted = true;
-                    _context.TvItemFile.Update(file);
+                    Context.TvItemFile.Update(file);
                 }
                 catch (Exception e)
                 {
@@ -296,9 +296,9 @@ namespace GLTV.Services
                 }
             }
 
-            _context.SaveChanges();
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
         public byte[] GetBytes(string filename)

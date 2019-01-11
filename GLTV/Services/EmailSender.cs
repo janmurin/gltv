@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Mail;
-//using System.Net.Mail;
 using System.Threading.Tasks;
 using GLTV.Extensions;
-using GLTV.Models;
 using GLTV.Models.Objects;
-using MailKit.Security;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-using MimeKit;
-using MimeKit.Text;
 
 namespace GLTV.Services
 {

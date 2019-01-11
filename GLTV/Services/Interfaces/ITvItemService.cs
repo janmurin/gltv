@@ -10,13 +10,13 @@ namespace GLTV.Services
 {
     public interface ITvItemService
     {
-        TvItem FetchTvItem(int id);
-        bool DeleteTvItem(int id);
-        List<TvItem> FetchTvItems(bool deleted);
-        bool AddTvItem(TvItem item);
-        bool UpdateTvItem(TvItem item);
-        List<TvItem> FetchActiveTvItems(Location location);
-        TvItemFile FetchTvItemFile(string filename);
-        TvItemFile FetchTvItemFile(int fileId);
+        Task<TvItem> FetchTvItemAsync(int id);
+        Task<bool> DeleteTvItemAsync(int id);
+        Task<List<TvItem>> FetchTvItemsAsync(bool deleted);
+        Task<bool> AddTvItemAsync(TvItem item);
+        Task<bool> UpdateTvItemAsync(TvItem item);
+        Task<List<TvItem>> FetchActiveTvItemsAsync(Location location);
+        Task<TvItemFile> FetchTvItemFileAsync(string filename);
+        Task<TvItemFile> FetchTvItemFileAsync(int fileId);
     }
 }

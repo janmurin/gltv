@@ -66,10 +66,6 @@
         {
             <tr>
                 <td>
-                    @*<label>Title:</label><br />
-                    <label>Time Inserted: </label><br />
-                    <label>Author: </label><br />
-                    <label>Type:</label><br />*@
                     <table class="inner-table">
                         <tbody>
                             <tr>
@@ -92,7 +88,7 @@
                     </table>
                 </td>
                 <td>
-                    <label>Total file size:</label>@Utils.GetTotalFileSize(item)<br />
+                    <label>Total file size:</label> @Utils.GetTotalFileSize(item)<br />
                     <p>@Html.Raw(Utils.GetFilesList(item))</p>
                 </td>
                 <td>

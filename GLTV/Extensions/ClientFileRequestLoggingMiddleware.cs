@@ -34,7 +34,7 @@ namespace GLTV.Extensions
                 //Console.WriteLine("file request url changed to: " + context.Request.Path.ToString());
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
-                TvItemFile itemFile = tvItemService.FetchTvItemFile(filename);
+                TvItemFile itemFile = await tvItemService.FetchTvItemFileAsync(filename);
 
                 //string headers = "";
                 //foreach (var key in context.Request.Headers.Keys)

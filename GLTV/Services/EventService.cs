@@ -29,15 +29,15 @@ namespace GLTV.Services
             logEvent.TimeInserted = DateTime.Now;
             logEvent.Type = type;
 
-            _context.Add(logEvent);
-            _context.SaveChanges();
+            Context.Add(logEvent);
+            Context.SaveChanges();
 
             return Task.CompletedTask;
         }
 
-        public List<LogEvent> FetchLogEventsAsync()
+        public Task<List<LogEvent>> FetchLogEventsAsync()
         {
-            List<LogEvent> events = _context.LogEvent
+            List<LogEvent> events = Context.LogEvent
                 .Include(x => x.TvItem)
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
@@ -70,27 +70,29 @@ namespace GLTV.Services
                 }
             }
 
-            return events;
+            return Task.FromResult(events);
         }
 
         public Task AddClientEventAsync(string source, ClientEventType type, string message, int? itemId)
         {
-            ClientEvent clientEvent = new ClientEvent();
-            clientEvent.Source = source;
-            clientEvent.Message = message;
-            clientEvent.TvItemFileId = itemId;
-            clientEvent.TimeInserted = DateTime.Now;
-            clientEvent.Type = type;
+            ClientEvent clientEvent = new ClientEvent
+            {
+                Source = source,
+                Message = message,
+                TvItemFileId = itemId,
+                TimeInserted = DateTime.Now,
+                Type = type
+            };
 
-            _context.Add(clientEvent);
-            _context.SaveChanges();
+            Context.Add(clientEvent);
+            Context.SaveChanges();
 
             return Task.CompletedTask;
         }
 
-        public List<ClientEvent> FetchClientEvents()
+        public Task<List<ClientEvent>> FetchClientEventsAsync()
         {
-            List<ClientEvent> events = _context.ClientEvent
+            List<ClientEvent> events = Context.ClientEvent
                 .Include(x => x.TvItemFile)
                 .Where(x => x.Type != ClientEventType.ProgramRequest)
                 .OrderByDescending(x => x.TimeInserted)
@@ -106,12 +108,12 @@ namespace GLTV.Services
                 }
             }
 
-            return events;
+            return Task.FromResult(events);
         }
 
-        public List<ClientEvent> FetchClientsLastProgramRequest()
+        public Task<List<ClientEvent>> FetchClientsLastProgramRequestAsync()
         {
-            List<ClientEvent> events = _context.ClientEvent
+            List<ClientEvent> events = Context.ClientEvent
                 .Include(x => x.TvItemFile)
                 .Where(x => x.Type == ClientEventType.ProgramRequest)
                 .OrderByDescending(x => x.TimeInserted)
@@ -136,7 +138,7 @@ namespace GLTV.Services
             }
 
 
-            return requestEvents;
+            return Task.FromResult(requestEvents);
 
         }
     }

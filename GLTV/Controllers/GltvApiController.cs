@@ -30,7 +30,7 @@ namespace GLTV.Controllers
 
         [Produces("application/json")]
         [Route("/api/read/maincontent/location/{locationID:int}/{token}")]
-        public IActionResult GetById(int locationID, string token)
+        public async Task<IActionResult> GetById(int locationID, string token)
         {
             if (!string.Equals(token, Constants.ANDROID_TOKEN))
             {
@@ -42,9 +42,9 @@ namespace GLTV.Controllers
                 throw new InvalidOperationException(
                     $"{locationID} is not an underlying value of the Location enumeration.");
 
-            List<TvItem> items = _tvItemService.FetchActiveTvItems(location);
+            List<TvItem> items = await _tvItemService.FetchActiveTvItemsAsync(location);
 
-            _eventService.AddClientEventAsync(
+            await _eventService.AddClientEventAsync(
                 HttpContext.Connection.RemoteIpAddress.ToString(),
                 ClientEventType.ProgramRequest,
                 $"Program request for location {location.ToString()}",
@@ -55,7 +55,7 @@ namespace GLTV.Controllers
 
         [Produces("application/json")]
         [Route("/api/read/chatmessages/location/{locationID:int}/{token}")]
-        public IActionResult GetChatMessages(int locationID, string token)
+        public async Task<IActionResult> GetChatMessages(int locationID, string token)
         {
             if (!string.Equals(token, Constants.ANDROID_TOKEN))
             {
@@ -64,7 +64,7 @@ namespace GLTV.Controllers
 
             Location location = (Location)locationID;
 
-            _eventService.AddClientEventAsync(
+            await _eventService.AddClientEventAsync(
                 HttpContext.Connection.RemoteIpAddress.ToString(),
                 ClientEventType.ChatRequest,
                 $"Chat messages request for location {location.ToString()}",

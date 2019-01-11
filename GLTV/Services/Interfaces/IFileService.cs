@@ -10,14 +10,14 @@ namespace GLTV.Services
 {
     public interface IFileService
     {
-        bool SaveVideoFile(TvItem tvItemId, IFormFile files);
-        bool ReplaceVideoFile(TvItem tvItem, IFormFile file);
-        bool DeleteFile(string filename);
-        bool DeleteFiles(List<TvItemFile> files);
+        Task<bool> SaveVideoFileAsync(TvItem tvItemId, IFormFile files);
+        Task<bool> ReplaceVideoFileAsync(TvItem tvItem, IFormFile file);
+        Task<bool> DeleteFileAsync(string filename);
+        Task<bool> DeleteFilesAsync(List<TvItemFile> files);
         byte[] GetBytes(string filename);
-        bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles);
-        bool ReplaceImageFile(TvItem tvItem, IFormFile formFile);
-        List<TvItemFile> FindZombieFiles();
-        bool DeleteZombieFile(string filename);
+        Task<bool> SaveImageFilesAsync(TvItem item, List<IFormFile> modelFiles);
+        Task<bool> ReplaceImageFileAsync(TvItem tvItem, IFormFile formFile);
+        Task<List<TvItemFile>> FindZombieFilesAsync();
+        Task<bool> DeleteZombieFileAsync(string filename);
     }
 }
