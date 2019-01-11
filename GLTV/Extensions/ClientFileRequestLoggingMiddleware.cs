@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Models;
 using GLTV.Models.Objects;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-//using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace GLTV.Extensions
 {
