@@ -1,4 +1,5 @@
 ﻿@using GLTV.Extensions
+@using GLTV.Models.Objects
 @model GLTV.Models.ViewModels.ClientEventsViewModel
 
 @{
@@ -55,7 +56,7 @@
         <select class="form-control" id="typeDropdown">
             <option value="All">@(ALL_VALUE)</option>
             @{
-                foreach (ClientEventType type in Enum.GetValues(typeof(ClientEventType)).Cast<ClientEventType>())
+                foreach (WebClientLogType type in Enum.GetValues(typeof(WebClientLogType)).Cast<WebClientLogType>())
                 {
                     <option value="@(type)">@type</option>
                 }

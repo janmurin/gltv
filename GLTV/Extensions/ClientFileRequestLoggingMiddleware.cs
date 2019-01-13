@@ -17,7 +17,7 @@ namespace GLTV.Extensions
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, ApplicationDbContext db, IEventService eventService, ITvItemService tvItemService)
+        public async Task InvokeAsync(HttpContext context, IEventService eventService)
         {
             string requestPath = context.Request.Path.ToString();
 
@@ -29,31 +29,8 @@ namespace GLTV.Extensions
                 //Console.WriteLine("file request url changed to: " + context.Request.Path.ToString());
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
-                TvItemFile itemFile = await tvItemService.FetchTvItemFileAsync(filename);
-
-                //string headers = "";
-                //foreach (var key in context.Request.Headers.Keys)
-                //    headers += key + "=" + context.Request.Headers[key] + Environment.NewLine;
-                //Console.WriteLine(headers);
-
-                if (itemFile != null)
-                {
-                    await eventService.AddClientEventAsync(
-                        //context.Connection.RemoteIpAddress.ToString(),
-                        context.Request.Headers["X-Forwarded-For"],
-                        itemFile.IsVideoFile() ? ClientEventType.VideoRequest : ClientEventType.ImageRequest,
-                        "",
-                        itemFile.ID);
-                }
-                else
-                {
-                    await eventService.AddClientEventAsync(
-                        //context.Connection.RemoteIpAddress.ToString(),
-                        context.Request.Headers["X-Forwarded-For"],
-                        ClientEventType.Exception,
-                        $"File [{filename}] not found.",
-                        null);
-                }
+                
+                await eventService.AddFileRequestEventAsync(context.Request.Headers["X-Forwarded-For"], filename);
             }
 
             if (requestPath.Contains("/api/read/"))

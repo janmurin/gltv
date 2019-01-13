@@ -111,7 +111,7 @@ namespace GLTV.Controllers
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
 
-                await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+                await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
 
                 return RedirectToLocal(returnUrl);
             }
@@ -138,7 +138,7 @@ namespace GLTV.Controllers
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                        await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+                        await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
                         return RedirectToLocal(returnUrl);
                     }
                 }

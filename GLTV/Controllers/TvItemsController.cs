@@ -57,15 +57,15 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> IndexLogs()
         {
-            List<LogEvent> tvItems = await _eventService.FetchLogEventsAsync();
+            List<WebServerLog> tvItems = await _eventService.FetchWebServerActivitiesAsync();
 
             return View(tvItems);
         }
 
         public async Task<IActionResult> IndexClients()
         {
-            List<ClientEvent> tvItems = await _eventService.FetchClientEventsAsync();
-            List<ClientEvent> clientsLastProgramRequest = await _eventService.FetchClientsLastProgramRequestAsync();
+            List<WebClientLog> tvItems = await _eventService.FetchWebClientLogsAsync();
+            List<WebClientLog> clientsLastProgramRequest = await _eventService.FetchClientsLastProgramRequestAsync();
 
             ClientEventsViewModel model = new ClientEventsViewModel();
             model.ClientEvents = tvItems;
@@ -88,7 +88,7 @@ namespace GLTV.Controllers
         {
             TvItem item = await _tvItemService.FetchTvItemAsync(id);
 
-            await _eventService.AddLogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
+            await _eventService.AddWebServerLogAsync(HttpContext.Connection.RemoteIpAddress.ToString(), WebServerLogType.AnonymousDetails, "", id);
 
             return View(item);
         }
@@ -165,7 +165,7 @@ namespace GLTV.Controllers
                 }
 
                 await _emailSender.SendEmailAsync(item.Author, EmailType.Insert, item);
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemInsert, "", item.ID);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemInsert, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -212,7 +212,7 @@ namespace GLTV.Controllers
                 }
 
                 await _tvItemService.UpdateTvItemAsync(item);
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemUpdate, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -235,7 +235,7 @@ namespace GLTV.Controllers
         {
             await _tvItemService.DeleteTvItemAsync(id);
 
-            await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
+            await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDelete, "", id);
 
             return RedirectToAction(nameof(Index));
         }
@@ -249,7 +249,7 @@ namespace GLTV.Controllers
             bool success = await _fileService.DeleteFilesAsync(item.Files);
             if (success)
             {
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteFiles, "", id);
             }
 
             return RedirectToAction(nameof(IndexDeleted));
@@ -265,18 +265,18 @@ namespace GLTV.Controllers
             bool success = await _fileService.DeleteFileAsync(itemFile.FileName);
             if (success)
             {
-                await _eventService.AddLogEventAsync(
+                await _eventService.AddWebServerLogAsync(
                     User.Identity.Name,
-                    LogEventType.ItemDeleteSingleFile,
+                    WebServerLogType.ItemDeleteSingleFile,
                     $"User deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
                     item.ID);
             }
             else
             {
                 // if file deletion is not successful, it will stay in the file system as a zombie file
-                await _eventService.AddLogEventAsync(
+                await _eventService.AddWebServerLogAsync(
                     User.Identity.Name,
-                    LogEventType.Exception,
+                    WebServerLogType.Exception,
                     $"User NOT SUCCESSFULLY deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
                     item.ID);
             }
@@ -294,12 +294,12 @@ namespace GLTV.Controllers
             bool success = await _fileService.DeleteZombieFileAsync(fileName);
             if (success)
             {
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);
             }
             else
             {
                 // if file deletion is not successful, it will stay in the file system as a zombie file
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.Exception, $"User NOT SUCCESSFULLY deleted zombie file[{fileName}].", null);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.Exception, $"User NOT SUCCESSFULLY deleted zombie file[{fileName}].", null);
             }
 
             return RedirectToAction(nameof(IndexDeleted));
@@ -358,7 +358,7 @@ namespace GLTV.Controllers
                     return View("Edit", model);
                 }
 
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", model.TvItem.ID);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemUpdate, "", model.TvItem.ID);
 
                 return View("Edit", model);
             }

@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Models;
+using GLTV.Models.Objects;
+using Microsoft.Extensions.Primitives;
 
 namespace GLTV.Services.Interfaces
 {
     public interface IEventService
     {
-        Task AddLogEventAsync(string author, LogEventType type, string message, int? itemId);
-        Task<List<LogEvent>> FetchLogEventsAsync();
-        Task AddClientEventAsync(string source, ClientEventType type, string message, int? itemId);
-        Task<List<ClientEvent>> FetchClientEventsAsync();
-        Task<List<ClientEvent>> FetchClientsLastProgramRequestAsync();
+        Task AddWebServerLogAsync(string author, WebServerLogType type, string message, int? itemId);
+        Task<List<WebServerLog>> FetchWebServerActivitiesAsync();
+        Task AddFileRequestEventAsync(string sourceIp, string filename);
+        Task AddHandShakeAsync(string sourceIp, WebClientLogType type, Location location);
+        Task<List<WebClientLog>> FetchWebClientLogsAsync();
+        Task<List<WebClientLog>> FetchClientsLastProgramRequestAsync();
+
     }
 }

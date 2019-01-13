@@ -1,6 +1,6 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using GLTV.Extensions
-@model IEnumerable<GLTV.Models.LogEvent>
+@model IEnumerable<GLTV.Models.WebServerLog>
 
 @{
     ViewData["Title"] = "Log";
@@ -16,7 +16,7 @@
         <select class="form-control" id="typeDropdown" data-val="true" data-val-required="The Type field is required." name="TvItem.Type">
             <option value="All">All</option>
             @{
-                foreach (LogEventType type in Enum.GetValues(typeof(LogEventType)).Cast<LogEventType>())
+                foreach (WebServerLogType type in Enum.GetValues(typeof(WebServerLogType)).Cast<WebServerLogType>())
                 {
                     <option value="@(type)">@type</option>
                 }
