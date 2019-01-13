@@ -79,15 +79,35 @@ namespace GLTV.Services
 
         public Task AddFileRequestEventAsync(string sourceIp, string filename)
         {
-            //TvItemFile itemFile = _tvItemService.FetchTvItemFileAsync(filename).Result;
-            //if (itemFile != null)
-            //{
-            //    AddClientEventAsync(
-            //        sourceIp,
-            //        itemFile.IsVideoFile() ? WebClientLogType.VideoRequest : WebClientLogType.ImageRequest,
-            //        "",
-            //        itemFile.ID, );
-            //}
+            TvItemFile itemFile = _tvItemService.FetchTvItemFileAsync(filename).Result;
+            if (itemFile != null)
+            {
+                WebClientLog wcl = new WebClientLog()
+                {
+                    Source = sourceIp,
+                    TimeInserted = DateTime.Now,
+                    TvItemFileId = itemFile.ID,
+                    Type = itemFile.IsVideoFile() ? WebClientLogType.VideoRequest : WebClientLogType.ImageRequest
+                };
+
+                Context.Add(wcl);
+                Context.SaveChanges();
+                Console.WriteLine("adding file request for file: " + wcl);
+            }
+            else
+            {
+                WebClientLog wcl = new WebClientLog()
+                {
+                    Source = sourceIp,
+                    TimeInserted = DateTime.Now,
+                    Message = $"file with filename [{filename}] not found!",
+                    Type = WebClientLogType.Exception
+                };
+
+                Context.Add(wcl);
+                Context.SaveChanges();
+                Console.WriteLine("file not found on file request: " + wcl);
+            }
 
             return Task.CompletedTask;
         }

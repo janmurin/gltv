@@ -31,6 +31,11 @@ namespace GLTV.Models
         public WebServerLogType Type { get; set; }
 
         public virtual TvItem TvItem { get; set; }
+
+        public override string ToString()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
     }
 
     public enum WebServerLogType

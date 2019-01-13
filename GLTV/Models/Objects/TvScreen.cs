@@ -53,7 +53,5 @@ namespace GLTV.Models.Objects
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
         }
-
-
     }
 }

@@ -29,8 +29,12 @@ namespace GLTV.Extensions
                 //Console.WriteLine("file request url changed to: " + context.Request.Path.ToString());
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
-                
-                await eventService.AddFileRequestEventAsync(context.Request.Headers["X-Forwarded-For"], filename);
+
+                string ipAddress = context.Connection.RemoteIpAddress.ToString();
+                ipAddress = ipAddress ?? context.Request.Headers["X-Forwarded-For"].ToString();
+                ipAddress = ipAddress ?? "UNKNOWN";
+
+                await eventService.AddFileRequestEventAsync(ipAddress, filename);
             }
 
             if (requestPath.Contains("/api/read/"))

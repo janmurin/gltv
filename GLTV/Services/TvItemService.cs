@@ -97,11 +97,7 @@ namespace GLTV.Services
         public Task<TvItemFile> FetchTvItemFileAsync(string filename)
         {
             TvItemFile itemFile = Context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
-            if (itemFile == null)
-            {
-                throw new Exception($"Item not found with filename {filename}.");
-            }
-
+            
             return Task.FromResult(itemFile);
         }
 
