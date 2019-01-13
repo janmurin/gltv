@@ -17,5 +17,6 @@ namespace GLTV.Services.Interfaces
         Task<List<WebClientLog>> FetchWebClientLogsAsync();
         Task<List<WebClientLog>> FetchClientsLastProgramRequestAsync();
 
+        Task MigrateData();
     }
 }

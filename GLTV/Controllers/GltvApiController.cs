@@ -65,5 +65,14 @@ namespace GLTV.Controllers
 
             return new ObjectResult(new List<MainContentResponse>());
         }
+
+        [Produces("application/json")]
+        [Route("/api/migratedata")]
+        public async Task<IActionResult> MigrateData()
+        {
+            await _eventService.MigrateData();
+
+            return new ObjectResult("finished");
+        }
     }
 }
