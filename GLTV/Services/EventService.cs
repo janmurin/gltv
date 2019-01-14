@@ -248,7 +248,7 @@ namespace GLTV.Services
 
             // 1. create tvScreens
             //HashSet<TvScreen> tvScreens = new HashSet<TvScreen>();
-            //programEvents.ForEach(pe =>
+            //programEvents.OrderByDescending(x => x.ID).ToList().ForEach(pe =>
             //{
 
             //    Location location = Location.Kosice;
@@ -264,7 +264,7 @@ namespace GLTV.Services
             //        Location = location,
             //        IpAddress = pe.Source,
             //        LastHandshake = pe.TimeInserted,
-            //        Description = "located at "+location.ToString()
+            //        Description = "located at " + location.ToString()
             //    };
             //    bool added = tvScreens.Add(s);
             //    if (added)
@@ -335,68 +335,85 @@ namespace GLTV.Services
             //    Context.Add(x);
             //});
 
-            // 2. create handshakes from chat requests
-            List<TvScreenHandshake> chatHandshakes = new List<TvScreenHandshake>();
-            KnownTvScreens.ForEach(screen =>
-            {
-                Console.WriteLine("current screen: " + screen);
-                List<ClientEvent> screenEvents = chatEvents.Where(pe => pe.Source.Equals(screen.IpAddress)).OrderBy(x => x.ID).ToList();
-                bool isActive = false;
-                TvScreenHandshake activeScreen = null;
+            // 3. create handshakes from chat requests
+            //List<TvScreenHandshake> chatHandshakes = new List<TvScreenHandshake>();
+            //KnownTvScreens.ForEach(screen =>
+            //{
+            //    Console.WriteLine("current screen: " + screen);
+            //    List<ClientEvent> screenEvents = chatEvents.Where(pe => pe.Source.Equals(screen.IpAddress)).OrderBy(x => x.ID).ToList();
+            //    bool isActive = false;
+            //    TvScreenHandshake activeScreen = null;
 
-                screenEvents.ForEach(se =>
-                {
-                    if (!isActive)
-                    {
-                        activeScreen = new TvScreenHandshake()
-                        {
-                            TvScreen = screen,
-                            FirstHandshake = se.TimeInserted,
-                            LastHandshake = se.TimeInserted,
-                            IsActive = true,
-                            Type = WebClientLogType.ChatRequest
-                        };
-                        isActive = true;
-                    }
-                    else
-                    {
-                        if ((se.TimeInserted - activeScreen.LastHandshake).TotalMinutes < 10)
-                        {
-                            activeScreen.LastHandshake = se.TimeInserted;
-                        }
-                        else
-                        {
-                            activeScreen.IsActive = false;
-                            Console.WriteLine("adding " + activeScreen);
-                            chatHandshakes.Add(activeScreen);
+            //    screenEvents.ForEach(se =>
+            //    {
+            //        if (!isActive)
+            //        {
+            //            activeScreen = new TvScreenHandshake()
+            //            {
+            //                TvScreen = screen,
+            //                FirstHandshake = se.TimeInserted,
+            //                LastHandshake = se.TimeInserted,
+            //                IsActive = true,
+            //                Type = WebClientLogType.ChatRequest
+            //            };
+            //            isActive = true;
+            //        }
+            //        else
+            //        {
+            //            if ((se.TimeInserted - activeScreen.LastHandshake).TotalMinutes < 10)
+            //            {
+            //                activeScreen.LastHandshake = se.TimeInserted;
+            //            }
+            //            else
+            //            {
+            //                activeScreen.IsActive = false;
+            //                Console.WriteLine("adding " + activeScreen);
+            //                chatHandshakes.Add(activeScreen);
 
-                            activeScreen = new TvScreenHandshake()
-                            {
-                                TvScreen = screen,
-                                FirstHandshake = se.TimeInserted,
-                                LastHandshake = se.TimeInserted,
-                                IsActive = true,
-                                Type = WebClientLogType.ChatRequest
-                            };
-                        }
-                    }
-                });
+            //                activeScreen = new TvScreenHandshake()
+            //                {
+            //                    TvScreen = screen,
+            //                    FirstHandshake = se.TimeInserted,
+            //                    LastHandshake = se.TimeInserted,
+            //                    IsActive = true,
+            //                    Type = WebClientLogType.ChatRequest
+            //                };
+            //            }
+            //        }
+            //    });
 
-                if (activeScreen != null)
-                {
-                    activeScreen.IsActive = false;
-                    Console.WriteLine("adding " + activeScreen);
-                    chatHandshakes.Add(activeScreen);
-                }
+            //    if (activeScreen != null)
+            //    {
+            //        activeScreen.IsActive = false;
+            //        Console.WriteLine("adding " + activeScreen);
+            //        chatHandshakes.Add(activeScreen);
+            //    }
 
-            });
-            chatHandshakes.ForEach(x =>
-            {
-                //Console.WriteLine(x.ToString());
-                Context.Add(x);
-            });
+            //});
+            //chatHandshakes.ForEach(x =>
+            //{
+            //    //Console.WriteLine(x.ToString());
+            //    Context.Add(x);
+            //});
 
-            Context.SaveChanges();
+            // 4. import file requests
+            //List<ClientEvent> fileRequestEvents = clientEvents
+            //    .Where(x => x.Type.Equals(ClientEventType.ImageRequest) || x.Type.Equals(ClientEventType.VideoRequest))
+            //    .ToList();
+            //fileRequestEvents.ForEach(x =>
+            //{
+            //    WebClientLog wcl = new WebClientLog()
+            //    {
+            //        Message = x.Message,
+            //        Source = x.Source,
+            //        TimeInserted = x.TimeInserted,
+            //        TvItemFileId = x.TvItemFileId,
+            //        Type = (int)x.Type == (int)WebClientLogType.VideoRequest ? WebClientLogType.VideoRequest : WebClientLogType.ImageRequest
+            //    };
+            //    Context.Add(wcl);
+            //});
+
+            //Context.SaveChanges();
 
             return Task.CompletedTask;
         }
