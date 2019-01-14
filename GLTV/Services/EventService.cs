@@ -413,7 +413,23 @@ namespace GLTV.Services
             //    Context.Add(wcl);
             //});
 
-            //Context.SaveChanges();
+            // 5. migrate log events
+            List<LogEvent> logEvents = Context.LogEvent.ToList(); 
+            logEvents.ForEach(x =>
+            {
+                WebServerLog wcl = new WebServerLog()
+                {
+                    Type = (WebServerLogType) x.Type,
+                    TimeInserted = x.TimeInserted,
+                    Message = x.Message,
+                    Author = x.Author,
+                    TvItemId = x.TvItemId
+                };
+                Console.WriteLine("adding "+wcl);
+                Context.Add(wcl);
+            });
+
+            Context.SaveChanges();
 
             return Task.CompletedTask;
         }
