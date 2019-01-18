@@ -207,34 +207,22 @@ namespace GLTV.Services
             return Task.FromResult(events);
         }
 
-        public Task<List<WebClientLog>> FetchClientsLastProgramRequestAsync()
+        public Task<List<TvScreen>> FetchClientsLastHandshakeAsync()
         {
-            List<WebClientLog> events = Context.WebClientLog
-                .Include(x => x.TvItemFile)
-                .Where(x => x.Type == WebClientLogType.ProgramRequest)
-                .OrderByDescending(x => x.TimeInserted)
-                .Skip(0)
-                .Take(20000)
-                .ToList();
-
-            IEnumerable<string> sources = events.Select(x => x.Source).ToList().Distinct();
-            List<WebClientLog> requestEvents = new List<WebClientLog>();
-
-            foreach (string source in sources)
-            {
-                WebClientLog webClientLog = events.First(x => x.Source.Equals(source));
-                var location = "unknown";
-                if (webClientLog.Message.LastIndexOf(" ", StringComparison.Ordinal) > 0)
+            var carsByPersonId = Context.TvScreenHandshake.ToLookup(p => p.TvScreenId, p => p.FirstHandshake);
+            var handshakeCounts = Context.TvScreenHandshake.GroupBy(info => info.TvScreenId)
+                .Select(group => new
                 {
-                    location = webClientLog.Message.Substring(
-                        webClientLog.Message.LastIndexOf(" ", StringComparison.Ordinal)).Trim();
-                }
-                webClientLog.Source += " (" + location + ")";
-                requestEvents.Add(webClientLog);
-            }
+                    Metric = @group.Key,
+                    Count = @group.Count()
+                });
+            Console.WriteLine("handshakeCounts: "+handshakeCounts);
+            List<TvScreen> events = Context.TvScreen.ToList();
 
 
-            return Task.FromResult(requestEvents);
+
+
+            return Task.FromResult(events);
 
         }
 
@@ -414,18 +402,18 @@ namespace GLTV.Services
             //});
 
             // 5. migrate log events
-            List<LogEvent> logEvents = Context.LogEvent.ToList(); 
+            List<LogEvent> logEvents = Context.LogEvent.ToList();
             logEvents.ForEach(x =>
             {
                 WebServerLog wcl = new WebServerLog()
                 {
-                    Type = (WebServerLogType) x.Type,
+                    Type = (WebServerLogType)x.Type,
                     TimeInserted = x.TimeInserted,
                     Message = x.Message,
                     Author = x.Author,
                     TvItemId = x.TvItemId
                 };
-                Console.WriteLine("adding "+wcl);
+                Console.WriteLine("adding " + wcl);
                 Context.Add(wcl);
             });
 

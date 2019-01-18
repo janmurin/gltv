@@ -15,7 +15,7 @@ namespace GLTV.Services.Interfaces
         Task AddFileRequestEventAsync(string sourceIp, string filename);
         Task AddHandShakeAsync(string sourceIp, WebClientLogType type, Location location);
         Task<List<WebClientLog>> FetchWebClientLogsAsync();
-        Task<List<WebClientLog>> FetchClientsLastProgramRequestAsync();
+        Task<List<TvScreen>> FetchClientsLastHandshakeAsync();
 
         Task MigrateData();
     }

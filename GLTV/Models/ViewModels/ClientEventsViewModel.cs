@@ -10,6 +10,6 @@ namespace GLTV.Models.ViewModels
     {
         public List<WebClientLog> ClientEvents { get; set; }
         public List<string> Sources { get; set; }
-        public List<WebClientLog> LastProgramClientEvents { get; set; }
+        public List<TvScreen> LastProgramClientEvents { get; set; }
     }
 }

@@ -65,7 +65,7 @@ namespace GLTV.Controllers
         public async Task<IActionResult> IndexClients()
         {
             List<WebClientLog> tvItems = await _eventService.FetchWebClientLogsAsync();
-            List<WebClientLog> clientsLastProgramRequest = await _eventService.FetchClientsLastProgramRequestAsync();
+            List<TvScreen> clientsLastProgramRequest = await _eventService.FetchClientsLastHandshakeAsync();
 
             ClientEventsViewModel model = new ClientEventsViewModel();
             model.ClientEvents = tvItems;

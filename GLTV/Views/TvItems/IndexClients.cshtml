@@ -14,24 +14,30 @@
 <h3>Last program requests</h3>
 <table class="table">
     <thead>
-    <tr>
-        <th>
-            Source
-        </th>
-        <th>
-            Time
-        </th>
-    </tr>
+        <tr>
+            <th>
+                Source
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                Time
+            </th>
+        </tr>
     </thead>
     <tbody>
     @foreach (var item in Model.LastProgramClientEvents)
     {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Source)
+                @Html.DisplayFor(modelItem => item.IpAddress)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TimeInserted) (@Utils.GetElapsedTime(item.TimeInserted))
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastHandshake) (@Utils.GetElapsedTime(item.LastHandshake))
             </td>
         </tr>
     }
