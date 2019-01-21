@@ -9,6 +9,7 @@ using GLTV.Models.Objects;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 
@@ -209,20 +210,30 @@ namespace GLTV.Services
 
         public Task<List<TvScreen>> FetchClientsLastHandshakeAsync()
         {
-            var carsByPersonId = Context.TvScreenHandshake.ToLookup(p => p.TvScreenId, p => p.FirstHandshake);
-            var handshakeCounts = Context.TvScreenHandshake.GroupBy(info => info.TvScreenId)
-                .Select(group => new
+            List<TvScreenHandshake> handshakes = Context.TvScreenHandshake.ToList();
+            List<TvScreen> screens = Context.TvScreen.ToList();
+            List<TvScreen> activeScreens = new List<TvScreen>();
+            screens.ForEach(screen =>
+            {
+                Console.WriteLine($"screem: {screen}");
+                // ignore inactive screens
+                if ((DateTime.Now - screen.LastHandshake).TotalDays < 30)
                 {
-                    Metric = @group.Key,
-                    Count = @group.Count()
-                });
-            Console.WriteLine("handshakeCounts: " + handshakeCounts);
-            List<TvScreen> events = Context.TvScreen.ToList();
+                    screen.ScreenHandshakes = handshakes.Where(s => s.TvScreenId == screen.ID).ToList();
+                    screen.TotalMinutesActive = (int)screen.ScreenHandshakes.Sum(s => (s.LastHandshake - s.FirstHandshake).TotalMinutes);
 
+                    // ignore screens with low activity
+                    Console.WriteLine($"total minutes: {screen.TotalMinutesActive}, total handshakes: {screen.ScreenHandshakes.Count}");
+                    if (screen.TotalMinutesActive > 24 * 60 || screen.ScreenHandshakes.Count > 10)
+                    {
+                        activeScreens.Add(screen);
+                    }
+                }
+            });
 
+            Console.WriteLine("active screen Counts: " + activeScreens.Count);
 
-
-            return Task.FromResult(events);
+            return Task.FromResult(activeScreens);
 
         }
 
@@ -309,7 +320,6 @@ namespace GLTV.Services
                         else
                         {
                             activeScreen.IsActive = false;
-                            Console.WriteLine("adding " + activeScreen);
                             programHandshakes.Add(activeScreen);
 
                             activeScreen = new TvScreenHandshake()
@@ -327,14 +337,13 @@ namespace GLTV.Services
                 if (activeScreen != null)
                 {
                     activeScreen.IsActive = false;
-                    Console.WriteLine("adding active screen: " + activeScreen);
                     programHandshakes.Add(activeScreen);
                 }
 
             });
             programHandshakes.ForEach(x =>
             {
-                //Console.WriteLine(x.ToString());
+                Console.WriteLine("adding new active screen: " + x);
                 Context.Add(x);
             });
 

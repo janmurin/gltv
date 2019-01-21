@@ -69,8 +69,7 @@ namespace GLTV.Controllers
 
             ClientEventsViewModel model = new ClientEventsViewModel();
             model.ClientEvents = tvItems;
-            model.LastProgramClientEvents = clientsLastProgramRequest;
-            model.Sources = tvItems.Select(x => x.Source).Distinct().ToList();
+            model.ActiveTvScreens = clientsLastProgramRequest;
 
             return View(model);
         }

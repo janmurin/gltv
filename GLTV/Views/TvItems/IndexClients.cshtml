@@ -22,12 +22,12 @@
                 Description
             </th>
             <th>
-                Time
+                Last Ping
             </th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.LastProgramClientEvents)
+    @foreach (var item in Model.ActiveTvScreens)
     {
         <tr>
             <td>
@@ -50,9 +50,9 @@
         <select class="form-control" id="sourceDropdown">
             <option value="All">@(ALL_VALUE)</option>
             @{
-                foreach (string type in Model.Sources)
+                foreach (TvScreen tvScreen in Model.ActiveTvScreens)
                 {
-                    <option value="@(type)">@type</option>
+                    <option value="@(tvScreen.IpAddress)">@tvScreen.IpAddress</option>
                 }
             }
         </select>

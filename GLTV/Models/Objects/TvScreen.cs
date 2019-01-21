@@ -33,6 +33,12 @@ namespace GLTV.Models.Objects
         [Required]
         public DateTime LastHandshake { get; set; }
 
+        [NotMapped]
+        public List<TvScreenHandshake> ScreenHandshakes { get; set; }
+
+        [NotMapped]
+        public int TotalMinutesActive { get; set; }
+
         public override bool Equals(object obj)
         {
             var screen = obj as TvScreen;
