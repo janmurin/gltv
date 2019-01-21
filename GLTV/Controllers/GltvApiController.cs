@@ -11,6 +11,7 @@ using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace GLTV.Controllers
 {
@@ -70,9 +71,19 @@ namespace GLTV.Controllers
         [Route("/api/migratedata")]
         public async Task<IActionResult> MigrateData()
         {
-            await _eventService.MigrateData();
+            ObjectResult objectResult = await _eventService.MigrateData().ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult("finished");
+                }
+                else
+                {
+                    return new ObjectResult("error: " + task.Exception?.Message);
+                }
+            });
 
-            return new ObjectResult("finished");
+            return objectResult;
         }
     }
 }
