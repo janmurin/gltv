@@ -12,7 +12,7 @@
 
 <h2>Active Screens</h2>
 
-<table class="table" id="tvScreensTable">
+<table class="table table-hover" id="tvScreensTable">
     <thead>
         <tr>
             <th>
@@ -23,6 +23,9 @@
             </th>
             <th>
                 Last Ping
+            </th>
+            <th>
+                Last 7 Days Stats
             </th>
         </tr>
     </thead>
@@ -37,7 +40,11 @@
                     @Html.DisplayFor(modelItem => screen.Description)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => screen.LastHandshake) (@Utils.GetElapsedTime(screen.LastHandshake))
+                    @Html.DisplayFor(modelItem => screen.LastHandshake) <br/>(@Utils.GetElapsedTime(screen.LastHandshake))
+                </td>
+                <td>
+                    <p><label>Uptime: </label>&nbsp;@screen.GetLast7DaysUptimeFormatted()</p>
+                    <p><label>Network Usage: </label>&nbsp;@Html.Raw(screen.GetTotalNetworkUsage7DaysFormatted())</p>
                 </td>
             </tr>
         }
@@ -76,7 +83,7 @@
 
         <div class="tab-content">
             <div id="uptimes_@screen.ID" class="tab-pane fade in active">
-                <table class="table">
+                <table class="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>
@@ -134,7 +141,7 @@
                         </select>
                     </div>
                 </form>
-                <table class="table activity-table">
+                <table class="table table-striped table-hover activity-table">
                     <thead>
                     <tr>
                         <th>

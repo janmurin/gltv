@@ -104,7 +104,7 @@ namespace GLTV.Extensions
         {
             long size = bytes;
 
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            string[] sizes = { "B", "KiB", "MiB", "GiB", "TiB" };
             int order = 0;
             while (size >= 1024 && order < sizes.Length - 1)
             {
@@ -145,6 +145,18 @@ namespace GLTV.Extensions
             //here backslash is must to tell that colon is
             //not the part of format, it just a character that we want in output
             return time.ToString(@"mm\:ss");
+        }
+
+        public static string GetFormattedDuration(int minutesActive)
+        {
+            TimeSpan time = TimeSpan.FromMinutes(minutesActive);
+
+            if (Math.Abs(time.TotalSeconds) > 3600 * 24)
+            {
+                return time.ToString(@"d' days '");
+            }
+
+            return time.ToString(@"h' h 'mm' m 'ss' s'");
         }
 
         public static string GetElapsedTime(DateTime timeStamp)

@@ -192,19 +192,41 @@ namespace GLTV.Services
             List<TvScreenHandshake> handshakes = Context.TvScreenHandshake.ToList();
             List<TvScreen> screens = Context.TvScreen.ToList();
             List<TvScreen> activeScreens = new List<TvScreen>();
+            DateTime days7Ago = DateTime.Now - TimeSpan.FromDays(7);
+
             screens.ForEach(screen =>
             {
                 Console.WriteLine($"screen: {screen}");
                 // ignore inactive screens
                 if ((DateTime.Now - screen.LastHandshake).TotalDays < 30)
                 {
-                    screen.ScreenHandshakes = handshakes.Where(s => s.TvScreenId == screen.ID && s.Type == WebClientLogType.ProgramRequest).OrderByDescending(s => s.LastHandshake).ToList();
+                    screen.ScreenHandshakes = handshakes
+                        .Where(s => s.TvScreenId == screen.ID && s.Type == WebClientLogType.ProgramRequest)
+                        .OrderByDescending(s => s.LastHandshake)
+                        .ToList();
+
                     screen.TotalMinutesActive = (int)screen.ScreenHandshakes.Sum(s => (s.LastHandshake - s.FirstHandshake).TotalMinutes);
 
                     // ignore screens with low activity
                     Console.WriteLine($"total minutes: {screen.TotalMinutesActive}, total handshakes: {screen.ScreenHandshakes.Count}");
                     if (screen.TotalMinutesActive > 24 * 60 || screen.ScreenHandshakes.Count > 10)
                     {
+                        // calculate sum of minutes active for the last 7 days
+                        List<TvScreenHandshake> lastWeekHandshakes = screen.ScreenHandshakes
+                            .Where(x => DateTime.Compare(x.LastHandshake, days7Ago) > 0)
+                            .ToList();
+                        lastWeekHandshakes.ForEach(handshake =>
+                        {
+                            if (DateTime.Compare(handshake.FirstHandshake, days7Ago) > 0)
+                            {
+                                screen.TotalMinutesActiveLast7days += (int)(handshake.LastHandshake - handshake.FirstHandshake).TotalMinutes;
+                            }
+                            else
+                            {
+                                screen.TotalMinutesActiveLast7days += (int)(handshake.LastHandshake - days7Ago).TotalMinutes;
+                            }
+                        });
+
                         activeScreens.Add(screen);
                     }
                 }
@@ -223,9 +245,24 @@ namespace GLTV.Services
                 screen.LastActivity = clientLogs
                     .Where(x => x.TvScreenId == screen.ID)
                     .OrderByDescending(log => log.TimeInserted)
-                    .Skip(0)
-                    .Take(200)
+                    .Where(x => DateTime.Compare(x.TimeInserted, days7Ago) > 0)
                     .ToList();
+
+                screen.TotalNetworkUsage7Days = screen.TotalMinutesActiveLast7days * 30 * 1024; // each program requests requires 30 KB approximately transfered
+
+                if (screen.LastActivity.Count == 0)
+                {
+                    screen.LastActivity = clientLogs
+                        .Where(x => x.TvScreenId == screen.ID)
+                        .OrderByDescending(log => log.TimeInserted)
+                        .Skip(0)
+                        .Take(200)
+                        .ToList();
+                }
+                else
+                {
+                    screen.TotalNetworkUsage7Days += screen.LastActivity.Sum(x => x.TvItemFile.Length);
+                }
             });
 
             return Task.FromResult(activeScreens);

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using GLTV.Extensions;
 using Newtonsoft.Json.Serialization;
 
 namespace GLTV.Models.Objects
@@ -41,6 +42,10 @@ namespace GLTV.Models.Objects
 
         [NotMapped]
         public int TotalMinutesActive { get; set; }
+        [NotMapped]
+        public int TotalMinutesActiveLast7days { get; set; }
+        [NotMapped]
+        public long TotalNetworkUsage7Days { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -61,6 +66,23 @@ namespace GLTV.Models.Objects
         public override string ToString()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+
+        public string GetLast7DaysUptimeFormatted()
+        {
+            int percent = 100 * TotalMinutesActiveLast7days / (7 * 24 * 60);
+            return $"{percent} %";
+        }
+
+        public string GetTotalNetworkUsage7DaysFormatted()
+        {
+            long dailyUsage = TotalNetworkUsage7Days / 7;
+            if (dailyUsage > 1024 * 1024 * 1024)
+            {
+                return $"<span style=\"color: red;\">{Utils.GetFileSize(dailyUsage)} a day</span>";
+            }
+
+            return $"<span style=\"color: green;\">{Utils.GetFileSize(dailyUsage)} a day</span>";
         }
     }
 }
