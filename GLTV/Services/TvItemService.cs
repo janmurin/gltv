@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Extensions;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,17 +16,14 @@ namespace GLTV.Services
 {
     public class TvItemService : ServiceBase, ITvItemService
     {
-        private readonly IFileService _fileService;
-
-        public TvItemService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager, IFileService fileService)
-            : base(context, env, signInManager)
+        public TvItemService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+            : base(context, signInManager)
         {
-            _fileService = fileService;
         }
 
-        public TvItem FetchTvItem(int id)
+        public Task<TvItem> FetchTvItemAsync(int id)
         {
-            var tvItem = _context.TvItem
+            var tvItem = Context.TvItem
                 .Include(x => x.Files)
                 .Include(y => y.Locations)
                 .SingleOrDefault(m => m.ID == id);
@@ -35,15 +33,12 @@ namespace GLTV.Services
                 throw new Exception($"Item not found with id {id}.");
             }
 
-            tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
-            tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
-
-            return tvItem;
+            return Task.FromResult(tvItem);
         }
 
-        public bool DeleteTvItem(int id)
+        public Task<bool> DeleteTvItemAsync(int id)
         {
-            var tvItem = _context.TvItem.SingleOrDefault(m => m.ID == id);
+            var tvItem = Context.TvItem.SingleOrDefault(m => m.ID == id);
             if (tvItem == null)
             {
                 throw new Exception($"Item not found with id {id}.");
@@ -52,48 +47,42 @@ namespace GLTV.Services
             // items are never actually deleted
             tvItem.Deleted = true;
 
-            _context.SaveChanges();
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public List<TvItem> FetchTvItems(bool deleted)
+        public Task<List<TvItem>> FetchTvItemsAsync(bool deleted)
         {
-            List<TvItem> tvItems = _context.TvItem
+            List<TvItem> tvItems = Context.TvItem
                 .Include(x => x.Files)
                 .Include(y => y.Locations)
                 .Where(x => x.Deleted == deleted)
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
 
-            foreach (TvItem tvItem in tvItems)
-            {
-                tvItem.Files.ForEach(i => i.Url = MakeWebPath(i.FileName));
-                tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
-            }
-
-            return tvItems;
+            return Task.FromResult(tvItems);
         }
 
-        public bool AddTvItem(TvItem item)
+        public Task<bool> AddTvItemAsync(TvItem item)
         {
-            _context.Add(item);
-            _context.SaveChanges();
+            Context.Add(item);
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool UpdateTvItem(TvItem item)
+        public Task<bool> UpdateTvItemAsync(TvItem item)
         {
-            _context.Update(item);
-            _context.SaveChanges();
+            Context.Update(item);
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public List<TvItem> FetchActiveTvItems(Location location)
+        public Task<List<TvItem>> FetchActiveTvItemsAsync(Location location)
         {
-            List<TvItem> tvItems = _context.TvItem
+            List<TvItem> tvItems = Context.TvItem
                 .Include(x => x.Files)
                 .Include(y => y.Locations)
                 .Where(x => x.Deleted == false && x.Locations.Select(y => y.Location).Contains(location))
@@ -102,19 +91,29 @@ namespace GLTV.Services
 
             tvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
 
-            foreach (TvItem tvItem in tvItems)
-            {
-                // special ending to differentiate between web and client file requests
-                tvItem.Files.ForEach(i => i.FullUrl = MakeFullWebPath(i.FileName) + Constants.CLIENT_FILE_REQUEST_SUFFIX);
-                tvItem.Files.ForEach(i => i.AbsolutePath = Path.Combine(WebRootPath, i.FileName));
-            }
-
-            return tvItems;
+            return Task.FromResult(tvItems);
         }
 
-        public TvItemFile GetTvItemFile(string filename)
+        public Task<TvItemFile> FetchTvItemFileAsync(string filename)
         {
-            return _context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
+            TvItemFile itemFile = Context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
+            if (itemFile == null)
+            {
+                throw new Exception($"Item not found with filename {filename}.");
+            }
+
+            return Task.FromResult(itemFile);
+        }
+
+        public Task<TvItemFile> FetchTvItemFileAsync(int fileId)
+        {
+            TvItemFile itemFile = Context.TvItemFile.FirstOrDefault(x => x.ID == fileId);
+            if (itemFile == null)
+            {
+                throw new Exception($"Item not found with fileId {fileId}.");
+            }
+
+            return Task.FromResult(itemFile);
         }
     }
 }

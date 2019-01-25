@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-//using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace GLTV.Extensions
 {
@@ -33,7 +29,7 @@ namespace GLTV.Extensions
                 //Console.WriteLine("file request url changed to: " + context.Request.Path.ToString());
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
-                TvItemFile itemFile = tvItemService.GetTvItemFile(filename);
+                TvItemFile itemFile = await tvItemService.FetchTvItemFileAsync(filename);
 
                 //string headers = "";
                 //foreach (var key in context.Request.Headers.Keys)

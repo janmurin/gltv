@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GLTV.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using GLTV.Models.ViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
@@ -34,7 +36,7 @@ namespace GLTV.Controllers
         // GET: TvItems
         public async Task<IActionResult> Index()
         {
-            List<TvItem> tvItems = _tvItemService.FetchTvItems(false);
+            List<TvItem> tvItems = await _tvItemService.FetchTvItemsAsync(false);
             var model = new TvItemsViewModel();
             // these active items list contains items that were not yet played on tv screens
             model.ActiveTvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
@@ -45,24 +47,29 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> IndexDeleted()
         {
-            List<TvItem> tvItems = _tvItemService.FetchTvItems(true);
+            DeletedViewModel model = new DeletedViewModel();
+            model.TvItems = await _tvItemService.FetchTvItemsAsync(true);
+            model.ZombieFiles = await _fileService.FindZombieFilesAsync();
+            model.TotalUndeletedFileSize = model.TvItems.Sum(x => Utils.GetTotalFileSizeLong(x));
 
-            return View(tvItems);
+            return View(model);
         }
 
         public async Task<IActionResult> IndexLogs()
         {
-            List<LogEvent> tvItems = _eventService.FetchLogEventsAsync();
+            List<LogEvent> tvItems = await _eventService.FetchLogEventsAsync();
 
             return View(tvItems);
         }
 
         public async Task<IActionResult> IndexClients()
         {
-            List<ClientEvent> tvItems = _eventService.FetchClientEventsAsync();
+            List<ClientEvent> tvItems = await _eventService.FetchClientEventsAsync();
+            List<ClientEvent> clientsLastProgramRequest = await _eventService.FetchClientsLastProgramRequestAsync();
 
-            ClientEventsViewModel model=new ClientEventsViewModel();
+            ClientEventsViewModel model = new ClientEventsViewModel();
             model.ClientEvents = tvItems;
+            model.LastProgramClientEvents = clientsLastProgramRequest;
             model.Sources = tvItems.Select(x => x.Source).Distinct().ToList();
 
             return View(model);
@@ -71,7 +78,7 @@ namespace GLTV.Controllers
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            TvItem item = _tvItemService.FetchTvItem(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id);
 
             return View(item);
         }
@@ -79,7 +86,7 @@ namespace GLTV.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DetailsAnonymous(int id)
         {
-            TvItem item = _tvItemService.FetchTvItem(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id);
 
             await _eventService.AddLogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
 
@@ -120,25 +127,25 @@ namespace GLTV.Controllers
                     item.Locations.Add(new TvItemLocation() { Location = Location.Zilina });
                 }
 
-                _tvItemService.AddTvItem(item);
+                await _tvItemService.AddTvItemAsync(item);
 
                 // add files
                 if (item.Type == TvItemType.Video)
                 {
                     if (model.Files.Count > 1)
                     {
-                        _tvItemService.DeleteTvItem(item.ID);
+                        await _tvItemService.DeleteTvItemAsync(item.ID);
                         ModelState.AddModelError("", "Only 1 file is allowed for video TV item type.");
                         return View(model);
                     }
 
                     try
                     {
-                        _fileService.SaveVideoFile(item, model.Files[0]);
+                        await _fileService.SaveVideoFileAsync(item, model.Files[0]);
                     }
                     catch (Exception e)
                     {
-                        _tvItemService.DeleteTvItem(item.ID);
+                        await _tvItemService.DeleteTvItemAsync(item.ID);
                         ModelState.AddModelError("", e.Message);
                         return View(model);
                     }
@@ -147,11 +154,11 @@ namespace GLTV.Controllers
                 {
                     try
                     {
-                        _fileService.SaveImageFiles(item, model.Files);
+                        await _fileService.SaveImageFilesAsync(item, model.Files);
                     }
                     catch (Exception e)
                     {
-                        _tvItemService.DeleteTvItem(item.ID);
+                        await _tvItemService.DeleteTvItemAsync(item.ID);
                         ModelState.AddModelError("", e.Message);
                         return View(model);
                     }
@@ -168,16 +175,7 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            TvItem item = _tvItemService.FetchTvItem(id);
-
-            var model = new TvItemEditViewModel();
-            model.TvItem = item;
-            model.LocationCheckboxes.LocationBanskaBystrica =
-                item.Locations.Any(x => x.Location == Location.BanskaBystrica);
-            model.LocationCheckboxes.LocationKosice =
-                item.Locations.Any(x => x.Location == Location.Kosice);
-            model.LocationCheckboxes.LocationZilina =
-                item.Locations.Any(x => x.Location == Location.Zilina);
+            var model = new TvItemEditViewModel(await _tvItemService.FetchTvItemAsync(id));
 
             return View(model);
         }
@@ -186,7 +184,7 @@ namespace GLTV.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind]TvItemEditViewModel model)
         {
-            TvItem item = _tvItemService.FetchTvItem(model.TvItem.ID);
+            TvItem item = await _tvItemService.FetchTvItemAsync(model.TvItem.ID);
 
             if (ModelState.IsValid)
             {
@@ -213,7 +211,7 @@ namespace GLTV.Controllers
                     item.Locations.Add(new TvItemLocation() { TvItemId = item.ID, Location = Location.Zilina });
                 }
 
-                _tvItemService.UpdateTvItem(item);
+                await _tvItemService.UpdateTvItemAsync(item);
                 await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
@@ -226,7 +224,7 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            TvItem item = _tvItemService.FetchTvItem(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id);
 
             return View(item);
         }
@@ -235,7 +233,7 @@ namespace GLTV.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            _tvItemService.DeleteTvItem(id);
+            await _tvItemService.DeleteTvItemAsync(id);
 
             await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
 
@@ -246,15 +244,127 @@ namespace GLTV.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteFiles(int id)
         {
-            TvItem item = _tvItemService.FetchTvItem(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id);
 
-            bool success = _fileService.DeleteFiles(item.Files);
+            bool success = await _fileService.DeleteFilesAsync(item.Files);
             if (success)
             {
                 await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
             }
 
             return RedirectToAction(nameof(IndexDeleted));
+        }
+
+        [HttpPost, ActionName("DeleteFile")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFile(int id)
+        {
+            TvItemFile itemFile = await _tvItemService.FetchTvItemFileAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(itemFile.TvItemId);
+
+            bool success = await _fileService.DeleteFileAsync(itemFile.FileName);
+            if (success)
+            {
+                await _eventService.AddLogEventAsync(
+                    User.Identity.Name,
+                    LogEventType.ItemDeleteSingleFile,
+                    $"User deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
+                    item.ID);
+            }
+            else
+            {
+                // if file deletion is not successful, it will stay in the file system as a zombie file
+                await _eventService.AddLogEventAsync(
+                    User.Identity.Name,
+                    LogEventType.Exception,
+                    $"User NOT SUCCESSFULLY deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
+                    item.ID);
+            }
+
+            item.Files.Remove(itemFile);
+            await _tvItemService.UpdateTvItemAsync(item);
+
+            return RedirectToAction(nameof(Edit), new { id = item.ID });
+        }
+
+        [HttpPost, ActionName("DeleteZombieFile")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteZombieFile([FromForm]string fileName)
+        {
+            bool success = await _fileService.DeleteZombieFileAsync(fileName);
+            if (success)
+            {
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);
+            }
+            else
+            {
+                // if file deletion is not successful, it will stay in the file system as a zombie file
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.Exception, $"User NOT SUCCESSFULLY deleted zombie file[{fileName}].", null);
+            }
+
+            return RedirectToAction(nameof(IndexDeleted));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFiles(int id, [FromForm]List<IFormFile> files, [FromForm]int duration)
+        {
+            if (ModelState.IsValid)
+            {
+                // add item
+                var model = new TvItemEditViewModel(await _tvItemService.FetchTvItemAsync(id));
+
+                // add files
+                try
+                {
+                    if (model.TvItem.Type == TvItemType.Video)
+                    {
+                        if (files.Count > 1)
+                        {
+                            ModelState.AddModelError("", "Only 1 file is allowed for video TV item type.");
+                        }
+
+                        if (duration < 3)
+                        {
+                            ModelState.AddModelError("", $"Incorrect video duration [{duration}]. Must be at least 4 seconds.");
+                        }
+
+                        if (ModelState.ErrorCount > 0)
+                        {
+                            return View("Edit", model);
+                        }
+
+                        model.TvItem.Duration = duration;
+                        await _fileService.ReplaceVideoFileAsync(model.TvItem, files[0]);
+                    }
+                    else if (model.TvItem.Type == TvItemType.Image)
+                    {
+                        if (files.Count > 1)
+                        {
+                            ModelState.AddModelError("", "Only 1 file is allowed for image TV item type.");
+                            return View("Edit", model);
+                        }
+
+                        await _fileService.ReplaceImageFileAsync(model.TvItem, files[0]);
+                    }
+                    else if (model.TvItem.Type == TvItemType.Gallery)
+                    {
+                        await _fileService.SaveImageFilesAsync(model.TvItem, files);
+                    }
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError("", e.Message);
+                    return View("Edit", model);
+                }
+
+                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", model.TvItem.ID);
+
+                return View("Edit", model);
+            }
+            // todo: log model state error
+
+            return RedirectToAction("Edit", new { id });
         }
     }
 }

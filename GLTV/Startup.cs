@@ -53,6 +53,7 @@ namespace GLTV
             Constants.ANDROID_TOKEN = Configuration["androidToken"];
             Constants.SERVER_URL = Configuration["serverUrl"];
             Constants.SERVER_ADMIN = Configuration["ServerAdmin"];
+            Constants.WEB_ROOT_PATH = _hostingEnvironment.WebRootPath;
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -97,6 +98,11 @@ namespace GLTV
                     .RequireAuthenticatedUser()
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
+            });
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = Constants.MULTIPART_BODY_LENGTH_LIMIT;
+                x.MultipartBodyLengthLimit = Constants.MULTIPART_BODY_LENGTH_LIMIT;
             });
 
             var physicalProvider = _hostingEnvironment.ContentRootFileProvider;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using GLTV.Models.Objects;
 using Newtonsoft.Json;
 // ReSharper disable InconsistentNaming
 
@@ -118,7 +119,7 @@ namespace GLTV.Models
             length = itemFile.Length;
             mainContentID = itemFile.TvItemId;
             duration = dur;
-            fullPath = itemFile.FullUrl;
+            fullPath = itemFile.FullUrl(true);
             thumb300Path = fullPath;
         }
     }

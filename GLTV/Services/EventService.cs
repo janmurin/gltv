@@ -15,8 +15,8 @@ namespace GLTV.Services
 {
     public class EventService : ServiceBase, IEventService
     {
-        public EventService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
-            : base(context, env, signInManager)
+        public EventService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+            : base(context, signInManager)
         {
         }
 
@@ -29,15 +29,15 @@ namespace GLTV.Services
             logEvent.TimeInserted = DateTime.Now;
             logEvent.Type = type;
 
-            _context.Add(logEvent);
-            _context.SaveChanges();
+            Context.Add(logEvent);
+            Context.SaveChanges();
 
             return Task.CompletedTask;
         }
 
-        public List<LogEvent> FetchLogEventsAsync()
+        public Task<List<LogEvent>> FetchLogEventsAsync()
         {
-            List<LogEvent> events = _context.LogEvent
+            List<LogEvent> events = Context.LogEvent
                 .Include(x => x.TvItem)
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
@@ -70,28 +70,31 @@ namespace GLTV.Services
                 }
             }
 
-            return events;
+            return Task.FromResult(events);
         }
 
         public Task AddClientEventAsync(string source, ClientEventType type, string message, int? itemId)
         {
-            ClientEvent clientEvent = new ClientEvent();
-            clientEvent.Source = source;
-            clientEvent.Message = message;
-            clientEvent.TvItemFileId = itemId;
-            clientEvent.TimeInserted = DateTime.Now;
-            clientEvent.Type = type;
+            ClientEvent clientEvent = new ClientEvent
+            {
+                Source = source,
+                Message = message,
+                TvItemFileId = itemId,
+                TimeInserted = DateTime.Now,
+                Type = type
+            };
 
-            _context.Add(clientEvent);
-            _context.SaveChanges();
+            Context.Add(clientEvent);
+            Context.SaveChanges();
 
             return Task.CompletedTask;
         }
 
-        public List<ClientEvent> FetchClientEventsAsync()
+        public Task<List<ClientEvent>> FetchClientEventsAsync()
         {
-            List<ClientEvent> events = _context.ClientEvent
+            List<ClientEvent> events = Context.ClientEvent
                 .Include(x => x.TvItemFile)
+                .Where(x => x.Type != ClientEventType.ProgramRequest)
                 .OrderByDescending(x => x.TimeInserted)
                 .Skip(0)
                 .Take(200)
@@ -101,11 +104,42 @@ namespace GLTV.Services
             {
                 if (logEvent.Type == ClientEventType.ImageRequest || logEvent.Type == ClientEventType.VideoRequest)
                 {
-                    logEvent.Message = $"Request for file {logEvent.TvItemFile.GetDetailHyperlink(MakeFullWebPath(logEvent.TvItemFile.FileName))}";
+                    logEvent.Message = $"Request for file {logEvent.TvItemFile.GetDetailHyperlink()}";
                 }
             }
 
-            return events;
+            return Task.FromResult(events);
+        }
+
+        public Task<List<ClientEvent>> FetchClientsLastProgramRequestAsync()
+        {
+            List<ClientEvent> events = Context.ClientEvent
+                .Include(x => x.TvItemFile)
+                .Where(x => x.Type == ClientEventType.ProgramRequest)
+                .OrderByDescending(x => x.TimeInserted)
+                .Skip(0)
+                .Take(20000)
+                .ToList();
+
+            IEnumerable<string> sources = events.Select(x => x.Source).ToList().Distinct();
+            List<ClientEvent> requestEvents = new List<ClientEvent>();
+
+            foreach (string source in sources)
+            {
+                ClientEvent clientEvent = events.First(x => x.Source.Equals(source));
+                var location = "unknown";
+                if (clientEvent.Message.LastIndexOf(" ", StringComparison.Ordinal) > 0)
+                {
+                    location = clientEvent.Message.Substring(
+                        clientEvent.Message.LastIndexOf(" ", StringComparison.Ordinal)).Trim();
+                }
+                clientEvent.Source += " (" + location +")";
+                requestEvents.Add(clientEvent);
+            }
+
+
+            return Task.FromResult(requestEvents);
+
         }
     }
 }

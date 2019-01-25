@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using GLTV.Extensions;
 using GLTV.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -43,7 +44,8 @@ namespace GLTV
                 .UseStartup<Startup>()
                 .UseKestrel(options =>
                 {
-                    options.Limits.MaxRequestBodySize = 1073741824;
+                    // this option necessary for production deployment running on kestrel
+                    options.Limits.MaxRequestBodySize = Constants.MULTIPART_BODY_LENGTH_LIMIT;
                     options.Listen(IPAddress.Any, 8080);
                 })
                 .Build();

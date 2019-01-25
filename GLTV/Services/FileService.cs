@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Extensions;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -17,28 +18,14 @@ namespace GLTV.Services
 {
     public class FileService : ServiceBase, IFileService
     {
-        public FileService(ApplicationDbContext context, IHostingEnvironment env, SignInManager<ApplicationUser> signInManager)
-            : base(context, env, signInManager)
+        public FileService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+            : base(context, signInManager)
         {
         }
 
-        public bool SaveVideoFile(TvItem tvItem, IFormFile file)
+        public Task<bool> SaveVideoFileAsync(TvItem tvItem, IFormFile file)
         {
             string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
-            string path = Path.Combine(WebRootPath, filename);
-
-            using (var fileStream = new FileStream(path, FileMode.Create))
-            {
-                file.CopyTo(fileStream);
-            }
-
-            IMediaInfo mediaInfo = new MediaInfo(path);
-            tvItem.Duration = (int)mediaInfo.Properties.VideoDuration.TotalSeconds;
-            if (tvItem.Duration == 0)
-            {
-                throw new Exception("Video duration is 0s.");
-            }
-
             TvItemFile itemFile = new TvItemFile()
             {
                 FileName = filename,
@@ -46,13 +33,63 @@ namespace GLTV.Services
                 TvItemId = tvItem.ID
             };
 
-            _context.Add(itemFile);
-            _context.SaveChanges();
+            using (var fileStream = new FileStream(itemFile.AbsolutePath, FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
 
-            return true;
+            if (tvItem.Duration == 0)
+            {
+                throw new Exception("Video duration is 0s.");
+            }
+
+            Context.Add(itemFile);
+            Context.SaveChanges();
+
+            return Task.FromResult(true);
         }
 
-        public bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles)
+        public Task<bool> ReplaceVideoFileAsync(TvItem tvItem, IFormFile file)
+        {
+            string filename = tvItem.ID + "_" + Guid.NewGuid() + Path.GetExtension(file.FileName);
+            TvItemFile newItemFile = new TvItemFile()
+            {
+                FileName = filename,
+                Length = file.Length
+            };
+
+            using (var fileStream = new FileStream(newItemFile.AbsolutePath, FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
+
+            if (tvItem.Duration == 0)
+            {
+                throw new Exception("Video duration is 0s.");
+            }
+
+            TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
+            if (tvItemFile != null)
+            {
+                bool success = DeleteFileAsync(tvItemFile.FileName).Result;
+                // if not successfull delete, then new zombie file 
+
+                tvItemFile.FileName = newItemFile.FileName;
+                tvItemFile.Length = newItemFile.Length;
+
+                Context.Update(tvItemFile);
+                Context.Update(tvItem);
+                Context.SaveChanges();
+
+                return Task.FromResult(true);
+            }
+            else
+            {
+                throw new Exception($"TvItem with id {tvItem.ID} does not have any files.");
+            }
+        }
+
+        public Task<bool> SaveImageFilesAsync(TvItem item, List<IFormFile> modelFiles)
         {
             foreach (IFormFile formFile in modelFiles)
             {
@@ -77,9 +114,14 @@ namespace GLTV.Services
 
                 string extension = Path.GetExtension(formFile.FileName) ?? "";
                 string filename = item.ID + "_" + Guid.NewGuid() + extension;
-                string path = Path.Combine(WebRootPath, filename);
+                TvItemFile itemFile = new TvItemFile()
+                {
+                    FileName = filename,
+                    Length = formFile.Length,
+                    TvItemId = item.ID
+                };
 
-                using (var fileStream = new FileStream(path, FileMode.Create))
+                using (var fileStream = new FileStream(itemFile.AbsolutePath, FileMode.Create))
                 {
                     if (extension.ToLower().EndsWith("jpg") || extension.ToLower().EndsWith("jpeg"))
                     {
@@ -94,62 +136,158 @@ namespace GLTV.Services
                         throw new Exception($"Unsupported image file extension [{extension}].");
                     }
 
-                    TvItemFile itemFile = new TvItemFile()
-                    {
-                        FileName = filename,
-                        Length = formFile.Length,
-                        TvItemId = item.ID
-                    };
-
-                    _context.Add(itemFile);
+                    itemFile.Length = fileStream.Length;
+                    Context.Add(itemFile);
                 }
             }
 
-            _context.SaveChanges();
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool DeleteFile(string filename)
+        public Task<bool> ReplaceImageFileAsync(TvItem tvItem, IFormFile formFile)
         {
-            TvItemFile tvItemFile = _context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
+            Image<Rgba32> image = null;
+            Stream inputStream = formFile.OpenReadStream();
+            image = Image.Load(inputStream);
+
+            double height = image.Height;
+            double width = image.Width;
+            double k1 = width / Constants.MAX_IMAGE_WIDTH;
+            double k2 = height / Constants.MAX_IMAGE_HEIGHT;
+            if (k1 > k2 && k1 > 1)
+            {
+                image.Mutate(x => x.Resize(Constants.MAX_IMAGE_WIDTH, (int)(height / k1)));
+            }
+
+            if (k1 < k2 && k2 > 1)
+            {
+                image.Mutate(x => x.Resize((int)(width / k2), Constants.MAX_IMAGE_HEIGHT));
+            }
+
+            string extension = Path.GetExtension(formFile.FileName) ?? "";
+            string filename = tvItem.ID + "_" + Guid.NewGuid() + extension;
+            TvItemFile newItemFile = new TvItemFile()
+            {
+                FileName = filename,
+                Length = formFile.Length,
+                TvItemId = tvItem.ID
+            };
+
+            using (var fileStream = new FileStream(newItemFile.AbsolutePath, FileMode.Create))
+            {
+                if (extension.ToLower().EndsWith("jpg") || extension.ToLower().EndsWith("jpeg"))
+                {
+                    image.SaveAsJpeg(fileStream);
+                }
+                else if (extension.ToLower().EndsWith("png"))
+                {
+                    image.SaveAsPng(fileStream);
+                }
+                else
+                {
+                    throw new Exception($"Unsupported image file extension [{extension}].");
+                }
+                newItemFile.Length = fileStream.Length;
+            }
+
+            TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
+            if (tvItemFile != null)
+            {
+                bool success = DeleteFileAsync(tvItemFile.FileName).Result;
+                // if not successfull delete, then new zombie file 
+
+                tvItemFile.FileName = newItemFile.FileName;
+                tvItemFile.Length = newItemFile.Length;
+
+                Context.Update(tvItemFile);
+                Context.Update(tvItem);
+                Context.SaveChanges();
+
+                return Task.FromResult(true);
+            }
+            else
+            {
+                throw new Exception($"TvItem with id {tvItem.ID} does not have any files.");
+            }
+        }
+
+        public Task<List<TvItemFile>> FindZombieFilesAsync()
+        {
+            DirectoryInfo d = new DirectoryInfo(Path.Combine(Constants.WEB_ROOT_PATH, Constants.FILES_DIR));
+            FileInfo[] files = d.GetFiles();
+            List<string> tvItemFiles = Context.TvItemFile.Select(x => x.FileName).ToList();
+
+            List<TvItemFile> zombieFiles = new List<TvItemFile>();
+            foreach (FileInfo file in files)
+            {
+                if (!tvItemFiles.Contains(file.Name))
+                {
+                    zombieFiles.Add(new TvItemFile() { FileName = file.Name, Length = file.Length });
+                }
+            }
+
+            return Task.FromResult(zombieFiles);
+        }
+
+        public Task<bool> DeleteFileAsync(string filename)
+        {
+            TvItemFile tvItemFile = Context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
             if (tvItemFile == null)
             {
                 throw new Exception($"TvItemFile not found with filename[{filename}].");
             }
 
-            string path = Path.Combine(WebRootPath, filename);
             try
             {
-                if (File.Exists(path))
+                if (File.Exists(tvItemFile.AbsolutePath))
                 {
-                    File.Delete(path);
+                    File.Delete(tvItemFile.AbsolutePath);
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return false;
+                return Task.FromResult(false);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        public bool DeleteFiles(List<TvItemFile> files)
+        public Task<bool> DeleteZombieFileAsync(string filename)
+        {
+            TvItemFile file = new TvItemFile() { FileName = filename };
+            try
+            {
+                if (File.Exists(file.AbsolutePath))
+                {
+                    File.Delete(file.AbsolutePath);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> DeleteFilesAsync(List<TvItemFile> files)
         {
             foreach (TvItemFile file in files)
             {
                 Console.WriteLine("deleting files: " + String.Join(", ", files.Select(x => x.FileName)));
-                string path = Path.Combine(WebRootPath, file.FileName);
                 try
                 {
-                    if (File.Exists(path))
+                    if (File.Exists(file.AbsolutePath))
                     {
-                        File.Delete(path);
+                        File.Delete(file.AbsolutePath);
                     }
 
                     file.Deleted = true;
-                    _context.TvItemFile.Update(file);
+                    Context.TvItemFile.Update(file);
                 }
                 catch (Exception e)
                 {
@@ -158,9 +296,9 @@ namespace GLTV.Services
                 }
             }
 
-            _context.SaveChanges();
+            Context.SaveChanges();
 
-            return true;
+            return Task.FromResult(true);
         }
 
         public byte[] GetBytes(string filename)

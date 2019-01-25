@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
@@ -50,7 +46,7 @@ namespace GLTV.Controllers
 
             throw new Exception("test exception for email sending");
 
-            return View();
+            //return View();
         }
 
         //public IActionResult Contact()
@@ -60,7 +56,7 @@ namespace GLTV.Controllers
         //    return View();
         //}
 
-        public IActionResult Error()
+        public async Task<IActionResult> Error()
         {
             IExceptionHandlerFeature exception = HttpContext.Features.Get<IExceptionHandlerFeature>();
 
@@ -68,8 +64,8 @@ namespace GLTV.Controllers
             ViewData["message"] = exception.Error.Message;
             ViewData["stackTrace"] = exception.Error.StackTrace;
 
-            _emailSender.SendEmailAsync(User.Identity.Name, EmailType.Error, exception);
-            _eventService.AddLogEventAsync(
+            await _emailSender.SendEmailAsync(User.Identity.Name, EmailType.Error, exception);
+            await _eventService.AddLogEventAsync(
                 User.Identity.Name,
                 LogEventType.Exception,
                 $"User encountered exception: [{exception.Error.Message}].", null);

@@ -102,6 +102,8 @@ namespace GLTV.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            string username = email.Split("@")[0];
 
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
@@ -109,8 +111,6 @@ namespace GLTV.Controllers
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
 
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                string username = email.Split("@")[0];
                 await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
 
                 return RedirectToLocal(returnUrl);
@@ -122,8 +122,6 @@ namespace GLTV.Controllers
             else
             {
                 // create user account.
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                string username = email.Split("@")[0];
                 if (!_allowedEmails.Contains(email))
                 {
                     ErrorMessage = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
@@ -139,6 +137,8 @@ namespace GLTV.Controllers
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
+                        await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
                         return RedirectToLocal(returnUrl);
                     }
                 }

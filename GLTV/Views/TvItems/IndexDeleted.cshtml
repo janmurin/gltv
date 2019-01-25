@@ -1,6 +1,7 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using GLTV.Extensions
-@model IEnumerable<GLTV.Models.TvItem>
+@using GLTV.Models.Objects
+@model GLTV.Models.ViewModels.DeletedViewModel
 
 @{
     ViewData["Title"] = "Deleted Items";
@@ -8,53 +9,87 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Deleted Tv Items</h2>
+@if (Model.ZombieFiles.Any())
+{
+    <h2>Zombie files:</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Filename
+                </th>
+                <th>
+                    Size
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (TvItemFile item in Model.ZombieFiles)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FileName)
+                    </td>
+                    <td>
+                        @Utils.GetFileSize(item)
+                    </td>
+                    <td>
+                        <form asp-controller="TvItems" asp-action="DeleteZombieFile">
+                            <input type="hidden" name="FileName" value="@item.FileName" />
+                            <input type="submit" value="Delete" class="btn btn-warning" />
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
-<table class="table">
+<h2>Deleted Tv Items</h2>
+<h4>Total undeleted files size: @Utils.GetFileSize(Model.TotalUndeletedFileSize)</h4>
+
+<table class="table deleted-items-table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TimeInserted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Author)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Type)
+                Info
             </th>
             <th>
                 Files
-            </th>
-            <th>
-                Total file size
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.TvItems)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Title)
+                    <table class="inner-table">
+                        <tbody>
+                            <tr>
+                                <th>Title</th>
+                                <th>Time Inserted</th>
+                            </tr>
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td>@Html.DisplayFor(modelItem => item.TimeInserted)</td>
+                        </tr>
+                        <tr>
+                            <th>Author</th>
+                            <th>Type</th>
+                        </tr>
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.TimeInserted)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Author)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Type)
-                </td>
-                <td>
+                    <label>Total file size:</label> @Utils.GetTotalFileSize(item)<br />
                     <p>@Html.Raw(Utils.GetFilesList(item))</p>
-                </td>
-                <td>
-                    @Utils.GetTotalFileSize(item)
                 </td>
                 <td>
                     @if (item.Files.Any(x => x.Deleted == false))
@@ -63,8 +98,8 @@
                             <input type="submit" value="Delete Files" class="btn btn-warning" />
                         </form>
                     }
-            </td>
-        </tr>
-    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

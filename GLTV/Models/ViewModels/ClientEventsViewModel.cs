@@ -9,5 +9,6 @@ namespace GLTV.Models.ViewModels
     {
         public List<ClientEvent> ClientEvents { get; set; }
         public List<string> Sources { get; set; }
+        public List<ClientEvent> LastProgramClientEvents { get; set; }
     }
 }

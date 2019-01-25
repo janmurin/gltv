@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using GLTV.Models;
+using GLTV.Models.Objects;
 
 namespace GLTV.Data
 {
@@ -23,11 +24,11 @@ namespace GLTV.Data
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<GLTV.Models.TvItem> TvItem { get; set; }
+        public DbSet<TvItem> TvItem { get; set; }
 
-        public DbSet<GLTV.Models.TvItemFile> TvItemFile { get; set; }
+        public DbSet<TvItemFile> TvItemFile { get; set; }
 
-        public DbSet<GLTV.Models.TvItemLocation> TvItemLocation { get; set; }
+        public DbSet<TvItemLocation> TvItemLocation { get; set; }
 
         public DbSet<GLTV.Models.LogEvent> LogEvent { get; set; }
 

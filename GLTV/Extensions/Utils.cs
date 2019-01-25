@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GLTV.Extensions
@@ -50,6 +51,17 @@ namespace GLTV.Extensions
             new SelectListItem {Value = "" + (int)TvItemType.Video, Text = "Video"},
         };
 
+        public static long GetTotalFileSizeLong(TvItem item)
+        {
+            long size = 0;
+            foreach (TvItemFile itemFile in item.Files)
+            {
+                size += itemFile.Deleted ? 0 : itemFile.Length;
+            }
+
+            return size;
+        }
+
         public static string GetTotalFileSize(TvItem item)
         {
             long size = 0;
@@ -74,6 +86,23 @@ namespace GLTV.Extensions
         public static string GetFileSize(TvItemFile item)
         {
             long size = item.Length;
+
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            while (size >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                size = size / 1024;
+            }
+
+            // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
+            // show a single decimal place, and no space.
+            return String.Format("{0:0.##} {1}", size, sizes[order]);
+        }
+
+        public static string GetFileSize(long bytes)
+        {
+            long size = bytes;
 
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
             int order = 0;
@@ -118,6 +147,15 @@ namespace GLTV.Extensions
             return time.ToString(@"mm\:ss");
         }
 
+        public static string GetElapsedTime(DateTime timeStamp)
+        {
+            TimeSpan time = DateTime.Now-timeStamp;
+
+            //here backslash is must to tell that colon is
+            //not the part of format, it just a character that we want in output
+            return time.ToString(@"d' days 'h' h 'mm' m 'ss' s'");
+        }
+
         public static string GetStatusFormat(TvItem item)
         {
             if (DateTime.Compare(DateTime.Now, item.StartTime) < 0)
@@ -151,5 +189,16 @@ namespace GLTV.Extensions
 
             return time.ToString(@"h' h 'mm' m 'ss' s'");
         }
+
+        public static string MakeWebPath(string path, bool addSeperatorToBegin = false, bool addSeperatorToLast = false)
+        {
+            path = path.Replace("\\", "/");
+
+            if (addSeperatorToBegin) path = "/" + path;
+            if (addSeperatorToLast) path = path + "/";
+
+            return path;
+        }
+
     }
 }

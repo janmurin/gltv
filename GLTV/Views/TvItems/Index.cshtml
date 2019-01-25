@@ -1,5 +1,6 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using GLTV.Extensions
+@using GLTV.Models.Objects
 @model TvItemsViewModel
 
 @{
@@ -127,7 +128,9 @@
                 <td>
                     <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
                     <a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                    <a asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    <form asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">
+                        <input type="submit" value="Delete" class="btn btn-danger btn-sm" />
+                    </form>
                 </td>
             </tr>
         }

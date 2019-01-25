@@ -3,16 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Http;
 
 namespace GLTV.Services
 {
     public interface IFileService
     {
-        bool SaveVideoFile(TvItem tvItemId, IFormFile files);
-        bool DeleteFile(string filename);
-        bool DeleteFiles(List<TvItemFile> files);
+        Task<bool> SaveVideoFileAsync(TvItem tvItemId, IFormFile files);
+        Task<bool> ReplaceVideoFileAsync(TvItem tvItem, IFormFile file);
+        Task<bool> DeleteFileAsync(string filename);
+        Task<bool> DeleteFilesAsync(List<TvItemFile> files);
         byte[] GetBytes(string filename);
-        bool SaveImageFiles(TvItem item, List<IFormFile> modelFiles);
+        Task<bool> SaveImageFilesAsync(TvItem item, List<IFormFile> modelFiles);
+        Task<bool> ReplaceImageFileAsync(TvItem tvItem, IFormFile formFile);
+        Task<List<TvItemFile>> FindZombieFilesAsync();
+        Task<bool> DeleteZombieFileAsync(string filename);
     }
 }

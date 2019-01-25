@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using GLTV.Models.Objects;
 
 namespace GLTV.Models
 {
@@ -42,6 +43,8 @@ namespace GLTV.Models
         Exception = 5,
         ServerStartUp = 6,
         ServerShutdown = 7,
-        ItemDeleteFiles = 8
+        ItemDeleteFiles = 8,
+        ItemDeleteSingleFile = 9,
+        ItemDeleteZombieFile = 10
     }
 }
