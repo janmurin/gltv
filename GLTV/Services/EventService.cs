@@ -262,6 +262,15 @@ namespace GLTV.Services
                 else
                 {
                     screen.TotalNetworkUsage7Days += screen.LastActivity.Sum(x => x.TvItemFile.Length);
+
+                    // if more than 200 rows, pick only last 200
+                    if (screen.LastActivity.Count > 200)
+                    {
+                        screen.LastActivity = screen.LastActivity
+                            .Skip(0)
+                            .Take(200)
+                            .ToList();
+                    }
                 }
             });
 

@@ -55,26 +55,6 @@
 {
     <div id="tvscreen_@screen.ID" class="tv-detail @(selectedTvScreen?.ID == screen.ID ? "" :"hidden")">
         <h3>Log data for @Html.DisplayFor(modelItem => screen.IpAddress)</h3>
-        @*<form class="form-horizontal">
-            <div class="form-group">
-                <label class="col-sm-2" for="server">Server:</label>
-                <div class="col-sm-10">
-                    @Html.DisplayFor(modelItem => screen.IpAddress)
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="pwd">Description:</label>
-                <div class="col-sm-10">
-                    @Html.DisplayFor(modelItem => screen.Description)
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="pwd">Last Ping:</label>
-                <div class="col-sm-10">
-                    @Html.DisplayFor(modelItem => screen.LastHandshake) (@Utils.GetElapsedTime(screen.LastHandshake))
-                </div>
-            </div>
-        </form>*@
 
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#uptimes_@screen.ID">Uptime Log</a></li>
@@ -123,7 +103,8 @@
                 </table>
             </div>
             <div id="activity_@screen.ID" class="tab-pane fade">
-
+                
+                <h4>Last 200 requests</h4>
                 <form class="form-inline" style="padding: 10px;">
                     <div class="form-group">
                         <label>Filter by type:</label>
