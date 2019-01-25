@@ -30,10 +30,6 @@ namespace GLTV.Data
 
         public DbSet<TvItemLocation> TvItemLocation { get; set; }
 
-        public DbSet<LogEvent> LogEvent { get; set; }
-
-        public DbSet<ClientEvent> ClientEvent { get; set; }
-
         public DbSet<WebServerLog> WebServerLog { get; set; }
 
         public DbSet<WebClientLog> WebClientLog { get; set; }
