@@ -152,3 +152,15 @@ span.time-expired {
     padding: 0 20px 0 0;
     min-width: 0 !important;
 }
+
+#tvScreensTable tr:hover {
+    cursor: pointer;
+}
+
+#tvScreensTable tr.selected {
+    font-weight: bold;
+}
+
+#tvScreensTable tr.selected td {
+    background-color: aliceblue;
+}

@@ -62,17 +62,7 @@ namespace GLTV.Controllers
             return View(tvItems);
         }
 
-        public async Task<IActionResult> IndexClients()
-        {
-            List<WebClientLog> tvItems = await _eventService.FetchWebClientLogsAsync();
-            List<TvScreen> clientsLastProgramRequest = await _eventService.FetchClientsLastHandshakeAsync();
-
-            ClientEventsViewModel model = new ClientEventsViewModel();
-            model.ClientEvents = tvItems;
-            model.ActiveTvScreens = clientsLastProgramRequest;
-
-            return View(model);
-        }
+        
 
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)

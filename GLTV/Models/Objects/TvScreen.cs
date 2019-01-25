@@ -37,6 +37,9 @@ namespace GLTV.Models.Objects
         public List<TvScreenHandshake> ScreenHandshakes { get; set; }
 
         [NotMapped]
+        public List<WebClientLog> LastActivity { get; set; }
+
+        [NotMapped]
         public int TotalMinutesActive { get; set; }
 
         public override bool Equals(object obj)

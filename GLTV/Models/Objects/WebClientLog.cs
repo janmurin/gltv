@@ -11,6 +11,7 @@ namespace GLTV.Models.Objects
         public string Message { get; set; }
 
         public int? TvItemFileId { get; set; }
+        public int? TvScreenId { get; set; }
 
         [DataType(DataType.Text)]
         [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}", ApplyFormatInEditMode = true)]
@@ -27,10 +28,29 @@ namespace GLTV.Models.Objects
         public WebClientLogType Type { get; set; }
 
         public virtual TvItemFile TvItemFile { get; set; }
+        public virtual TvScreen TvScreen { get; set; }
 
         public override string ToString()
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+
+        public string GetFormattedMessage()
+        {
+            switch (Type)
+            {
+                case WebClientLogType.ProgramRequest:
+                    return "Program Request";
+                case WebClientLogType.ChatRequest:
+                    return "Chat Request";
+                case WebClientLogType.Exception:
+                    return Message;
+                case WebClientLogType.VideoRequest:
+                case WebClientLogType.ImageRequest:
+                    return $"Request for file {(TvItemFile != null ? TvItemFile.GetDetailHyperlink() : TvItemFileId?.ToString())}<br> from";
+                default:
+                    return "Unknown type";
+            }
         }
     }
 

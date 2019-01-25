@@ -187,39 +187,18 @@ namespace GLTV.Services
             return Task.CompletedTask;
         }
 
-        public Task<List<WebClientLog>> FetchWebClientLogsAsync()
-        {
-            List<WebClientLog> events = Context.WebClientLog
-                .Include(x => x.TvItemFile)
-                .Where(x => x.Type != WebClientLogType.ProgramRequest)
-                .OrderByDescending(x => x.TimeInserted)
-                .Skip(0)
-                .Take(200)
-                .ToList();
-
-            foreach (WebClientLog logEvent in events)
-            {
-                if (logEvent.Type == WebClientLogType.ImageRequest || logEvent.Type == WebClientLogType.VideoRequest)
-                {
-                    logEvent.Message = $"Request for file {logEvent.TvItemFile.GetDetailHyperlink()}";
-                }
-            }
-
-            return Task.FromResult(events);
-        }
-
-        public Task<List<TvScreen>> FetchClientsLastHandshakeAsync()
+        public Task<List<TvScreen>> FetchActiveScreensAsync()
         {
             List<TvScreenHandshake> handshakes = Context.TvScreenHandshake.ToList();
             List<TvScreen> screens = Context.TvScreen.ToList();
             List<TvScreen> activeScreens = new List<TvScreen>();
             screens.ForEach(screen =>
             {
-                Console.WriteLine($"screem: {screen}");
+                Console.WriteLine($"screen: {screen}");
                 // ignore inactive screens
                 if ((DateTime.Now - screen.LastHandshake).TotalDays < 30)
                 {
-                    screen.ScreenHandshakes = handshakes.Where(s => s.TvScreenId == screen.ID).ToList();
+                    screen.ScreenHandshakes = handshakes.Where(s => s.TvScreenId == screen.ID && s.Type == WebClientLogType.ProgramRequest).OrderByDescending(s => s.LastHandshake).ToList();
                     screen.TotalMinutesActive = (int)screen.ScreenHandshakes.Sum(s => (s.LastHandshake - s.FirstHandshake).TotalMinutes);
 
                     // ignore screens with low activity
@@ -230,8 +209,24 @@ namespace GLTV.Services
                     }
                 }
             });
-
             Console.WriteLine("active screen Counts: " + activeScreens.Count);
+
+            // for each screen fetch last 200 client requests
+            List<int> ids = activeScreens.Select(x => x.ID).ToList();
+            List<WebClientLog> clientLogs = Context.WebClientLog
+                .Include(x => x.TvItemFile)
+                .Where(x => x.TvScreenId != null && ids.Contains((int)x.TvScreenId))
+                .ToList();
+
+            activeScreens.ForEach(screen =>
+            {
+                screen.LastActivity = clientLogs
+                    .Where(x => x.TvScreenId == screen.ID)
+                    .OrderByDescending(log => log.TimeInserted)
+                    .Skip(0)
+                    .Take(200)
+                    .ToList();
+            });
 
             return Task.FromResult(activeScreens);
 
@@ -420,6 +415,7 @@ namespace GLTV.Services
                     Source = x.Source,
                     TimeInserted = x.TimeInserted,
                     TvItemFileId = x.TvItemFileId,
+                    TvScreenId = KnownTvScreens.FirstOrDefault(y => y.IpAddress.Equals(x.Source))?.ID,
                     Type = (int)x.Type == (int)WebClientLogType.VideoRequest ? WebClientLogType.VideoRequest : WebClientLogType.ImageRequest
                 };
                 Context.Add(wcl);

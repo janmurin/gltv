@@ -178,7 +178,7 @@ namespace GLTV.Extensions
             return "<span class=\"time-expired\">EXPIRED</span>";
         }
 
-        private static string GetRemainingTime(DateTime now, DateTime destTime)
+        public static string GetRemainingTime(DateTime now, DateTime destTime)
         {
             TimeSpan time = TimeSpan.FromSeconds((destTime - now).TotalSeconds);
 
