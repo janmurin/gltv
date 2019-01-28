@@ -488,6 +488,11 @@ namespace GLTV.Services
 
             //Console.WriteLine("Migration done successfully. Drop tables ClientEvent and LogEvent.");
 
+            //Manual cleanup of WebClientLog table
+            //select TvScreenId, Type, count(*) as Count from WebClientLog group by TvScreenId, Type order by Count desc
+
+            //select* from WebClientLog where TvScreenId in (2, 4, 5) and TimeInserted<'2019-01-01 00:00:00.000' and Type in (2, 3)
+
             return Task.CompletedTask;
         }
     }
