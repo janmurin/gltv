@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Models;
 using GLTV.Models.Objects;
@@ -30,9 +31,18 @@ namespace GLTV.Extensions
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
 
-                string ipAddress = context.Connection.RemoteIpAddress.ToString();
-                ipAddress = ipAddress ?? context.Request.Headers["X-Forwarded-For"].ToString();
-                ipAddress = ipAddress ?? "UNKNOWN";
+                string ipAddress = "UNKNOWN";
+                String remoteIp = context.Connection.RemoteIpAddress.ToString();
+                String headerIp = context.Request.Headers["X-Forwarded-For"].ToString();
+                if (!String.IsNullOrEmpty(headerIp))
+                {
+                    ipAddress = headerIp;
+                }
+                else if (!String.IsNullOrEmpty(remoteIp))
+                {
+                    ipAddress = remoteIp;
+                }
+                Console.WriteLine($"file request intercepted: RemoteIpAddress={remoteIp}, X-Forwarded-For={headerIp}, final ipAddress={ipAddress}");
 
                 await eventService.AddFileRequestEventAsync(ipAddress, filename);
             }

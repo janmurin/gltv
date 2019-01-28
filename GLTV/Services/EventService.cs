@@ -93,7 +93,7 @@ namespace GLTV.Services
 
                 Context.Add(wcl);
                 Context.SaveChanges();
-                Console.WriteLine("adding file request for file: " + wcl);
+                Console.WriteLine($"adding file request from ip {sourceIp} for file: " + wcl);
             }
             else
             {
