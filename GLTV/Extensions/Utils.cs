@@ -161,7 +161,7 @@ namespace GLTV.Extensions
 
         public static string GetElapsedTime(DateTime timeStamp)
         {
-            TimeSpan time = DateTime.Now-timeStamp;
+            TimeSpan time = DateTime.Now - timeStamp;
 
             //here backslash is must to tell that colon is
             //not the part of format, it just a character that we want in output

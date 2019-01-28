@@ -40,7 +40,7 @@
                     @Html.DisplayFor(modelItem => screen.Description)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => screen.LastHandshake) <br/>(@Utils.GetElapsedTime(screen.LastHandshake))
+                    @Html.DisplayFor(modelItem => screen.LastHandshake) <br />@Html.Raw(screen.GetLastActiveFormatted(screen.LastHandshake))
                 </td>
                 <td>
                     <p><label>Uptime: </label>&nbsp;@screen.GetLast7DaysUptimeFormatted()</p>

@@ -92,5 +92,27 @@ namespace GLTV.Models.Objects
 
             return $"<span style=\"color: green;\">{Utils.GetFileSize(dailyUsage)} a day</span>";
         }
+
+        public string GetLastActiveFormatted(DateTime lastActive)
+        {
+            TimeSpan time = DateTime.Now - lastActive;
+
+            if (Math.Abs(time.TotalSeconds) > 3600 * 24)
+            {
+                return time.ToString(@"d' days'");
+            }
+
+            if (Math.Abs(time.TotalSeconds) > 3600)
+            {
+                return time.ToString(@"h' hours'");
+            }
+
+            if (Math.Abs(time.TotalSeconds) > 60)
+            {
+                return time.ToString(@"m' minutes'");
+            }
+
+            return $"<span style=\"color: green;\">active</span>";
+        }
     }
 }

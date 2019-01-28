@@ -42,7 +42,7 @@ namespace GLTV.Extensions
                 {
                     ipAddress = remoteIp;
                 }
-                Console.WriteLine($"file request intercepted: RemoteIpAddress={remoteIp}, X-Forwarded-For={headerIp}, final ipAddress={ipAddress}");
+                //Console.WriteLine($"file request intercepted: RemoteIpAddress={remoteIp}, X-Forwarded-For={headerIp}, final ipAddress={ipAddress}");
 
                 await eventService.AddFileRequestEventAsync(ipAddress, filename);
             }
