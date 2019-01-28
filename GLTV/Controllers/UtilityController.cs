@@ -9,6 +9,7 @@ using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace GLTV.Controllers
 {
@@ -20,13 +21,15 @@ namespace GLTV.Controllers
         private readonly ITvItemService _tvItemService;
         private readonly IEmailSender _emailSender;
         private readonly IEventService _eventService;
+        private readonly IConfiguration _configuration;
 
-        public UtilityController(IFileService fileService, ITvItemService tvItemService, IEmailSender emailSender, IEventService eventService)
+        public UtilityController(IFileService fileService, ITvItemService tvItemService, IEmailSender emailSender, IEventService eventService, IConfiguration configuration)
         {
             _fileService = fileService;
             _tvItemService = tvItemService;
             _emailSender = emailSender;
             _eventService = eventService;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> ActiveScreens()
@@ -45,6 +48,15 @@ namespace GLTV.Controllers
             List<WebServerLog> tvItems = await _eventService.FetchWebServerActivitiesAsync();
 
             return View(tvItems);
+        }
+
+        public async Task<IActionResult> Help()
+        {
+            HelpViewModel viewModel = new HelpViewModel();
+            viewModel.allowedEmails = _configuration.GetSection("AllowedEmails").Get<string[]>();
+            viewModel.serverAdmin = _configuration.GetSection("ServerAdmin").Value;
+
+            return View(viewModel);
         }
 
         public async Task<IActionResult> DeletedItems()

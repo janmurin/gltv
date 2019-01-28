@@ -1,0 +1,37 @@
+﻿@model GLTV.Models.ViewModels.HelpViewModel
+
+@{
+    ViewData["Title"] = "Help";
+    ViewBag.HelpNav = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Help</h2>
+
+<table class="table" id="helpItemsTable">
+    <thead>
+    <tr>
+        <th>
+            Key
+        </th>
+        <th>
+            Value
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><label>Server Admin:</label></td>
+            <td>@Model.serverAdmin</td>
+        </tr>
+        <tr>
+            <td><label>Allowed Users:</label></td>
+            <td>
+                @foreach (var item in Model.allowedEmails)
+                {
+                    <p>@item</p>
+                }
+            </td>
+        </tr>
+    </tbody>
+</table>
