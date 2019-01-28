@@ -95,7 +95,11 @@ namespace GLTV
                     .RequireAuthenticatedUser()
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
-            });
+            })
+                .AddSessionStateTempDataProvider();
+
+            services.AddSession();
+
             services.Configure<FormOptions>(x =>
             {
                 x.ValueLengthLimit = Constants.MULTIPART_BODY_LENGTH_LIMIT;
@@ -139,7 +143,7 @@ namespace GLTV
             });
 
             app.UseAuthentication();
-
+            app.UseSession();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

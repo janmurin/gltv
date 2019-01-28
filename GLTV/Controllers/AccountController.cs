@@ -42,9 +42,6 @@ namespace GLTV.Controllers
             _allowedEmails = configuration.GetSection("AllowedEmails").Get<string[]>();
         }
 
-        [TempData]
-        public string ErrorMessage { get; set; }
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = null)
@@ -53,7 +50,6 @@ namespace GLTV.Controllers
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ViewData["ReturnUrl"] = returnUrl;
-            ViewData["ErrorMessage"] = ErrorMessage;
             return View();
         }
 
@@ -90,7 +86,7 @@ namespace GLTV.Controllers
         {
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
+                TempData["ErrorMessage"] = $"Error from external provider: {remoteError}";
                 return RedirectToAction(nameof(Login));
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -120,7 +116,7 @@ namespace GLTV.Controllers
                 // create user account.
                 if (!_allowedEmails.Contains(email))
                 {
-                    ErrorMessage = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
+                    TempData["ErrorMessage"] = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
                     return RedirectToAction(nameof(Login));
                 }
 

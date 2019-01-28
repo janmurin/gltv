@@ -1,7 +1,7 @@
 ﻿@inject SignInManager<ApplicationUser> SignInManager
 @{
     Layout = null;
-    string error = (string)ViewData["ErrorMessage"];
+    string error = (string)TempData["ErrorMessage"];
     var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 }
 
