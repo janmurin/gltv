@@ -196,7 +196,7 @@ namespace GLTV.Services
 
             screens.ForEach(screen =>
             {
-                Console.WriteLine($"screen: {screen}");
+                //Console.WriteLine($"screen: {screen}");
                 // ignore inactive screens
                 if ((DateTime.Now - screen.LastHandshake).TotalDays < 30)
                 {
@@ -208,7 +208,7 @@ namespace GLTV.Services
                     screen.TotalMinutesActive = (int)screen.ScreenHandshakes.Sum(s => (s.LastHandshake - s.FirstHandshake).TotalMinutes);
 
                     // ignore screens with low activity
-                    Console.WriteLine($"total minutes: {screen.TotalMinutesActive}, total handshakes: {screen.ScreenHandshakes.Count}");
+                    //Console.WriteLine($"total minutes: {screen.TotalMinutesActive}, total handshakes: {screen.ScreenHandshakes.Count}");
                     if (screen.TotalMinutesActive > 24 * 60 || screen.ScreenHandshakes.Count > 10)
                     {
                         // calculate sum of minutes active for the last 7 days

@@ -76,7 +76,15 @@ namespace GLTV.Models.Objects
 
         public string GetTotalNetworkUsage7DaysFormatted()
         {
-            long dailyUsage = TotalNetworkUsage7Days / 7;
+            long dailyUsage = 0;
+            if (TotalNetworkUsage7Days == 0 || TotalMinutesActiveLast7days == 0)
+            {
+                dailyUsage = 0;
+            }
+            else
+            {
+                dailyUsage = (long)(TotalNetworkUsage7Days / (TotalMinutesActiveLast7days / (60.0 * 24)));
+            }
             if (dailyUsage > 1024 * 1024 * 1024)
             {
                 return $"<span style=\"color: red;\">{Utils.GetFileSize(dailyUsage)} a day</span>";
