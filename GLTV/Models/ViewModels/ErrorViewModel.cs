@@ -1,5 +1,3 @@
-using System;
-
 namespace GLTV.Models
 {
     public class ErrorViewModel

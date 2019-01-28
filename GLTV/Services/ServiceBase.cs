@@ -5,7 +5,6 @@ using GLTV.Data;
 using GLTV.Models;
 using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace GLTV.Services
 {

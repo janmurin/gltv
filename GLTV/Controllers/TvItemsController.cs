@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GLTV.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
 using GLTV.Models.Objects;
-using GLTV.Models.ViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Internal;
 
 
 namespace GLTV.Controllers
@@ -45,25 +42,7 @@ namespace GLTV.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> IndexDeleted()
-        {
-            DeletedViewModel model = new DeletedViewModel();
-            model.TvItems = await _tvItemService.FetchTvItemsAsync(true);
-            model.ZombieFiles = await _fileService.FindZombieFilesAsync();
-            model.TotalUndeletedFileSize = model.TvItems.Sum(x => Utils.GetTotalFileSizeLong(x));
-
-            return View(model);
-        }
-
-        public async Task<IActionResult> IndexLogs()
-        {
-            List<WebServerLog> tvItems = await _eventService.FetchWebServerActivitiesAsync();
-
-            return View(tvItems);
-        }
-
-        
-
+       
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -229,21 +208,6 @@ namespace GLTV.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost, ActionName("DeleteFiles")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteFiles(int id)
-        {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
-
-            bool success = await _fileService.DeleteFilesAsync(item.Files);
-            if (success)
-            {
-                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteFiles, "", id);
-            }
-
-            return RedirectToAction(nameof(IndexDeleted));
-        }
-
         [HttpPost, ActionName("DeleteFile")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteFile(int id)
@@ -274,24 +238,6 @@ namespace GLTV.Controllers
             await _tvItemService.UpdateTvItemAsync(item);
 
             return RedirectToAction(nameof(Edit), new { id = item.ID });
-        }
-
-        [HttpPost, ActionName("DeleteZombieFile")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteZombieFile([FromForm]string fileName)
-        {
-            bool success = await _fileService.DeleteZombieFileAsync(fileName);
-            if (success)
-            {
-                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);
-            }
-            else
-            {
-                // if file deletion is not successful, it will stay in the file system as a zombie file
-                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.Exception, $"User NOT SUCCESSFULLY deleted zombie file[{fileName}].", null);
-            }
-
-            return RedirectToAction(nameof(IndexDeleted));
         }
 
         [HttpPost]

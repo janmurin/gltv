@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 using GLTV.Extensions;
-using Newtonsoft.Json.Serialization;
 
 namespace GLTV.Models.Objects
 {

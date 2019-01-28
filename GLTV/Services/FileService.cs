@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,11 +7,9 @@ using GLTV.Data;
 using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Models.Objects;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using SixLabors.ImageSharp;
-using Xabe.FFmpeg;
 
 namespace GLTV.Services
 {
@@ -276,9 +273,9 @@ namespace GLTV.Services
 
         public Task<bool> DeleteFilesAsync(List<TvItemFile> files)
         {
+            Console.WriteLine("deleting files: " + String.Join(", ", files.Select(x => x.FileName)));
             foreach (TvItemFile file in files)
             {
-                Console.WriteLine("deleting files: " + String.Join(", ", files.Select(x => x.FileName)));
                 try
                 {
                     if (File.Exists(file.AbsolutePath))

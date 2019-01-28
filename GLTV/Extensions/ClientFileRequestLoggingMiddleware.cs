@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GLTV.Data;
-using GLTV.Models;
-using GLTV.Models.Objects;
-using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 

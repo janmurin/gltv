@@ -80,9 +80,9 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li class="@(ViewBag.IndexNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="TvItems" asp-action="Index">TV Items</a></li>
-                    <li class="@(ViewBag.DeletedNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="TvItems" asp-action="IndexDeleted">Deleted TV Items</a></li>
-                    <li class="@(ViewBag.LogNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="TvItems" asp-action="IndexLogs">Log</a></li>
-                    <li class="@(ViewBag.ClientNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="ClientActivity" asp-action="Index">Active Screens</a></li>
+                    <li class="@(ViewBag.DeletedNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="Utility" asp-action="DeletedItems">Deleted TV Items</a></li>
+                    <li class="@(ViewBag.LogNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="Utility" asp-action="ServerLog">Server Log</a></li>
+                    <li class="@(ViewBag.ClientNav == true ? "active-underline" : "")"><a asp-area="" asp-controller="Utility" asp-action="ActiveScreens">Active Screens</a></li>
                     @*<li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
         <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>*@
                 </ul>
