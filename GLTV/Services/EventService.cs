@@ -88,6 +88,7 @@ namespace GLTV.Services
                     Source = sourceIp,
                     TimeInserted = DateTime.Now,
                     TvItemFileId = itemFile.ID,
+                    TvScreenId = KnownTvScreens.FirstOrDefault(x => x.IpAddress.Equals(sourceIp))?.ID,
                     Type = itemFile.IsVideoFile() ? WebClientLogType.VideoRequest : WebClientLogType.ImageRequest
                 };
 
@@ -122,15 +123,16 @@ namespace GLTV.Services
 
             DateTime now = DateTime.Now;
 
-            // find/add known screen according to ip and location and update lastHandshake
-            TvScreen knownScreen = KnownTvScreens.FirstOrDefault(x => x.Location.Equals(location) && x.IpAddress.Equals(sourceIp));
+            // find/add known screen according to ip and update lastHandshake
+            TvScreen knownScreen = KnownTvScreens.FirstOrDefault(x => x.IpAddress.Equals(sourceIp));
             if (knownScreen == null)
             {
                 knownScreen = new TvScreen()
                 {
                     Location = location,
                     LastHandshake = now,
-                    IpAddress = sourceIp
+                    IpAddress = sourceIp,
+                    Description = "located at " + location
                 };
                 Console.WriteLine("adding new known screen: " + knownScreen);
                 Context.Add(knownScreen);
@@ -138,6 +140,12 @@ namespace GLTV.Services
             else
             {
                 knownScreen.LastHandshake = now;
+                if (knownScreen.Location != location)
+                {
+                    // very rare and improbable case
+                    Console.WriteLine($"CHANGING LOCATION FOR {knownScreen.IpAddress} FROM {knownScreen.Location} TO {location}.");
+                    knownScreen.Location = location;
+                }
             }
 
             var activeScreens = Context.TvScreenHandshake
