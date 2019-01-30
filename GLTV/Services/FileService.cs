@@ -68,8 +68,8 @@ namespace GLTV.Services
             TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
             if (tvItemFile != null)
             {
-                bool success = DeleteFileAsync(tvItemFile.FileName).Result;
-                // if not successfull delete, then new zombie file 
+                bool success = DeletePhysicalFileAsync(tvItemFile.FileName).Result;
+                // if not successful delete, then new zombie file 
 
                 tvItemFile.FileName = newItemFile.FileName;
                 tvItemFile.Length = newItemFile.Length;
@@ -192,7 +192,7 @@ namespace GLTV.Services
             TvItemFile tvItemFile = tvItem.Files.FirstOrDefault();
             if (tvItemFile != null)
             {
-                bool success = DeleteFileAsync(tvItemFile.FileName).Result;
+                bool success = DeletePhysicalFileAsync(tvItemFile.FileName).Result;
                 // if not successfull delete, then new zombie file 
 
                 tvItemFile.FileName = newItemFile.FileName;
@@ -228,33 +228,15 @@ namespace GLTV.Services
             return Task.FromResult(zombieFiles);
         }
 
-        public Task<bool> DeleteFileAsync(string filename)
-        {
-            TvItemFile tvItemFile = Context.TvItemFile.SingleOrDefault(m => m.FileName.Equals(filename));
-            if (tvItemFile == null)
-            {
-                throw new Exception($"TvItemFile not found with filename[{filename}].");
-            }
-
-            try
-            {
-                if (File.Exists(tvItemFile.AbsolutePath))
-                {
-                    File.Delete(tvItemFile.AbsolutePath);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return Task.FromResult(false);
-            }
-
-            return Task.FromResult(true);
-        }
-
-        public Task<bool> DeleteZombieFileAsync(string filename)
+        /// <summary>
+        /// Removing specific file. If the file does not exist, then it is still a success.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public Task<bool> DeletePhysicalFileAsync(string filename)
         {
             TvItemFile file = new TvItemFile() { FileName = filename };
+
             try
             {
                 if (File.Exists(file.AbsolutePath))
@@ -269,38 +251,6 @@ namespace GLTV.Services
             }
 
             return Task.FromResult(true);
-        }
-
-        public Task<bool> DeleteFilesAsync(List<TvItemFile> files)
-        {
-            Console.WriteLine("deleting files: " + String.Join(", ", files.Select(x => x.FileName)));
-            foreach (TvItemFile file in files)
-            {
-                try
-                {
-                    if (File.Exists(file.AbsolutePath))
-                    {
-                        File.Delete(file.AbsolutePath);
-                    }
-
-                    file.Deleted = true;
-                    Context.TvItemFile.Update(file);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    //throw;
-                }
-            }
-
-            Context.SaveChanges();
-
-            return Task.FromResult(true);
-        }
-
-        public byte[] GetBytes(string filename)
-        {
-            throw new NotImplementedException();
         }
     }
 }

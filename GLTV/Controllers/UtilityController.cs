@@ -73,13 +73,8 @@ namespace GLTV.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteFiles(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
-
-            bool success = await _fileService.DeleteFilesAsync(item.Files);
-            if (success)
-            {
-                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteFiles, "", id);
-            }
+            await _tvItemService.DeleteTvItemFilesAsync(id);
+            await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteFiles, "", id);
 
             return RedirectToAction(nameof(DeletedItems));
         }
@@ -88,7 +83,7 @@ namespace GLTV.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteZombieFile([FromForm]string fileName)
         {
-            bool success = await _fileService.DeleteZombieFileAsync(fileName);
+            bool success = await _fileService.DeletePhysicalFileAsync(fileName);
             if (success)
             {
                 await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);

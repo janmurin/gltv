@@ -41,8 +41,7 @@ namespace GLTV.Controllers
 
             return View(model);
         }
-
-       
+        
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -202,7 +201,6 @@ namespace GLTV.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _tvItemService.DeleteTvItemAsync(id);
-
             await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDelete, "", id);
 
             return RedirectToAction(nameof(Index));
@@ -215,27 +213,12 @@ namespace GLTV.Controllers
             TvItemFile itemFile = await _tvItemService.FetchTvItemFileAsync(id);
             TvItem item = await _tvItemService.FetchTvItemAsync(itemFile.TvItemId);
 
-            bool success = await _fileService.DeleteFileAsync(itemFile.FileName);
-            if (success)
-            {
-                await _eventService.AddWebServerLogAsync(
+            await _tvItemService.DeleteTvItemFileAsync(id);
+            await _eventService.AddWebServerLogAsync(
                     User.Identity.Name,
                     WebServerLogType.ItemDeleteSingleFile,
                     $"User deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
                     item.ID);
-            }
-            else
-            {
-                // if file deletion is not successful, it will stay in the file system as a zombie file
-                await _eventService.AddWebServerLogAsync(
-                    User.Identity.Name,
-                    WebServerLogType.Exception,
-                    $"User NOT SUCCESSFULLY deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
-                    item.ID);
-            }
-
-            item.Files.Remove(itemFile);
-            await _tvItemService.UpdateTvItemAsync(item);
 
             return RedirectToAction(nameof(Edit), new { id = item.ID });
         }

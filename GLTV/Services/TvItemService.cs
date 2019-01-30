@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GLTV.Data;
 using GLTV.Models;
 using GLTV.Models.Objects;
+using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +13,12 @@ namespace GLTV.Services
 {
     public class TvItemService : ServiceBase, ITvItemService
     {
-        public TvItemService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+        private readonly IFileService _fileService;
+
+        public TvItemService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager, IFileService fileService)
             : base(context, signInManager)
         {
+            _fileService = fileService;
         }
 
         public Task<TvItem> FetchTvItemAsync(int id)
@@ -30,22 +34,6 @@ namespace GLTV.Services
             }
 
             return Task.FromResult(tvItem);
-        }
-
-        public Task<bool> DeleteTvItemAsync(int id)
-        {
-            var tvItem = Context.TvItem.SingleOrDefault(m => m.ID == id);
-            if (tvItem == null)
-            {
-                throw new Exception($"Item not found with id {id}.");
-            }
-
-            // items are never actually deleted
-            tvItem.Deleted = true;
-
-            Context.SaveChanges();
-
-            return Task.FromResult(true);
         }
 
         public Task<List<TvItem>> FetchTvItemsAsync(bool deleted)
@@ -93,7 +81,7 @@ namespace GLTV.Services
         public Task<TvItemFile> FetchTvItemFileAsync(string filename)
         {
             TvItemFile itemFile = Context.TvItemFile.FirstOrDefault(x => x.FileName.Equals(filename));
-            
+
             return Task.FromResult(itemFile);
         }
 
@@ -107,5 +95,53 @@ namespace GLTV.Services
 
             return Task.FromResult(itemFile);
         }
+
+        public Task DeleteTvItemAsync(int tvItemId)
+        {
+            var tvItem = FetchTvItemAsync(tvItemId).Result;
+
+            // items are never actually deleted
+            tvItem.Deleted = true;
+            Context.TvItem.Update(tvItem);
+            Context.SaveChanges();
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteTvItemFileAsync(int fileId)
+        {
+            TvItemFile tvItemFile = Context.TvItemFile.SingleOrDefault(m => m.ID == fileId);
+            if (tvItemFile == null)
+            {
+                throw new Exception($"Item not found with id {fileId}.");
+            }
+            Console.WriteLine($"deleting file: {tvItemFile.FileName}");
+
+            _fileService.DeletePhysicalFileAsync(tvItemFile.AbsolutePath);
+            tvItemFile.Deleted = true;
+
+            Context.TvItemFile.Update(tvItemFile);
+            Context.SaveChanges();
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteTvItemFilesAsync(int tvItemId)
+        {
+            TvItem tvItem = FetchTvItemAsync(tvItemId).Result;
+            Console.WriteLine("deleting files: " + String.Join(", ", tvItem.Files.Select(x => x.FileName)));
+
+            foreach (TvItemFile file in tvItem.Files)
+            {
+                _fileService.DeletePhysicalFileAsync(file.AbsolutePath);
+                file.Deleted = true;
+                Context.TvItemFile.Update(file);
+            }
+
+            Context.SaveChanges();
+
+            return Task.CompletedTask;
+        }
+
     }
 }
