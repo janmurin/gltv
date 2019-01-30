@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Net;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -45,6 +47,14 @@ namespace GLTV
             {
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                googleOptions.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
+                googleOptions.ClaimActions.Clear();
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "given_name");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Surname, "family_name");
+                googleOptions.ClaimActions.MapJsonKey("urn:google:profile", "link");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
             });
 
             Constants.ANDROID_TOKEN = Configuration["androidToken"];
