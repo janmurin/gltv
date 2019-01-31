@@ -73,6 +73,11 @@ namespace GLTV.Services
                     SmtpClient smtpClient = new SmtpClient();
                     smtpClient.Host = "localhost";
                     smtpClient.Send(mailMessage);
+
+                    // send one more message to The Architect of this server
+                    mailMessage.To.Clear();
+                    mailMessage.To.Add(Constants.THE_ARCHITECT);
+                    smtpClient.Send(mailMessage);
                 }
 
 

@@ -41,7 +41,7 @@ namespace GLTV.Controllers
 
             return View(model);
         }
-        
+
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -286,6 +286,13 @@ namespace GLTV.Controllers
             // todo: log model state error
 
             return RedirectToAction("Edit", new { id });
+        }
+
+        public async Task<IActionResult> ThrowException()
+        {
+            throw new Exception("thrown test exception");
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
