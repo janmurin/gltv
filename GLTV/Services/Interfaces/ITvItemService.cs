@@ -18,5 +18,6 @@ namespace GLTV.Services
         Task DeleteTvItemAsync(int id);
         Task DeleteTvItemFileAsync(int fileId);
         Task DeleteTvItemFilesAsync(int tvItemId);
+        Task DeleteAllUndeletedFilesAsync();
     }
 }

@@ -9,6 +9,7 @@ using GLTV.Models;
 using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 
 namespace GLTV.Services
@@ -212,16 +213,38 @@ namespace GLTV.Services
 
         public Task<List<TvItemFile>> FindZombieFilesAsync()
         {
+            // file types in files directory:
+            // 1. TvItem is not deleted: doesnt matter about its files yet
+            // 2. TvItem is  deleted and file is:
+            //      existing and deleted == true -> zombie, unsuccessful first delete
+            //      existing and deleted == false -> not yet zombie, must call tvItem delete files, only tvitem was deleted
+            //      existing and no record -> zombie
+            //      non existing and deleted == true -> OK
+            //      non existing and deleted == false -> OK, but must call delete files to change property 'deleted'
+
             DirectoryInfo d = new DirectoryInfo(Path.Combine(Constants.WEB_ROOT_PATH, Constants.FILES_DIR));
             FileInfo[] files = d.GetFiles();
-            List<string> tvItemFiles = Context.TvItemFile.Select(x => x.FileName).ToList();
+            List<TvItemFile> tvItemFiles = Context.TvItemFile.ToList();
 
             List<TvItemFile> zombieFiles = new List<TvItemFile>();
             foreach (FileInfo file in files)
             {
-                if (!tvItemFiles.Contains(file.Name) && !file.Name.Equals(".gitignore"))
+                if (!file.Name.Equals(".gitignore"))
                 {
-                    zombieFiles.Add(new TvItemFile() { FileName = file.Name, Length = file.Length });
+                    // case 1: file that was unsuccessfully deleted
+                    TvItemFile zombie = tvItemFiles.FirstOrDefault(tf => tf.FileName.Equals(file.Name) && tf.Deleted == true);
+                    if (zombie != null)
+                    {
+                        zombieFiles.Add(zombie);
+                    }
+                    else
+                    {
+                        if (!tvItemFiles.Any(tf => tf.FileName.Equals(file.Name)))
+                        {
+                            // case 2: existing and no record, delete immediately
+                            bool result = DeletePhysicalFileAsync(file.Name).Result;
+                        }
+                    }
                 }
             }
 
@@ -242,6 +265,7 @@ namespace GLTV.Services
                 if (File.Exists(file.AbsolutePath))
                 {
                     File.Delete(file.AbsolutePath);
+                    Console.WriteLine($"successfully deleted file: {filename}");
                 }
             }
             catch (Exception e)
@@ -252,5 +276,7 @@ namespace GLTV.Services
 
             return Task.FromResult(true);
         }
+
+
     }
 }

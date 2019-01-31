@@ -96,5 +96,13 @@ namespace GLTV.Controllers
 
             return RedirectToAction(nameof(DeletedItems));
         }
+
+        public async Task<IActionResult> DeleteAllUndeletedFiles()
+        {
+            await _tvItemService.DeleteAllUndeletedFilesAsync();
+            await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDeleteAllUndeletedFiles, $"User deleted all undeleted files.", null);
+
+            return RedirectToAction(nameof(DeletedItems));
+        }
     }
 }

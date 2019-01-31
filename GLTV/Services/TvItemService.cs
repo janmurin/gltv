@@ -162,5 +162,33 @@ namespace GLTV.Services
             return Task.CompletedTask;
         }
 
+        public Task DeleteAllUndeletedFilesAsync()
+        {
+            // get all items which are deleted
+            List<TvItem> tvItems = Context.TvItem
+                .Include(x => x.Files)
+                .Include(y => y.Locations)
+                .Where(x => x.Deleted == true)
+                .ToList();
+
+            List<TvItemFile> toDeleteFiles = new List<TvItemFile>();
+            tvItems.ForEach(tv =>
+            {
+                // from deleted items get all files which are not deleted
+                toDeleteFiles.AddRange(tv.Files.Where(f => f.Deleted == false).ToList());
+            });
+
+            toDeleteFiles.ForEach(f =>
+            {
+                _fileService.DeletePhysicalFileAsync(f.AbsolutePath);
+                f.Deleted = true;
+
+                Context.TvItemFile.Update(f);
+            });
+
+            Context.SaveChanges();
+
+            return Task.CompletedTask;
+        }
     }
 }

@@ -47,6 +47,12 @@
 
 <h2>Deleted Tv Items</h2>
 <h4>Total undeleted files size: @Utils.GetFileSize(Model.TotalUndeletedFileSize)</h4>
+@if (Model.TotalUndeletedFileSize > 0)
+{
+    <form asp-controller="Utility" asp-action="DeleteAllUndeletedFiles">
+        <input type="submit" value="Delete All" class="btn btn-danger" />
+    </form>
+}
 
 <table class="table deleted-items-table">
     <thead>
