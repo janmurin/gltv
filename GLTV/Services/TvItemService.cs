@@ -50,6 +50,7 @@ namespace GLTV.Services
                 .Include(y => y.Locations)
                 .Where(x => x.Deleted == deleted)
                 .OrderByDescending(x => x.TimeInserted)
+                .AsNoTracking()
                 .ToList();
 
             tvItems.ForEach(tv =>
@@ -84,6 +85,7 @@ namespace GLTV.Services
                 .Include(y => y.Locations)
                 .Where(x => x.Deleted == false && x.Locations.Select(y => y.Location).Contains(location))
                 .OrderByDescending(x => x.TimeInserted)
+                .AsNoTracking()
                 .ToList();
 
             tvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();

@@ -219,7 +219,7 @@ namespace GLTV.Services
             List<TvItemFile> zombieFiles = new List<TvItemFile>();
             foreach (FileInfo file in files)
             {
-                if (!tvItemFiles.Contains(file.Name))
+                if (!tvItemFiles.Contains(file.Name) && !file.Name.Equals(".gitignore"))
                 {
                     zombieFiles.Add(new TvItemFile() { FileName = file.Name, Length = file.Length });
                 }
