@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using GLTV.Models;
 using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -104,7 +101,7 @@ namespace GLTV.Extensions
         {
             long size = bytes;
 
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            string[] sizes = { "B", "KiB", "MiB", "GiB", "TiB" };
             int order = 0;
             while (size >= 1024 && order < sizes.Length - 1)
             {
@@ -147,9 +144,21 @@ namespace GLTV.Extensions
             return time.ToString(@"mm\:ss");
         }
 
+        public static string GetFormattedDuration(int minutesActive)
+        {
+            TimeSpan time = TimeSpan.FromMinutes(minutesActive);
+
+            if (Math.Abs(time.TotalSeconds) > 3600 * 24)
+            {
+                return time.ToString(@"d' days '");
+            }
+
+            return time.ToString(@"h' h 'mm' m 'ss' s'");
+        }
+
         public static string GetElapsedTime(DateTime timeStamp)
         {
-            TimeSpan time = DateTime.Now-timeStamp;
+            TimeSpan time = DateTime.Now - timeStamp;
 
             //here backslash is must to tell that colon is
             //not the part of format, it just a character that we want in output
@@ -178,7 +187,7 @@ namespace GLTV.Extensions
             return "<span class=\"time-expired\">EXPIRED</span>";
         }
 
-        private static string GetRemainingTime(DateTime now, DateTime destTime)
+        public static string GetRemainingTime(DateTime now, DateTime destTime)
         {
             TimeSpan time = TimeSpan.FromSeconds((destTime - now).TotalSeconds);
 

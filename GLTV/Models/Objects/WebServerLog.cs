@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using GLTV.Models.Objects;
 
 namespace GLTV.Models
 {
-    public class LogEvent
+    public class WebServerLog
     {
         public int ID { get; set; }
 
@@ -28,12 +25,17 @@ namespace GLTV.Models
 
         [StringLength(100, MinimumLength = 3)]
         [Required]
-        public LogEventType Type { get; set; }
+        public WebServerLogType Type { get; set; }
 
         public virtual TvItem TvItem { get; set; }
+
+        public override string ToString()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
     }
 
-    public enum LogEventType
+    public enum WebServerLogType
     {
         ItemInsert = 0,
         ItemUpdate = 1,
@@ -45,6 +47,7 @@ namespace GLTV.Models
         ServerShutdown = 7,
         ItemDeleteFiles = 8,
         ItemDeleteSingleFile = 9,
-        ItemDeleteZombieFile = 10
+        ItemDeleteZombieFile = 10,
+        ItemDeleteAllUndeletedFiles = 11
     }
 }

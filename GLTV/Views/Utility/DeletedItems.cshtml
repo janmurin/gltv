@@ -1,5 +1,4 @@
-﻿@using System.ComponentModel.DataAnnotations
-@using GLTV.Extensions
+﻿@using GLTV.Extensions
 @using GLTV.Models.Objects
 @model GLTV.Models.ViewModels.DeletedViewModel
 
@@ -35,7 +34,7 @@
                         @Utils.GetFileSize(item)
                     </td>
                     <td>
-                        <form asp-controller="TvItems" asp-action="DeleteZombieFile">
+                        <form asp-controller="Utility" asp-action="DeleteZombieFile">
                             <input type="hidden" name="FileName" value="@item.FileName" />
                             <input type="submit" value="Delete" class="btn btn-warning" />
                         </form>
@@ -48,6 +47,12 @@
 
 <h2>Deleted Tv Items</h2>
 <h4>Total undeleted files size: @Utils.GetFileSize(Model.TotalUndeletedFileSize)</h4>
+@if (Model.TotalUndeletedFileSize > 0)
+{
+    <form asp-controller="Utility" asp-action="DeleteAllUndeletedFiles">
+        <input type="submit" value="Delete All" class="btn btn-danger" />
+    </form>
+}
 
 <table class="table deleted-items-table">
     <thead>
@@ -72,18 +77,18 @@
                                 <th>Title</th>
                                 <th>Time Inserted</th>
                             </tr>
-                        <tr>
-                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
-                            <td>@Html.DisplayFor(modelItem => item.TimeInserted)</td>
-                        </tr>
-                        <tr>
-                            <th>Author</th>
-                            <th>Type</th>
-                        </tr>
-                        <tr>
-                            <td>@Html.DisplayFor(modelItem => item.Author)</td>
-                            <td>@Html.DisplayFor(modelItem => item.Type)</td>
-                        </tr>
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                                <td>@Html.DisplayFor(modelItem => item.TimeInserted)</td>
+                            </tr>
+                            <tr>
+                                <th>Author</th>
+                                <th>Type</th>
+                            </tr>
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                            </tr>
                         </tbody>
                     </table>
                 </td>
@@ -94,7 +99,7 @@
                 <td>
                     @if (item.Files.Any(x => x.Deleted == false))
                     {
-                        <form asp-controller="TvItems" asp-action="DeleteFiles" asp-route-id="@item.ID">
+                        <form asp-controller="Utility" asp-action="DeleteFiles" asp-route-id="@item.ID">
                             <input type="submit" value="Delete Files" class="btn btn-warning" />
                         </form>
                     }

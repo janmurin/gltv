@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -7,11 +6,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using GLTV.Models;
-using GLTV.Models.AccountViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -46,9 +42,6 @@ namespace GLTV.Controllers
             _allowedEmails = configuration.GetSection("AllowedEmails").Get<string[]>();
         }
 
-        [TempData]
-        public string ErrorMessage { get; set; }
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = null)
@@ -57,7 +50,6 @@ namespace GLTV.Controllers
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ViewData["ReturnUrl"] = returnUrl;
-            ViewData["ErrorMessage"] = ErrorMessage;
             return View();
         }
 
@@ -94,7 +86,7 @@ namespace GLTV.Controllers
         {
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
+                TempData["ErrorMessage"] = $"Error from external provider: {remoteError}";
                 return RedirectToAction(nameof(Login));
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -111,7 +103,7 @@ namespace GLTV.Controllers
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
 
-                await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+                await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
 
                 return RedirectToLocal(returnUrl);
             }
@@ -124,7 +116,7 @@ namespace GLTV.Controllers
                 // create user account.
                 if (!_allowedEmails.Contains(email))
                 {
-                    ErrorMessage = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
+                    TempData["ErrorMessage"] = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
                     return RedirectToAction(nameof(Login));
                 }
 
@@ -138,7 +130,7 @@ namespace GLTV.Controllers
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                        await _eventService.AddLogEventAsync(username, LogEventType.UserLoggedIn, $"User {username} logged in.", null);
+                        await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
                         return RedirectToLocal(returnUrl);
                     }
                 }

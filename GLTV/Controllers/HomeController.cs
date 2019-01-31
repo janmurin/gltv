@@ -65,9 +65,9 @@ namespace GLTV.Controllers
             ViewData["stackTrace"] = exception.Error.StackTrace;
 
             await _emailSender.SendEmailAsync(User.Identity.Name, EmailType.Error, exception);
-            await _eventService.AddLogEventAsync(
+            await _eventService.AddWebServerLogAsync(
                 User.Identity.Name,
-                LogEventType.Exception,
+                WebServerLogType.Exception,
                 $"User encountered exception: [{exception.Error.Message}].", null);
 
             return View();

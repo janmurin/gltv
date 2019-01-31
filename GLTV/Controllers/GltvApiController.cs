@@ -9,7 +9,6 @@ using GLTV.Models.Objects;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GLTV.Controllers
@@ -39,16 +38,11 @@ namespace GLTV.Controllers
 
             Location location = (Location)locationID;
             if (!Enum.IsDefined(typeof(Location), location) && !location.ToString().Contains(","))
-                throw new InvalidOperationException(
-                    $"{locationID} is not an underlying value of the Location enumeration.");
+                throw new InvalidOperationException($"{locationID} is not an underlying value of the Location enumeration.");
 
             List<TvItem> items = await _tvItemService.FetchActiveTvItemsAsync(location);
 
-            await _eventService.AddClientEventAsync(
-                HttpContext.Connection.RemoteIpAddress.ToString(),
-                ClientEventType.ProgramRequest,
-                $"Program request for location {location.ToString()}",
-                null);
+            await _eventService.AddHandShakeAsync(HttpContext.Connection.RemoteIpAddress.ToString(), WebClientLogType.ProgramRequest, location);
 
             return new ObjectResult(items.Select(x => new MainContentResponse(x)).ToList());
         }
@@ -63,14 +57,31 @@ namespace GLTV.Controllers
             }
 
             Location location = (Location)locationID;
+            if (!Enum.IsDefined(typeof(Location), location) && !location.ToString().Contains(","))
+                throw new InvalidOperationException($"{locationID} is not an underlying value of the Location enumeration.");
 
-            await _eventService.AddClientEventAsync(
-                HttpContext.Connection.RemoteIpAddress.ToString(),
-                ClientEventType.ChatRequest,
-                $"Chat messages request for location {location.ToString()}",
-                null);
+            await _eventService.AddHandShakeAsync(HttpContext.Connection.RemoteIpAddress.ToString(), WebClientLogType.ChatRequest, location);
 
             return new ObjectResult(new List<MainContentResponse>());
+        }
+
+        [Produces("application/json")]
+        [Route("/api/migratedata")]
+        public async Task<IActionResult> MigrateData()
+        {
+            ObjectResult objectResult = await _eventService.MigrateData().ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult("finished");
+                }
+                else
+                {
+                    return new ObjectResult("error: " + task.Exception?.Message);
+                }
+            });
+
+            return objectResult;
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,16 +13,22 @@ using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace GLTV
 {
     public class Startup
     {
+        public static readonly LoggerFactory MyLoggerFactory
+            = new LoggerFactory(new[] { new ConsoleLoggerProvider((_, __) => true, true) });
+
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
@@ -38,7 +42,10 @@ namespace GLTV
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
+            {
+                //options.UseLoggerFactory(MyLoggerFactory);
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -48,6 +55,14 @@ namespace GLTV
             {
                 googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
+                googleOptions.UserInformationEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo";
+                googleOptions.ClaimActions.Clear();
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "given_name");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Surname, "family_name");
+                googleOptions.ClaimActions.MapJsonKey("urn:google:profile", "link");
+                googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
             });
 
             Constants.ANDROID_TOKEN = Configuration["androidToken"];
@@ -98,7 +113,11 @@ namespace GLTV
                     .RequireAuthenticatedUser()
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
-            });
+            })
+                .AddSessionStateTempDataProvider();
+
+            services.AddSession();
+
             services.Configure<FormOptions>(x =>
             {
                 x.ValueLengthLimit = Constants.MULTIPART_BODY_LENGTH_LIMIT;
@@ -142,7 +161,7 @@ namespace GLTV
             });
 
             app.UseAuthentication();
-
+            app.UseSession();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

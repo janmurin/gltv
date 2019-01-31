@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using GLTV.Data;
 using GLTV.Models;
+using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Identity;
 
 namespace GLTV.Services
@@ -9,6 +11,8 @@ namespace GLTV.Services
     public class ServiceBase
     {
         protected readonly ApplicationDbContext Context;
+
+        private List<TvScreen> _knownScreens;
 
         public ServiceBase(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
         {
@@ -20,5 +24,21 @@ namespace GLTV.Services
         protected ClaimsPrincipal CurrentUser { get; }
 
         protected List<string> AllowedExtensions { get; }
+
+        protected List<TvScreen> KnownTvScreens
+        {
+            get
+            {
+                if (_knownScreens == null)
+                {
+                    _knownScreens = Context.TvScreen.ToList();
+                    return _knownScreens;
+                }
+                else
+                {
+                    return _knownScreens;
+                }
+            }
+        }
     }
 }

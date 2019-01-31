@@ -14,6 +14,7 @@
         public static string ANDROID_TOKEN;
         public static string SERVER_URL;
         public static string SERVER_ADMIN;
+        public static string THE_ARCHITECT = "janmurin2@gmail.com";
         public static string WEB_ROOT_PATH;
         public static string FILES_DIR = "files";
     }

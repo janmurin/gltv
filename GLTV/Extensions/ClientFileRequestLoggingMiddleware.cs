@@ -1,8 +1,5 @@
-﻿using System.Threading.Tasks;
-using GLTV.Data;
-using GLTV.Models;
-using GLTV.Models.Objects;
-using GLTV.Services;
+﻿using System;
+using System.Threading.Tasks;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 
@@ -17,7 +14,7 @@ namespace GLTV.Extensions
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, ApplicationDbContext db, IEventService eventService, ITvItemService tvItemService)
+        public async Task InvokeAsync(HttpContext context, IEventService eventService)
         {
             string requestPath = context.Request.Path.ToString();
 
@@ -29,31 +26,21 @@ namespace GLTV.Extensions
                 //Console.WriteLine("file request url changed to: " + context.Request.Path.ToString());
 
                 string filename = truncatedPath.Substring(requestPath.LastIndexOf('/') + 1);
-                TvItemFile itemFile = await tvItemService.FetchTvItemFileAsync(filename);
 
-                //string headers = "";
-                //foreach (var key in context.Request.Headers.Keys)
-                //    headers += key + "=" + context.Request.Headers[key] + Environment.NewLine;
-                //Console.WriteLine(headers);
+                string ipAddress = "UNKNOWN";
+                String remoteIp = context.Connection.RemoteIpAddress.ToString();
+                String headerIp = context.Request.Headers["X-Forwarded-For"].ToString();
+                if (!String.IsNullOrEmpty(headerIp))
+                {
+                    ipAddress = headerIp;
+                }
+                else if (!String.IsNullOrEmpty(remoteIp))
+                {
+                    ipAddress = remoteIp;
+                }
+                //Console.WriteLine($"file request intercepted: RemoteIpAddress={remoteIp}, X-Forwarded-For={headerIp}, final ipAddress={ipAddress}");
 
-                if (itemFile != null)
-                {
-                    await eventService.AddClientEventAsync(
-                        //context.Connection.RemoteIpAddress.ToString(),
-                        context.Request.Headers["X-Forwarded-For"],
-                        itemFile.IsVideoFile() ? ClientEventType.VideoRequest : ClientEventType.ImageRequest,
-                        "",
-                        itemFile.ID);
-                }
-                else
-                {
-                    await eventService.AddClientEventAsync(
-                        //context.Connection.RemoteIpAddress.ToString(),
-                        context.Request.Headers["X-Forwarded-For"],
-                        ClientEventType.Exception,
-                        $"File [{filename}] not found.",
-                        null);
-                }
+                await eventService.AddFileRequestEventAsync(ipAddress, filename);
             }
 
             if (requestPath.Contains("/api/read/"))

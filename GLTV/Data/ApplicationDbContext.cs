@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using GLTV.Models;
 using GLTV.Models.Objects;
@@ -30,8 +26,12 @@ namespace GLTV.Data
 
         public DbSet<TvItemLocation> TvItemLocation { get; set; }
 
-        public DbSet<GLTV.Models.LogEvent> LogEvent { get; set; }
+        public DbSet<WebServerLog> WebServerLog { get; set; }
 
-        public DbSet<GLTV.Models.ClientEvent> ClientEvent { get; set; }
+        public DbSet<WebClientLog> WebClientLog { get; set; }
+
+        public DbSet<TvScreen> TvScreen { get; set; }
+
+        public DbSet<TvScreenHandshake> TvScreenHandshake { get; set; }
     }
 }

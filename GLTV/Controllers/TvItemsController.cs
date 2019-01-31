@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GLTV.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
 using GLTV.Models.Objects;
-using GLTV.Models.ViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Internal;
 
 
 namespace GLTV.Controllers
@@ -45,40 +42,10 @@ namespace GLTV.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> IndexDeleted()
-        {
-            DeletedViewModel model = new DeletedViewModel();
-            model.TvItems = await _tvItemService.FetchTvItemsAsync(true);
-            model.ZombieFiles = await _fileService.FindZombieFilesAsync();
-            model.TotalUndeletedFileSize = model.TvItems.Sum(x => Utils.GetTotalFileSizeLong(x));
-
-            return View(model);
-        }
-
-        public async Task<IActionResult> IndexLogs()
-        {
-            List<LogEvent> tvItems = await _eventService.FetchLogEventsAsync();
-
-            return View(tvItems);
-        }
-
-        public async Task<IActionResult> IndexClients()
-        {
-            List<ClientEvent> tvItems = await _eventService.FetchClientEventsAsync();
-            List<ClientEvent> clientsLastProgramRequest = await _eventService.FetchClientsLastProgramRequestAsync();
-
-            ClientEventsViewModel model = new ClientEventsViewModel();
-            model.ClientEvents = tvItems;
-            model.LastProgramClientEvents = clientsLastProgramRequest;
-            model.Sources = tvItems.Select(x => x.Source).Distinct().ToList();
-
-            return View(model);
-        }
-
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id, true);
 
             return View(item);
         }
@@ -86,9 +53,9 @@ namespace GLTV.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DetailsAnonymous(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id, true);
 
-            await _eventService.AddLogEventAsync(HttpContext.Connection.RemoteIpAddress.ToString(), LogEventType.AnonymousDetails, "", id);
+            await _eventService.AddWebServerLogAsync(HttpContext.Connection.RemoteIpAddress.ToString(), WebServerLogType.AnonymousDetails, "", id);
 
             return View(item);
         }
@@ -165,7 +132,7 @@ namespace GLTV.Controllers
                 }
 
                 await _emailSender.SendEmailAsync(item.Author, EmailType.Insert, item);
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemInsert, "", item.ID);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemInsert, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -175,7 +142,7 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var model = new TvItemEditViewModel(await _tvItemService.FetchTvItemAsync(id));
+            var model = new TvItemEditViewModel(await _tvItemService.FetchTvItemAsync(id, true));
 
             return View(model);
         }
@@ -212,19 +179,20 @@ namespace GLTV.Controllers
                 }
 
                 await _tvItemService.UpdateTvItemAsync(item);
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", item.ID);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemUpdate, "", item.ID);
 
                 return RedirectToAction(nameof(Index));
             }
 
-            model.TvItem.Files = item.Files;
+            // filter deleted files
+            model.TvItem.Files = item.Files.Where(f => f.Deleted == false).ToList();
 
             return View(model);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id, true);
 
             return View(item);
         }
@@ -234,25 +202,9 @@ namespace GLTV.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _tvItemService.DeleteTvItemAsync(id);
-
-            await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDelete, "", id);
+            await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemDelete, "", id);
 
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost, ActionName("DeleteFiles")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteFiles(int id)
-        {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
-
-            bool success = await _fileService.DeleteFilesAsync(item.Files);
-            if (success)
-            {
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteFiles, "", id);
-            }
-
-            return RedirectToAction(nameof(IndexDeleted));
         }
 
         [HttpPost, ActionName("DeleteFile")]
@@ -262,47 +214,14 @@ namespace GLTV.Controllers
             TvItemFile itemFile = await _tvItemService.FetchTvItemFileAsync(id);
             TvItem item = await _tvItemService.FetchTvItemAsync(itemFile.TvItemId);
 
-            bool success = await _fileService.DeleteFileAsync(itemFile.FileName);
-            if (success)
-            {
-                await _eventService.AddLogEventAsync(
+            await _tvItemService.DeleteTvItemFileAsync(id);
+            await _eventService.AddWebServerLogAsync(
                     User.Identity.Name,
-                    LogEventType.ItemDeleteSingleFile,
+                    WebServerLogType.ItemDeleteSingleFile,
                     $"User deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
                     item.ID);
-            }
-            else
-            {
-                // if file deletion is not successful, it will stay in the file system as a zombie file
-                await _eventService.AddLogEventAsync(
-                    User.Identity.Name,
-                    LogEventType.Exception,
-                    $"User NOT SUCCESSFULLY deleted file[{itemFile.FileName}] for item [{item.GetDetailHyperlink(false)}] with id [{item.ID}].",
-                    item.ID);
-            }
-
-            item.Files.Remove(itemFile);
-            await _tvItemService.UpdateTvItemAsync(item);
 
             return RedirectToAction(nameof(Edit), new { id = item.ID });
-        }
-
-        [HttpPost, ActionName("DeleteZombieFile")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteZombieFile([FromForm]string fileName)
-        {
-            bool success = await _fileService.DeleteZombieFileAsync(fileName);
-            if (success)
-            {
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemDeleteZombieFile, $"User deleted zombie file[{fileName}].", null);
-            }
-            else
-            {
-                // if file deletion is not successful, it will stay in the file system as a zombie file
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.Exception, $"User NOT SUCCESSFULLY deleted zombie file[{fileName}].", null);
-            }
-
-            return RedirectToAction(nameof(IndexDeleted));
         }
 
         [HttpPost]
@@ -355,16 +274,25 @@ namespace GLTV.Controllers
                 catch (Exception e)
                 {
                     ModelState.AddModelError("", e.Message);
+                    // filter deleted files
+                    model.TvItem.Files = model.TvItem.Files.Where(f => f.Deleted == false).ToList();
                     return View("Edit", model);
                 }
 
-                await _eventService.AddLogEventAsync(User.Identity.Name, LogEventType.ItemUpdate, "", model.TvItem.ID);
+                await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemUpdate, "", model.TvItem.ID);
 
-                return View("Edit", model);
+                //return RedirectToAction("Edit", new { id });
             }
             // todo: log model state error
 
             return RedirectToAction("Edit", new { id });
+        }
+
+        public async Task<IActionResult> ThrowException()
+        {
+            throw new Exception("thrown test exception");
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
