@@ -45,7 +45,7 @@ namespace GLTV.Controllers
         // GET: TvItems/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id, true);
 
             return View(item);
         }
@@ -53,7 +53,7 @@ namespace GLTV.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DetailsAnonymous(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id, true);
 
             await _eventService.AddWebServerLogAsync(HttpContext.Connection.RemoteIpAddress.ToString(), WebServerLogType.AnonymousDetails, "", id);
 
@@ -142,7 +142,7 @@ namespace GLTV.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var model = new TvItemEditViewModel(await _tvItemService.FetchTvItemAsync(id));
+            var model = new TvItemEditViewModel(await _tvItemService.FetchTvItemAsync(id, true));
 
             return View(model);
         }
@@ -184,14 +184,15 @@ namespace GLTV.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            model.TvItem.Files = item.Files;
+            // filter deleted files
+            model.TvItem.Files = item.Files.Where(f => f.Deleted == false).ToList();
 
             return View(model);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            TvItem item = await _tvItemService.FetchTvItemAsync(id);
+            TvItem item = await _tvItemService.FetchTvItemAsync(id, true);
 
             return View(item);
         }
@@ -273,12 +274,14 @@ namespace GLTV.Controllers
                 catch (Exception e)
                 {
                     ModelState.AddModelError("", e.Message);
+                    // filter deleted files
+                    model.TvItem.Files = model.TvItem.Files.Where(f => f.Deleted == false).ToList();
                     return View("Edit", model);
                 }
 
                 await _eventService.AddWebServerLogAsync(User.Identity.Name, WebServerLogType.ItemUpdate, "", model.TvItem.ID);
 
-                return View("Edit", model);
+                //return RedirectToAction("Edit", new { id });
             }
             // todo: log model state error
 

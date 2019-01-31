@@ -6,7 +6,7 @@ namespace GLTV.Services
 {
     public interface ITvItemService
     {
-        Task<TvItem> FetchTvItemAsync(int id);
+        Task<TvItem> FetchTvItemAsync(int id, bool filterFiles = false);
         Task<List<TvItem>> FetchTvItemsAsync(bool deleted);
         Task<List<TvItem>> FetchActiveTvItemsAsync(Location location);
         Task<TvItemFile> FetchTvItemFileAsync(string filename);

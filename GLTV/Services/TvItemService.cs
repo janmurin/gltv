@@ -21,7 +21,7 @@ namespace GLTV.Services
             _fileService = fileService;
         }
 
-        public Task<TvItem> FetchTvItemAsync(int id)
+        public Task<TvItem> FetchTvItemAsync(int id, bool filterFiles = false)
         {
             var tvItem = Context.TvItem
                 .Include(x => x.Files)
@@ -32,18 +32,30 @@ namespace GLTV.Services
             {
                 throw new Exception($"Item not found with id {id}.");
             }
+            // do not filter files: filtering files out causes unwanted delete sqls,
+            // because context is tracking the whole object with its related entities
+            if (filterFiles)
+            {
+                tvItem.Files = tvItem.Files.Where(f => f.Deleted == false).ToList();
+            }
 
             return Task.FromResult(tvItem);
         }
 
         public Task<List<TvItem>> FetchTvItemsAsync(bool deleted)
         {
+            // used only for read only purposes, no danger regarding updates/deletes
             List<TvItem> tvItems = Context.TvItem
                 .Include(x => x.Files)
                 .Include(y => y.Locations)
                 .Where(x => x.Deleted == deleted)
                 .OrderByDescending(x => x.TimeInserted)
                 .ToList();
+
+            tvItems.ForEach(tv =>
+            {
+                tv.Files = tv.Files.Where(f => f.Deleted == false).ToList();
+            });
 
             return Task.FromResult(tvItems);
         }
@@ -66,6 +78,7 @@ namespace GLTV.Services
 
         public Task<List<TvItem>> FetchActiveTvItemsAsync(Location location)
         {
+            // used only for read only purposes for API, no danger regarding updates/deletes
             List<TvItem> tvItems = Context.TvItem
                 .Include(x => x.Files)
                 .Include(y => y.Locations)
@@ -74,6 +87,10 @@ namespace GLTV.Services
                 .ToList();
 
             tvItems = tvItems.Where(x => DateTime.Compare(DateTime.Now, x.StartTime) > 0 && DateTime.Compare(DateTime.Now, x.EndTime) < 0).ToList();
+            tvItems.ForEach(tv =>
+            {
+                tv.Files = tv.Files.Where(f => f.Deleted == false).ToList();
+            });
 
             return Task.FromResult(tvItems);
         }
