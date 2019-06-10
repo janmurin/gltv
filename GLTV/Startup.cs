@@ -46,6 +46,11 @@ namespace GLTV
                 //options.UseLoggerFactory(MyLoggerFactory);
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
             });
+            //services.AddDbContext<AdDbContext>(options =>
+            //{
+            //    //options.UseLoggerFactory(MyLoggerFactory);
+            //    options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+            //});
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
