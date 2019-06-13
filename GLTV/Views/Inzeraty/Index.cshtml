@@ -16,7 +16,7 @@
         <select asp-for="InzeratType" asp-items="Model.InzeratyTypes">
             <option value="">All</option>
         </select>
-        
+
         <label>Lokácia</label>
         <select asp-for="Location" asp-items="Model.Locations">
             <option value="">All</option>
@@ -25,6 +25,29 @@
         Cena do: <input type="number" asp-for="PriceString" />
         <input type="submit" value="Filter" />
     </p>
+    @{
+        var prevDisabled = !Model.Inzeraty.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.Inzeraty.HasNextPage ? "disabled" : "";
+    }
+
+    <a asp-action="Index"
+       asp-route-pageNumber="@(Model.Inzeraty.PageIndex - 1)"
+       asp-route-inzeratType="@Model.InzeratType"
+       asp-route-location="@Model.Location"
+       asp-route-priceString="@Model.PriceString"
+       class="btn btn-default @prevDisabled">
+        Previous
+    </a>
+    <a asp-action="Index"
+       asp-route-pageNumber="@(Model.Inzeraty.PageIndex + 1)"
+       asp-route-inzeratType="@Model.InzeratType"
+       asp-route-location="@Model.Location"
+       asp-route-priceString="@Model.PriceString"
+       class="btn btn-default @nextDisabled">
+        Next
+    </a>
+    <p>Nájdených výsledkov @(Model.Inzeraty.TotalCount)</p>
+    <p>Stránka @(Model.Inzeraty.PageIndex)/@(Model.Inzeraty.TotalPages)</p>
 </form>
 
 <table class="table" id="inzeratyTable">
@@ -73,65 +96,67 @@
     </tbody>
 </table>
 
+
+
 @*<h2 style="padding-top: 100px;">Expired TvItems</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Title
-            </th>
-            <th>
-                Status
-            </th>
-            <th>
-                Author
-            </th>
-            <th>
-                Total Duration
-            </th>
-            <th>
-                Type
-            </th>
-            <th>
-                Locations
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.ExpiredTvItems)
-        {
+    <table class="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    <p class="time-hint">@Html.Raw(Utils.GetStatusFormat(item))</p>
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Author)
-                </td>
-                <td>
-                    @Utils.GetFormattedDuration(item)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Type)
-                </td>
-                <td>
-                    @Utils.GetLocationsString(item.Locations)
-                </td>
-                <td>
-                    <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                    <a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                    <form asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">
-                        <input type="submit" value="Delete" class="btn btn-danger btn-sm" />
-                    </form>
-                </td>
+                <th>
+                    Title
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    Author
+                </th>
+                <th>
+                    Total Duration
+                </th>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Locations
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>*@
+        </thead>
+        <tbody>
+            @foreach (var item in Model.ExpiredTvItems)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        <p class="time-hint">@Html.Raw(Utils.GetStatusFormat(item))</p>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Author)
+                    </td>
+                    <td>
+                        @Utils.GetFormattedDuration(item)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Type)
+                    </td>
+                    <td>
+                        @Utils.GetLocationsString(item.Locations)
+                    </td>
+                    <td>
+                        <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                        <a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                        <form asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">
+                            <input type="submit" value="Delete" class="btn btn-danger btn-sm" />
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>*@
 
 <script type="text/javascript">
     $(function () {

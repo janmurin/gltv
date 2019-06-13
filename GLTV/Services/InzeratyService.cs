@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Models.Objects;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace GLTV.Services
 {
@@ -77,6 +79,17 @@ namespace GLTV.Services
                             .ToList();
 
             return Task.FromResult(types);
+        }
+
+        public Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string location, int priceMax, int pageNumber, int pageSize)
+        {
+            IOrderedQueryable<Inzerat> query = Context.Inzerat
+                .Where(y => y.Type.Equals(inzeratType) || string.IsNullOrEmpty(inzeratType) || inzeratType.Equals("All"))
+                .Where(y => y.Location.Contains(location) || string.IsNullOrEmpty(location) || location.Equals("All"))
+                .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
+                .OrderByDescending(x => x.DateInserted);
+
+            return PaginatedList<Inzerat>.CreateAsync(query.AsNoTracking(), pageNumber, pageSize);
         }
     }
 

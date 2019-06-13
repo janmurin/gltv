@@ -19,15 +19,19 @@ namespace GLTV.Controllers
             _inzeratyService = inzeratyService;
         }
 
-        public async Task<IActionResult> Index(string inzeratType, string location, string priceString)
+        public async Task<IActionResult> Index(string inzeratType, string location, string priceString, int? pageNumber)
         {
+            int pageSize = 100;
             var model = new InzeratyViewModel();
             int priceMax = 0;
             Int32.TryParse(priceString, out priceMax);
 
-            model.Inzeraty = await _inzeratyService.FetchInzeratyAsync(inzeratType, location, priceMax);
+            model.Inzeraty = await _inzeratyService.FetchInzeratyAsync(inzeratType, location, priceMax, pageNumber ?? 1, pageSize);
             model.InzeratyTypes = new SelectList(await _inzeratyService.FetchInzeratyTypesAsync());
             model.Locations = new SelectList(await _inzeratyService.FetchInzeratyLocationsAsync());
+            model.InzeratType = inzeratType;
+            model.Location = location;
+            model.PriceString = priceString;
 
             return View(model);
         }
