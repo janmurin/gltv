@@ -1,6 +1,6 @@
 ﻿@using GLTV.Extensions
 @using GLTV.Models.Objects
-@model TvItemsViewModel
+@model GLTV.Models.ViewModels.InzeratyViewModel
 
 @{
     ViewData["Title"] = "Ads";
@@ -10,60 +10,58 @@
 
 <h2>Inzeraty</h2>
 
-<p>
-    <div class="pull-right" style="padding: 10px;" id="locationRadioDiv">
-        <span style="font-weight: bold; padding-right: 20px;">Filter by location:</span>
-        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="-1" checked>All</label>
-        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="@((int)Location.Kosice)">@Constants.KE</label>
-        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="@((int)Location.Zilina)">@Constants.ZA</label>
-        <label class="radio-inline"><input class="location-radio" type="radio" name="optradio" value="@((int)Location.BanskaBystrica)">@Constants.BB</label>
-    </div>
-</p>
+<form asp-controller="Inzeraty" asp-action="Index" method="get">
+    <p>
+        <label>Typ</label>
+        <select asp-for="InzeratType" asp-items="Model.InzeratyTypes">
+            <option value="">All</option>
+        </select>
+        
+        <label>Lokácia</label>
+        <select asp-for="Location" asp-items="Model.Locations">
+            <option value="">All</option>
+        </select>
+
+        Cena do: <input type="number" asp-for="PriceString" />
+        <input type="submit" value="Filter" />
+    </p>
+</form>
+
 <table class="table" id="inzeratyTable">
     <thead>
         <tr>
             <th>
-                Title
+                Typ
             </th>
             <th>
-                Status
+                Cena
             </th>
             <th>
-                Author
+                Lokácia
             </th>
             <th>
-                Total Duration
-            </th>
-            <th>
-                Type
-            </th>
-            <th>
-                Locations
+                Url
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.ActiveTvItems)
+        @foreach (var item in Model.Inzeraty)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Title)
+                    @Html.DisplayFor(modelItem => item.Type)<br />
+                    (@Html.DisplayFor(modelItem => item.Category))
                 </td>
                 <td>
-                    <p class="time-hint">@Html.Raw(Utils.GetStatusFormat(item))</p>
+                    @Html.DisplayFor(modelItem => item.Price)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Author)
+                    @Html.DisplayFor(modelItem => item.Location)<br />
+                    <small>@Html.DisplayFor(modelItem => item.DateInserted)</small>
                 </td>
                 <td>
-                    @Utils.GetFormattedDuration(item)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Type)
-                </td>
-                <td class="location-col">
-                    @Utils.GetLocationsString(item.Locations)
+                    <a target="_blank" href="@Html.DisplayFor(modelItem => item.Url)">@Html.DisplayFor(modelItem => item.Title)</a>
                 </td>
                 <td>
                     <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
@@ -75,7 +73,7 @@
     </tbody>
 </table>
 
-<h2 style="padding-top: 100px;">Expired TvItems</h2>
+@*<h2 style="padding-top: 100px;">Expired TvItems</h2>
 
 <table class="table">
     <thead>
@@ -133,7 +131,7 @@
             </tr>
         }
     </tbody>
-</table>
+</table>*@
 
 <script type="text/javascript">
     $(function () {

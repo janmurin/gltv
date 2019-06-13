@@ -36,7 +36,7 @@ namespace GLTV.Controllers
 
             //var contents = _fileProvider.GetDirectoryContents("");
             //return View(contents);
-            return RedirectToAction("Index", "TvItems");
+            return RedirectToAction("Index", "Inzeraty");
         }
 
 

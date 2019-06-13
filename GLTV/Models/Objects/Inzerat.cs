@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,7 +19,9 @@ namespace GLTV.Models.Objects
         public string Type { get; set; }
         public string Category { get; set; }
         public string Price { get; set; }
+        public int PriceValue { get; set; }
         public string Email { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}")]
         public DateTime DateInserted { get; set; }
         public override string ToString()
         {
