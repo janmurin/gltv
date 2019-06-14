@@ -164,3 +164,7 @@ span.time-expired {
 #tvScreensTable tr.selected td {
     background-color: aliceblue;
 }
+
+table a:not(.btn):visited {
+    color: firebrick;
+}

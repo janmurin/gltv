@@ -17,6 +17,11 @@
             <option value="">All</option>
         </select>
 
+        <label>Kategória</label>
+        <select asp-for="InzeratCategory" asp-items="Model.InzeratyCategories">
+            <option value="">All</option>
+        </select>
+
         <label>Lokácia</label>
         <select asp-for="Location" asp-items="Model.Locations">
             <option value="">All</option>
@@ -33,6 +38,7 @@
     <a asp-action="Index"
        asp-route-pageNumber="@(Model.Inzeraty.PageIndex - 1)"
        asp-route-inzeratType="@Model.InzeratType"
+       asp-route-inzeratCategory="@Model.InzeratCategory"
        asp-route-location="@Model.Location"
        asp-route-priceString="@Model.PriceString"
        class="btn btn-default @prevDisabled">
@@ -41,6 +47,7 @@
     <a asp-action="Index"
        asp-route-pageNumber="@(Model.Inzeraty.PageIndex + 1)"
        asp-route-inzeratType="@Model.InzeratType"
+       asp-route-inzeratCategory="@Model.InzeratCategory"
        asp-route-location="@Model.Location"
        asp-route-priceString="@Model.PriceString"
        class="btn btn-default @nextDisabled">

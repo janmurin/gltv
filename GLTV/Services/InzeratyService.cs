@@ -70,6 +70,17 @@ namespace GLTV.Services
             return Task.FromResult(types);
         }
 
+        public Task<List<string>> FetchInzeratyCategoriesAsync()
+        {
+            List<string> types = Context.Inzerat
+                .Select(x => x.Category)
+                .Distinct()
+                .OrderBy(q => q)
+                .ToList();
+
+            return Task.FromResult(types);
+        }
+
         public Task<List<string>> FetchInzeratyLocationsAsync()
         {
             List<string> types = Context.Inzerat
@@ -81,10 +92,12 @@ namespace GLTV.Services
             return Task.FromResult(types);
         }
 
-        public Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string location, int priceMax, int pageNumber, int pageSize)
+        public Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string inzeratCategory,
+            string location, int priceMax, int pageNumber, int pageSize)
         {
             IOrderedQueryable<Inzerat> query = Context.Inzerat
                 .Where(y => y.Type.Equals(inzeratType) || string.IsNullOrEmpty(inzeratType) || inzeratType.Equals("All"))
+                .Where(y => y.Category.Equals(inzeratCategory) || string.IsNullOrEmpty(inzeratCategory) || inzeratCategory.Equals("All"))
                 .Where(y => y.Location.Contains(location) || string.IsNullOrEmpty(location) || location.Equals("All"))
                 .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
                 .OrderByDescending(x => x.DateInserted);

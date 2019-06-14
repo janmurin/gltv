@@ -14,7 +14,9 @@ namespace GLTV.Services.Interfaces
         Task<List<Inzerat>> FetchInzeratyAsync();
         Task<List<Inzerat>> FetchInzeratyAsync(string inzeratType, string location, int priceMax);
         Task<List<string>> FetchInzeratyTypesAsync();
+        Task<List<string>> FetchInzeratyCategoriesAsync();
         Task<List<string>> FetchInzeratyLocationsAsync();
-        Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string location, int priceMax, int pageNumber, int pageSize);
+        Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string inzeratCategory, string location,
+            int priceMax, int pageNumber, int pageSize);
     }
 }

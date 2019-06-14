@@ -12,7 +12,9 @@ namespace GLTV.Models.ViewModels
     {
         public PaginatedList<Inzerat> Inzeraty { get; set; }
         public SelectList InzeratyTypes { get; set;}
+        public SelectList InzeratyCategories { get; set; }
         public string InzeratType { get; set; }
+        public string InzeratCategory { get; set; }
         public string Location { get; set; }
         public SelectList Locations { get; set; }
         public String PriceString { get; set; }
