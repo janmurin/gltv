@@ -110,6 +110,7 @@ namespace GLTV
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ITvItemService, TvItemService>();
             services.AddScoped<IInzeratyService, InzeratyService>();
+            services.AddScoped<IUserFilterService, UserFilterService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IEventService, EventService>();
 

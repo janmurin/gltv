@@ -17,6 +17,6 @@ namespace GLTV.Models.ViewModels
         public string InzeratCategory { get; set; }
         public string Location { get; set; }
         public SelectList Locations { get; set; }
-        public String PriceString { get; set; }
+        public string PriceString { get; set; }
     }
 }
