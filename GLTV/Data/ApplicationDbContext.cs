@@ -37,5 +37,6 @@ namespace GLTV.Data
         public DbSet<UserFilter> UserFilter { get; set; }
         public DbSet<IgnoredInzerat> IgnoredInzerat { get; set; }
         public DbSet<MarkedInzerat> MarkedInzerat { get; set; }
+        public DbSet<Filter> Filter { get; set; }
     }
 }

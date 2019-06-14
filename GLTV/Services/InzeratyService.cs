@@ -61,9 +61,9 @@ namespace GLTV.Services
 
         public Task<List<string>> FetchInzeratyTypesAsync()
         {
-            List<string> types = Context.Inzerat
-                .Select(x => x.Type)
-                .Distinct()
+            List<string> types = Context.Filter
+                .Where(x => x.FilterCategory == FilterCategory.Reality && x.FilterType == FilterType.Type)
+                .Select(x => x.Value)
                 .OrderBy(q => q)
                 .ToList();
 
@@ -72,24 +72,24 @@ namespace GLTV.Services
 
         public Task<List<string>> FetchInzeratyCategoriesAsync()
         {
-            List<string> types = Context.Inzerat
-                .Select(x => x.Category)
-                .Distinct()
+            List<string> categories = Context.Filter
+                .Where(x => x.FilterCategory == FilterCategory.Reality && x.FilterType == FilterType.Category)
+                .Select(x => x.Value)
                 .OrderBy(q => q)
                 .ToList();
 
-            return Task.FromResult(types);
+            return Task.FromResult(categories);
         }
 
         public Task<List<string>> FetchInzeratyLocationsAsync()
         {
-            List<string> types = Context.Inzerat
-                            .Select(x => x.Location.Substring(7).Trim())
-                            .Distinct()
-                            .OrderBy(q => q)
-                            .ToList();
+            List<string> locations = Context.Filter
+                .Where(x => x.FilterCategory == FilterCategory.All && x.FilterType == FilterType.Location)
+                .Select(x => x.Value)
+                .OrderBy(q => q)
+                .ToList();
 
-            return Task.FromResult(types);
+            return Task.FromResult(locations);
         }
 
         public Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string inzeratCategory,
@@ -202,11 +202,11 @@ namespace GLTV.Services
             int pageNumber, int pageSize)
         {
             List<Inzerat> ignoredInzeraty = (from inzerat in Context.Inzerat
-                    join m in Context.IgnoredInzerat
-                        on inzerat.ID equals m.InzeratId
-                    where m.UserName.Equals(CurrentUser.Identity.Name)
-                    orderby m.ID descending
-                    select inzerat)
+                                             join m in Context.IgnoredInzerat
+                                                 on inzerat.ID equals m.InzeratId
+                                             where m.UserName.Equals(CurrentUser.Identity.Name)
+                                             orderby m.ID descending
+                                             select inzerat)
                 .ToList();
 
             List<Inzerat> filteredInzeraty = ignoredInzeraty
