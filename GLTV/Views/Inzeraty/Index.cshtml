@@ -1,5 +1,7 @@
 ﻿@using GLTV.Extensions
 @using GLTV.Models.Objects
+@using Microsoft.AspNetCore.Http
+@inject UserManager<ApplicationUser> UserManager
 @model GLTV.Models.ViewModels.InzeratyViewModel
 
 @{
@@ -60,6 +62,7 @@
 <table class="table" id="inzeratyTable">
     <thead>
         <tr>
+            <th></th>
             <th>
                 Typ
             </th>
@@ -72,13 +75,17 @@
             <th>
                 Url
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model.Inzeraty)
         {
-            <tr>
+            <tr data-id="@item.ID">
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="ignoreInzerat(@item.ID)" asp-controller="GltvApi" asp-action="IgnoreInzerat" asp-route-id="@item.ID">Ignore</button>
+                    @*<a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                        <a asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">Delete</a>*@
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Type)<br />
                     (@Html.DisplayFor(modelItem => item.Category))
@@ -93,107 +100,21 @@
                 <td>
                     <a target="_blank" href="@Html.DisplayFor(modelItem => item.Url)">@Html.DisplayFor(modelItem => item.Title)</a>
                 </td>
-                <td>
-                    <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                    <a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                    <a asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-                </td>
             </tr>
         }
     </tbody>
 </table>
 
-
-
-@*<h2 style="padding-top: 100px;">Expired TvItems</h2>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    Title
-                </th>
-                <th>
-                    Status
-                </th>
-                <th>
-                    Author
-                </th>
-                <th>
-                    Total Duration
-                </th>
-                <th>
-                    Type
-                </th>
-                <th>
-                    Locations
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.ExpiredTvItems)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Title)
-                    </td>
-                    <td>
-                        <p class="time-hint">@Html.Raw(Utils.GetStatusFormat(item))</p>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Author)
-                    </td>
-                    <td>
-                        @Utils.GetFormattedDuration(item)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Type)
-                    </td>
-                    <td>
-                        @Utils.GetLocationsString(item.Locations)
-                    </td>
-                    <td>
-                        <a asp-controller="TvItems" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                        <a asp-controller="TvItems" asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                        <form asp-controller="TvItems" asp-action="Delete" asp-route-id="@item.ID">
-                            <input type="submit" value="Delete" class="btn btn-danger btn-sm" />
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>*@
-
 <script type="text/javascript">
-    $(function () {
-        $('#locationRadioDiv .location-radio').on('change',
-            function() {
-                var value = $(this).val();
-
-                $('#activeItemsTable > tbody > tr > td.location-col').each(function(index) {
-                    var text = $(this).text().trim();
-
-                    if (value == -1) {
-                        $(this).closest('tr').show();
-                        return;
-                    }
-
-                    if (text.includes("@Constants.KE") && value == @((int)Location.Kosice)) {
-                        $(this).closest('tr').show();
-                        return;
-                    } else if (text.includes("@Constants.ZA") && value == @((int)Location.Zilina)) {
-                        $(this).closest('tr').show();
-                        return;
-                    } else if (text.includes("@Constants.BB") && value == @((int)Location.BanskaBystrica)) {
-                        $(this).closest('tr').show();
-                        return;
-                    } else {
-                        $(this).closest('tr').hide();
-                        return;
-                    }
-                });
+    function ignoreInzerat(id) {
+        $.get("/api/ignoreInzerat/" + id,
+                function(data) {
+                    console.log("ignore inzerat with id " + data.id + " is ignored by " + data.username);
+                    $('#inzeratyTable tbody tr[data-id="' + data.id + '"]').addClass('hidden');
+                })
+            .fail(function(data) {
+                console.log("ignore inzerat with id " + id + " ERROR=" + data.message);
             });
-    });
+    }
 
 </script>

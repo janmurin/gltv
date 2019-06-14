@@ -95,14 +95,43 @@ namespace GLTV.Services
         public Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string inzeratCategory,
             string location, int priceMax, int pageNumber, int pageSize)
         {
-            IOrderedQueryable<Inzerat> query = Context.Inzerat
+            // first filter by location
+            List<Inzerat> locationInzeraty = Context.Inzerat
+                .Where(y => y.Location.Contains(location) || string.IsNullOrEmpty(location) || location.Equals("All"))
+                .OrderBy(x => x.ID)
+                .ToList();
+            // get ignored Inzeraty
+            HashSet<int> ignoredInzeratyIds = Context.IgnoredInzerat
+                .Where(x => x.UserName.Equals(CurrentUser.Identity.Name))
+                .Select(x => x.InzeratId)
+                .ToHashSet();
+            // filter out ignored Inzeraty 
+            locationInzeraty = locationInzeraty
+                .Where(x => !ignoredInzeratyIds.Contains(x.ID))
+                .ToList();
+
+            List<Inzerat> filteredInzeraty = locationInzeraty
                 .Where(y => y.Type.Equals(inzeratType) || string.IsNullOrEmpty(inzeratType) || inzeratType.Equals("All"))
                 .Where(y => y.Category.Equals(inzeratCategory) || string.IsNullOrEmpty(inzeratCategory) || inzeratCategory.Equals("All"))
-                .Where(y => y.Location.Contains(location) || string.IsNullOrEmpty(location) || location.Equals("All"))
                 .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
-                .OrderByDescending(x => x.DateInserted);
+                .OrderByDescending(x => x.DateInserted)
+                .ToList();
 
-            return PaginatedList<Inzerat>.CreateAsync(query.AsNoTracking(), pageNumber, pageSize);
+            return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
+        }
+
+        public Task IgnoreInzeratForUser(int id)
+        {
+            string username = CurrentUser.Identity.Name;
+            //Console.WriteLine($"{username} ignoring inzerat with id {id}");
+            Context.Add(new IgnoredInzerat()
+            {
+                InzeratId = id,
+                UserName = username
+            });
+            Context.SaveChanges();
+
+            return Task.CompletedTask;
         }
     }
 

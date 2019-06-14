@@ -35,5 +35,6 @@ namespace GLTV.Data
         public DbSet<TvScreenHandshake> TvScreenHandshake { get; set; }
         public DbSet<Inzerat> Inzerat { get; set; }
         public DbSet<UserFilter> UserFilter { get; set; }
+        public DbSet<IgnoredInzerat> IgnoredInzerat { get; set; }
     }
 }

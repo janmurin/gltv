@@ -19,12 +19,14 @@ namespace GLTV.Controllers
         private readonly IFileService _fileService;
         private readonly ITvItemService _tvItemService;
         private readonly IEventService _eventService;
+        private readonly IInzeratyService _inzeratyService;
 
-        public GltvApiController(IFileService fileService, ITvItemService tvItemService, IEventService eventService)
+        public GltvApiController(IFileService fileService, ITvItemService tvItemService, IEventService eventService, IInzeratyService inzeratyService)
         {
             _fileService = fileService;
             _tvItemService = tvItemService;
             _eventService = eventService;
+            _inzeratyService = inzeratyService;
         }
 
         [Produces("application/json")]
@@ -78,6 +80,26 @@ namespace GLTV.Controllers
                 else
                 {
                     return new ObjectResult("error: " + task.Exception?.Message);
+                }
+            });
+
+            return objectResult;
+        }
+
+        [Authorize]
+        [Produces("application/json")]
+        [Route("/api/ignoreInzerat/{id:int}")]
+        public async Task<IActionResult> IgnoreInzerat(int id)
+        {
+            ObjectResult objectResult = await _inzeratyService.IgnoreInzeratForUser(id).ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult(new { id = id, username = HttpContext.User.Identity.Name });
+                }
+                else
+                {
+                    return new ObjectResult(new { message = $"{task.Exception?.Message}" });
                 }
             });
 
