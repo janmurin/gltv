@@ -105,5 +105,65 @@ namespace GLTV.Controllers
 
             return objectResult;
         }
+
+        [Authorize]
+        [Produces("application/json")]
+        [Route("/api/markInzerat/{id:int}")]
+        public async Task<IActionResult> MarkInzerat(int id)
+        {
+            ObjectResult objectResult = await _inzeratyService.MarkInzeratForUser(id).ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult(new { id = id, username = HttpContext.User.Identity.Name });
+                }
+                else
+                {
+                    return new ObjectResult(new { message = $"{task.Exception?.Message}" });
+                }
+            });
+
+            return objectResult;
+        }
+
+        [Authorize]
+        [Produces("application/json")]
+        [Route("/api/cancelIgnoredInzerat/{id:int}")]
+        public async Task<IActionResult> CancelIgnoredInzerat(int id)
+        {
+            ObjectResult objectResult = await _inzeratyService.CancelIgnoredInzeratForUser(id).ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult(new { id = id, username = HttpContext.User.Identity.Name });
+                }
+                else
+                {
+                    return new ObjectResult(new { message = $"{task.Exception?.Message}" });
+                }
+            });
+
+            return objectResult;
+        }
+
+        [Authorize]
+        [Produces("application/json")]
+        [Route("/api/cancelMarkedInzerat/{id:int}")]
+        public async Task<IActionResult> CancelMarkedInzerat(int id)
+        {
+            ObjectResult objectResult = await _inzeratyService.CancelMarkedInzeratForUser(id).ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult(new { id = id, username = HttpContext.User.Identity.Name });
+                }
+                else
+                {
+                    return new ObjectResult(new { message = $"{task.Exception?.Message}" });
+                }
+            });
+
+            return objectResult;
+        }
     }
 }

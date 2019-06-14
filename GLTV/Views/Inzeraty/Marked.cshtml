@@ -5,14 +5,14 @@
 @model GLTV.Models.ViewModels.InzeratyViewModel
 
 @{
-    ViewData["Title"] = "Inzeráty";
-    ViewBag.IndexNav = true;
+    ViewData["Title"] = "Poznačené";
+    ViewBag.MarkedNav = true;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Inzeraty</h2>
+<h2>Poznačené Inzeráty</h2>
 
-<form asp-controller="Inzeraty" asp-action="Index" method="get">
+<form asp-controller="Inzeraty" asp-action="Marked" method="get">
     <p>
         <label>Typ</label>
         <select asp-for="InzeratType" asp-items="Model.InzeratyTypes">
@@ -84,7 +84,7 @@
         {
             <tr data-id="@item.ID">
                 <td>
-                    <button class="btn btn-success btn-sm" onclick="markInzerat(@item.ID)">Označiť</button>
+                    <button class="btn btn-default btn-sm" onclick="cancelMarkedInzerat(@item.ID)">Zrušiť</button>
                     <button class="btn btn-danger btn-sm" onclick="ignoreInzerat(@item.ID)">Ignorovať</button>
                 </td>
                 <td>
@@ -117,14 +117,14 @@
                 console.log("ignore inzerat with id " + id + " ERROR=" + data.message);
             });
     }
-    function markInzerat(id) {
-        $.get("/api/markInzerat/" + id,
+    function cancelMarkedInzerat(id) {
+        $.get("/api/cancelMarkedInzerat/" + id,
             function (data) {
-                console.log("mark inzerat with id " + data.id + " is marked by " + data.username);
+                console.log("cancelMarkedInzerat with id " + data.id + " is marked by " + data.username);
                 $('#inzeratyTable tbody tr[data-id="' + data.id + '"]').addClass('hidden');
             })
             .fail(function (data) {
-                console.log("mark inzerat with id " + id + " ERROR=" + data.message);
+                console.log("cancelMarkedInzerat with id " + id + " ERROR=" + data.message);
             });
     }
 
