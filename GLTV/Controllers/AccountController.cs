@@ -23,7 +23,7 @@ namespace GLTV.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly string[] _allowedEmails;
-        private readonly IEventService _eventService;
+        //private readonly IEventService _eventService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -31,13 +31,14 @@ namespace GLTV.Controllers
             IEmailSender emailSender,
             ILogger<AccountController> logger,
             IConfiguration configuration
-            , IEventService eventService)
+            //, IEventService eventService
+            )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
-            _eventService = eventService;
+            //_eventService = eventService;
 
             _allowedEmails = configuration.GetSection("AllowedEmails").Get<string[]>();
         }
@@ -103,7 +104,7 @@ namespace GLTV.Controllers
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
 
-                await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
+                //await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
 
                 return RedirectToLocal(returnUrl);
             }
@@ -130,7 +131,7 @@ namespace GLTV.Controllers
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                        await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
+                        //await _eventService.AddWebServerLogAsync(username, WebServerLogType.UserLoggedIn, $"User {username} logged in.", null);
                         return RedirectToLocal(returnUrl);
                     }
                 }

@@ -12,8 +12,6 @@ namespace GLTV.Services
     {
         protected readonly ApplicationDbContext Context;
 
-        private List<TvScreen> _knownScreens;
-
         public ServiceBase(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
         {
             Context = context;
@@ -25,20 +23,5 @@ namespace GLTV.Services
 
         protected List<string> AllowedExtensions { get; }
 
-        protected List<TvScreen> KnownTvScreens
-        {
-            get
-            {
-                if (_knownScreens == null)
-                {
-                    _knownScreens = Context.TvScreen.ToList();
-                    return _knownScreens;
-                }
-                else
-                {
-                    return _knownScreens;
-                }
-            }
-        }
     }
 }

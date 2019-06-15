@@ -21,8 +21,6 @@ namespace GLTV
 
                 try
                 {
-                    // Requires using MvcMovie.Models;
-                    SeedData.Initialize(services);
                     SeedData.InitializeInzeraty(services);
                 }
                 catch (Exception ex)

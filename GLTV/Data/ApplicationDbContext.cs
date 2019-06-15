@@ -20,19 +20,6 @@ namespace GLTV.Data
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<TvItem> TvItem { get; set; }
-
-        public DbSet<TvItemFile> TvItemFile { get; set; }
-
-        public DbSet<TvItemLocation> TvItemLocation { get; set; }
-
-        public DbSet<WebServerLog> WebServerLog { get; set; }
-
-        public DbSet<WebClientLog> WebClientLog { get; set; }
-
-        public DbSet<TvScreen> TvScreen { get; set; }
-
-        public DbSet<TvScreenHandshake> TvScreenHandshake { get; set; }
         public DbSet<Inzerat> Inzerat { get; set; }
         public DbSet<UserFilter> UserFilter { get; set; }
         public DbSet<IgnoredInzerat> IgnoredInzerat { get; set; }

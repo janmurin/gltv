@@ -46,11 +46,6 @@ namespace GLTV
                 //options.UseLoggerFactory(MyLoggerFactory);
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
             });
-            //services.AddDbContext<AdDbContext>(options =>
-            //{
-            //    //options.UseLoggerFactory(MyLoggerFactory);
-            //    options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
-            //});
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -70,7 +65,6 @@ namespace GLTV
                 googleOptions.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
             });
 
-            Constants.ANDROID_TOKEN = Configuration["androidToken"];
             Constants.SERVER_URL = Configuration["serverUrl"];
             Constants.SERVER_ADMIN = Configuration["ServerAdmin"];
             Constants.WEB_ROOT_PATH = _hostingEnvironment.WebRootPath;
@@ -106,13 +100,9 @@ namespace GLTV
             });
 
             // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.AddScoped<IFileService, FileService>();
-            services.AddScoped<ITvItemService, TvItemService>();
             services.AddScoped<IInzeratyService, InzeratyService>();
             services.AddScoped<IUserFilterService, UserFilterService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddScoped<IEventService, EventService>();
 
             services.AddMvc(config =>
             {
@@ -153,7 +143,6 @@ namespace GLTV
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseConventionalMiddleware();
             app.UseStaticFiles();
             //app.UseForwardedHeaders(new ForwardedHeadersOptions
             //{
@@ -164,7 +153,7 @@ namespace GLTV
                 ForwardedHeaders = ForwardedHeaders.All,
                 RequireHeaderSymmetry = false,
                 ForwardLimit = null,
-                KnownProxies = { IPAddress.Parse("172.17.114.36"), IPAddress.Parse("127.0.0.1") },
+                KnownProxies = { IPAddress.Parse("81.2.244.134"), IPAddress.Parse("127.0.0.1") },
             });
 
             app.UseAuthentication();
