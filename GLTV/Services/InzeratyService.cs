@@ -8,55 +8,20 @@ using GLTV.Models;
 using GLTV.Models.Objects;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace GLTV.Services
 {
     public class InzeratyService : ServiceBase, IInzeratyService
     {
+        private List<Filter> _filters;
+
 
         public InzeratyService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
             : base(context, signInManager)
         {
 
-        }
-
-        public Task<Inzerat> FetchInzeratAsync(int id)
-        {
-            var tvItem = Context.Inzerat
-                .SingleOrDefault(m => m.ID == id);
-
-            if (tvItem == null)
-            {
-                throw new Exception($"Item not found with id {id}.");
-            }
-
-            return Task.FromResult(tvItem);
-        }
-
-        public Task<List<Inzerat>> FetchInzeratyAsync()
-        {
-            List<Inzerat> tvItems = Context.Inzerat
-                .OrderByDescending(x => x.DateInserted)
-                .Skip(0)
-                .Take(100)
-                .ToList();
-
-            return Task.FromResult(tvItems);
-        }
-
-        public Task<List<Inzerat>> FetchInzeratyAsync(string inzeratType, string location, int priceMax)
-        {
-            List<Inzerat> tvItems = Context.Inzerat
-                .Where(y => string.IsNullOrEmpty(inzeratType) || y.Type.Equals(inzeratType) || inzeratType.Equals("All"))
-                .Where(y => string.IsNullOrEmpty(location) || y.Location.Contains(location) || location.Equals("All"))
-                .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
-                .OrderByDescending(x => x.DateInserted)
-                .Skip(0)
-                .Take(100)
-                .ToList();
-
-            return Task.FromResult(tvItems);
         }
 
         public Task<List<string>> FetchInzeratyTypesAsync()
@@ -83,7 +48,7 @@ namespace GLTV.Services
 
         public Task<List<string>> FetchInzeratyLocationsAsync()
         {
-            List<string> locations = Context.Filter
+            List<string> locations = GetFilters()
                 .Where(x => x.FilterCategory == FilterCategory.All && x.FilterType == FilterType.Location)
                 .Select(x => x.Value)
                 .OrderBy(q => q)
@@ -95,9 +60,12 @@ namespace GLTV.Services
         public Task<PaginatedList<Inzerat>> FetchInzeratyAsync(string inzeratType, string inzeratCategory,
             string location, int priceMax, int pageNumber, int pageSize)
         {
+            int locationID = GetLocationId(location);
+
             // first filter by location
             List<Inzerat> locationInzeraty = Context.Inzerat
-                .Where(y => string.IsNullOrEmpty(location) || y.Location.Contains(location) || location.Equals("All"))
+                .Where(y => locationID == 0 || y.LocationID == locationID)
+                //.Where(y => string.IsNullOrEmpty(location) || y.Location.Contains(location) || location.Equals("All"))
                 .OrderBy(x => x.ID)
                 .ToList();
             // get ignored Inzeraty
@@ -120,6 +88,53 @@ namespace GLTV.Services
                 .Where(y => string.IsNullOrEmpty(inzeratCategory) || y.Category.Equals(inzeratCategory) || inzeratCategory.Equals("All"))
                 .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
                 .OrderByDescending(x => x.DateInserted)
+                .ToList();
+
+            return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
+        }
+
+        public Task<PaginatedList<Inzerat>> FetchMarkedInzeratyAsync(string inzeratType, string inzeratCategory, string location, int priceMax, int pageNumber,
+    int pageSize)
+        {
+            List<Inzerat> markedInzeraty = (from inzerat in Context.Inzerat
+                                            join m in Context.MarkedInzerat
+                                                on inzerat.ID equals m.InzeratId
+                                            where m.UserName.Equals(CurrentUser.Identity.Name)
+                                            orderby m.ID descending
+                                            select inzerat)
+                .ToList();
+
+            int locationID = GetLocationId(location);
+
+            List<Inzerat> filteredInzeraty = markedInzeraty
+                .Where(y => locationID == 0 || y.LocationID == locationID)
+                .Where(y => string.IsNullOrEmpty(inzeratType) || y.Type.Equals(inzeratType) || inzeratType.Equals("All"))
+                .Where(y => string.IsNullOrEmpty(inzeratCategory) || y.Category.Equals(inzeratCategory) || inzeratCategory.Equals("All"))
+                .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
+                .ToList();
+
+            return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
+        }
+
+        public Task<PaginatedList<Inzerat>> FetchIgnoredInzeratyAsync(string inzeratType, string inzeratCategory, string location, int priceMax,
+            int pageNumber, int pageSize)
+        {
+            List<Inzerat> ignoredInzeraty = (from inzerat in Context.Inzerat
+                                             join m in Context.IgnoredInzerat
+                                                 on inzerat.ID equals m.InzeratId
+                                             where m.UserName.Equals(CurrentUser.Identity.Name)
+                                             orderby m.ID descending
+                                             select inzerat)
+                .ToList();
+
+            int locationID = GetLocationId(location);
+            
+            List<Inzerat> filteredInzeraty = ignoredInzeraty
+                .Where(y => locationID == 0 || y.LocationID == locationID)
+                //.Where(y => string.IsNullOrEmpty(location) || y.Location.Contains(location) || location.Equals("All"))
+                .Where(y => string.IsNullOrEmpty(inzeratType) || y.Type.Equals(inzeratType) || inzeratType.Equals("All"))
+                .Where(y => string.IsNullOrEmpty(inzeratCategory) || y.Category.Equals(inzeratCategory) || inzeratCategory.Equals("All"))
+                .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
                 .ToList();
 
             return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
@@ -177,46 +192,21 @@ namespace GLTV.Services
             return Task.CompletedTask;
         }
 
-        public Task<PaginatedList<Inzerat>> FetchMarkedInzeratyAsync(string inzeratType, string inzeratCategory, string location, int priceMax, int pageNumber,
-            int pageSize)
+        private List<Filter> GetFilters()
         {
-            List<Inzerat> markedInzeraty = (from inzerat in Context.Inzerat
-                                            join m in Context.MarkedInzerat
-                                                on inzerat.ID equals m.InzeratId
-                                            where m.UserName.Equals(CurrentUser.Identity.Name)
-                                            orderby m.ID descending
-                                            select inzerat)
-                .ToList();
+            if (_filters == null)
+            {
+                _filters = Context.Filter.ToList();
+            }
 
-            List<Inzerat> filteredInzeraty = markedInzeraty
-                .Where(y => string.IsNullOrEmpty(location) || y.Location.Contains(location) || location.Equals("All"))
-                .Where(y => string.IsNullOrEmpty(inzeratType) || y.Type.Equals(inzeratType) || inzeratType.Equals("All"))
-                .Where(y => string.IsNullOrEmpty(inzeratCategory) || y.Category.Equals(inzeratCategory) || inzeratCategory.Equals("All"))
-                .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
-                .ToList();
-
-            return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
+            return _filters;
         }
 
-        public Task<PaginatedList<Inzerat>> FetchIgnoredInzeratyAsync(string inzeratType, string inzeratCategory, string location, int priceMax,
-            int pageNumber, int pageSize)
+        private int GetLocationId(string location)
         {
-            List<Inzerat> ignoredInzeraty = (from inzerat in Context.Inzerat
-                                             join m in Context.IgnoredInzerat
-                                                 on inzerat.ID equals m.InzeratId
-                                             where m.UserName.Equals(CurrentUser.Identity.Name)
-                                             orderby m.ID descending
-                                             select inzerat)
-                .ToList();
-
-            List<Inzerat> filteredInzeraty = ignoredInzeraty
-                .Where(y => string.IsNullOrEmpty(location) || y.Location.Contains(location) || location.Equals("All"))
-                .Where(y => string.IsNullOrEmpty(inzeratType) || y.Type.Equals(inzeratType) || inzeratType.Equals("All"))
-                .Where(y => string.IsNullOrEmpty(inzeratCategory) || y.Category.Equals(inzeratCategory) || inzeratCategory.Equals("All"))
-                .Where(y => y.PriceValue <= priceMax || priceMax <= 0)
-                .ToList();
-
-            return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
+            return GetFilters()
+                       .Where(x => x.FilterCategory == FilterCategory.All && x.FilterType == FilterType.Location)
+                       .FirstOrDefault(x => x.Value.Equals(location))?.ID ?? 0;
         }
     }
 

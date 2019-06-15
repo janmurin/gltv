@@ -15,6 +15,8 @@ namespace GLTV.Models.Objects
         public string Author { get; set; }
         public string Phone { get; set; }
         public string Location { get; set; }
+        [Required]
+        public int LocationID { get; set; }
         public string Url { get; set; }
         public string Type { get; set; }
         public string Category { get; set; }
