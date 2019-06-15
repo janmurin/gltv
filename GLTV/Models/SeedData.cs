@@ -2,6 +2,7 @@
 using System.Linq;
 using GLTV.Data;
 using GLTV.Models.Objects;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,16 @@ namespace GLTV.Models
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
+                if (!context.ScraperLogEvent.Any())
+                {
+                    context.ScraperLogEvent.Add(new ScraperLogEvent()
+                    {
+                        EventID = 0,
+                        Message = "initial eventID",
+                        TimeInserted = DateTime.Now
+                    });
+                    context.SaveChanges();
+                }
                 // Look for any movies.
                 if (context.Inzerat.Any())
                 {
