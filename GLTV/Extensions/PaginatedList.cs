@@ -50,5 +50,10 @@ namespace GLTV.Extensions
             var items = source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
             return new PaginatedList<T>(items, count, pageIndex, pageSize);
         }
+
+        public static PaginatedList<T> CreateForLogEvents(IEnumerable<T> source, int count, int pageIndex, int pageSize)
+        {
+            return new PaginatedList<T>(source.ToList(), count, pageIndex, pageSize);
+        }
     }
 }

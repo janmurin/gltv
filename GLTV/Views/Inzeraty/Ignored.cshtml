@@ -15,6 +15,33 @@
 <form asp-controller="Inzeraty" asp-action="Ignored" method="get" class="form-inline">
     @await Html.PartialAsync("_FilterForm", Model)
 </form>
+@{
+    var prevDisabled = !Model.Inzeraty.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Inzeraty.HasNextPage ? "disabled" : "";
+}
+<br />
+<a asp-action="Ignored" asp-controller="Inzeraty"
+   asp-route-pageNumber="@(Model.Inzeraty.PageIndex - 1)"
+   asp-route-inzeratType="@Model.InzeratType"
+   asp-route-inzeratCategory="@Model.InzeratCategory"
+   asp-route-location="@Model.Location"
+   asp-route-priceString="@Model.PriceString"
+   id="prev-button"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Ignored" asp-controller="Inzeraty"
+   asp-route-pageNumber="@(Model.Inzeraty.PageIndex + 1)"
+   asp-route-inzeratType="@Model.InzeratType"
+   asp-route-inzeratCategory="@Model.InzeratCategory"
+   asp-route-location="@Model.Location"
+   asp-route-priceString="@Model.PriceString"
+   id="next-button"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
+<p>Nájdených výsledkov @(Model.Inzeraty.TotalCount)</p>
+<p>Stránka @(Model.Inzeraty.PageIndex)/@(Model.Inzeraty.TotalPages)</p>
 
 <table class="table" id="inzeratyTable">
     <thead>

@@ -1,7 +1,68 @@
-﻿
+﻿@using GLTV.Models.Objects
+@model GLTV.Models.ViewModels.LogEventViewModel
+
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Log";
+    ViewBag.LogNav = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var prevDisabled = !Model.LogEvents.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.LogEvents.HasNextPage ? "disabled" : "";
+    List<List<ScraperLogEvent>> eventsLists = Model.LogEvents.GroupBy(u => u.EventID).Select(g => g.ToList()).ToList();
 }
 
-<h2>Index</h2>
+<h1>Log</h1>
 
+<a asp-action="Index" asp-controller="LogEvent"
+   asp-route-pageNumber="@(Model.LogEvents.PageIndex - 1)"
+   id="prev-button"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index" asp-controller="LogEvent"
+   asp-route-pageNumber="@(Model.LogEvents.PageIndex + 1)"
+   id="next-button"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
+<p>Všetkých záznamov @(Model.LogEvents.TotalCount)</p>
+<p>Stránka @(Model.LogEvents.PageIndex)/@(Model.LogEvents.TotalPages)</p>
+
+<table class="table" id="logEventsTable">
+    <thead>
+        <tr>
+            <th>
+                ID
+            </th>
+            <th>
+                Dátum
+            </th>
+            <th>
+                Záznam
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in eventsLists)
+        {
+            int eventID = item.First().EventID;
+            DateTime date = item.First().TimeInserted.Date;
+            IEnumerable<ScraperLogEvent> events = item.OrderByDescending(x=>x.ID).Reverse();
+            <tr>
+                <td>
+                    @eventID
+                </td>
+                <td>
+                    @date.ToString("yyyy-MM-dd")
+                </td>
+                <td>
+                    @foreach (var e in events)
+                    {
+
+                        <small style="padding-right: 20px;">@e.TimeInserted.ToString("HH:mm:ss")</small>@e.Message<br />
+
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

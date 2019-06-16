@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GLTV.Models.ViewModels;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,18 +12,19 @@ namespace GLTV.Controllers
     [Authorize]
     public class LogEventController : Controller
     {
-        private readonly IInzeratyService _inzeratyService;
-        private readonly IUserFilterService _userFilterService;
+        private readonly ILogEventService _logEventService;
 
-        public LogEventController(IInzeratyService inzeratyService, IUserFilterService userFilterService)
+        public LogEventController(ILogEventService logEventService)
         {
-            _inzeratyService = inzeratyService;
-            _userFilterService = userFilterService;
+            _logEventService = logEventService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? pageNumber)
         {
-            return View();
+            LogEventViewModel model = new LogEventViewModel();
+            model.LogEvents = await _logEventService.FetchScraperLogEventsAsync(pageNumber ?? 1);
+
+            return View(model);
         }
     }
 }

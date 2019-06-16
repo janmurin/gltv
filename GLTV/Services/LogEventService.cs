@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GLTV.Data;
+using GLTV.Extensions;
 using GLTV.Models;
 using GLTV.Models.Objects;
 using GLTV.Services.Interfaces;
+using MailKit.Search;
 using Microsoft.AspNetCore.Identity;
 
 namespace GLTV.Services
@@ -18,10 +20,20 @@ namespace GLTV.Services
 
         }
 
-        public Task<List<ScraperLogEvent>> FetchScraperLogEventsAsync()
+        public Task<PaginatedList<ScraperLogEvent>> FetchScraperLogEventsAsync(int pageNumber)
         {
-            List<ScraperLogEvent> logEvents = Context.ScraperLogEvent.OrderByDescending(q => q.ID).ToList();
-            return Task.FromResult(logEvents);
+            int topEventID = Context.ScraperLogEvent.OrderByDescending(x => x.ID).First().EventID;
+            // one page contains 10 events
+            int pageSize = 10;
+            int topId = topEventID - (pageNumber - 1) * pageSize;
+            int bottomId = Math.Max(0, topEventID - (pageNumber + 1) * pageSize);
+
+            List<ScraperLogEvent> events = Context.ScraperLogEvent
+                .Where(x => x.EventID <= topId && x.EventID > bottomId)
+                .OrderByDescending(x => x.ID)
+                .ToList();
+
+            return Task.FromResult(PaginatedList<ScraperLogEvent>.CreateForLogEvents(events, topEventID, pageNumber, pageSize));
         }
     }
 }

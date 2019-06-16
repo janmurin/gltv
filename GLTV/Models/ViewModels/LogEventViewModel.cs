@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using GLTV.Extensions;
 using GLTV.Models.Objects;
 
-namespace GLTV.Services.Interfaces
+namespace GLTV.Models.ViewModels
 {
-    public interface ILogEventService
+    public class LogEventViewModel
     {
-        Task<PaginatedList<ScraperLogEvent>> FetchScraperLogEventsAsync(int pageNumber);
+        public PaginatedList<ScraperLogEvent> LogEvents { get; set; }
     }
 }

@@ -102,6 +102,7 @@ namespace GLTV
             // Add application services.
             services.AddScoped<IInzeratyService, InzeratyService>();
             services.AddScoped<IUserFilterService, UserFilterService>();
+            services.AddScoped<ILogEventService, LogEventService>();
             services.AddScoped<IEmailSender, EmailSender>();
 
             services.AddMvc(config =>
