@@ -12,53 +12,8 @@
 
 <h2>Poznačené Inzeráty</h2>
 
-<form asp-controller="Inzeraty" asp-action="Marked" method="get">
-    <p>
-        <label>Typ</label>
-        <select asp-for="InzeratType" asp-items="Model.InzeratyTypes">
-            <option value="">All</option>
-        </select>
-
-        <label>Kategória</label>
-        <select asp-for="InzeratCategory" asp-items="Model.InzeratyCategories">
-            <option value="">All</option>
-        </select>
-
-        <label>Lokácia</label>
-        <select asp-for="Location" asp-items="Model.Locations">
-            <option value="">All</option>
-        </select>
-
-        Cena do: <input type="number" asp-for="PriceString" />
-        <input type="submit" value="Filter" />
-    </p>
-    @{
-        var prevDisabled = !Model.Inzeraty.HasPreviousPage ? "disabled" : "";
-        var nextDisabled = !Model.Inzeraty.HasNextPage ? "disabled" : "";
-    }
-
-    <a asp-action="Index"
-       asp-route-pageNumber="@(Model.Inzeraty.PageIndex - 1)"
-       asp-route-inzeratType="@Model.InzeratType"
-       asp-route-inzeratCategory="@Model.InzeratCategory"
-       asp-route-location="@Model.Location"
-       asp-route-priceString="@Model.PriceString"
-       id="prev-button"
-       class="btn btn-default @prevDisabled">
-        Previous
-    </a>
-    <a asp-action="Index"
-       asp-route-pageNumber="@(Model.Inzeraty.PageIndex + 1)"
-       asp-route-inzeratType="@Model.InzeratType"
-       asp-route-inzeratCategory="@Model.InzeratCategory"
-       asp-route-location="@Model.Location"
-       asp-route-priceString="@Model.PriceString"
-       id="next-button"
-       class="btn btn-default @nextDisabled">
-        Next
-    </a>
-    <p>Nájdených výsledkov @(Model.Inzeraty.TotalCount)</p>
-    <p>Stránka @(Model.Inzeraty.PageIndex)/@(Model.Inzeraty.TotalPages)</p>
+<form asp-controller="Inzeraty" asp-action="Marked" method="get" class="form-inline">
+    @await Html.PartialAsync("_FilterForm", Model)
 </form>
 
 <table class="table" id="inzeratyTable">
@@ -109,11 +64,11 @@
 <script type="text/javascript">
     function ignoreInzerat(id) {
         $.get("/api/ignoreInzerat/" + id,
-                function(data) {
-                    console.log("ignore inzerat with id " + data.id + " is ignored by " + data.username);
-                    $('#inzeratyTable tbody tr[data-id="' + data.id + '"]').addClass('hidden');
-                })
-            .fail(function(data) {
+            function (data) {
+                console.log("ignore inzerat with id " + data.id + " is ignored by " + data.username);
+                $('#inzeratyTable tbody tr[data-id="' + data.id + '"]').addClass('hidden');
+            })
+            .fail(function (data) {
                 console.log("ignore inzerat with id " + id + " ERROR=" + data.message);
             });
     }

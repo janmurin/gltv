@@ -13,57 +13,8 @@
 <h2>Inzeráty</h2>
 
 <form asp-controller="Inzeraty" asp-action="Index" method="get" class="form-inline">
-    <div class="form-group">
-        <label for="InzeratType">Typ:</label>
-        <select asp-for="InzeratType" asp-items="Model.InzeratyTypes">
-            <option value="0">All</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="InzeratCategory">Kategória:</label>
-        <select asp-for="InzeratCategory" asp-items="Model.InzeratyCategories">
-            <option value="">All</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="Location">Lokácia:</label>
-        <select asp-for="Location" asp-items="Model.Locations">
-            <option value="">All</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="PriceString">Cena do:</label>
-        <input type="number" asp-for="PriceString" />
-    </div>
-    <button type="submit" class="btn btn-default">Filtrovať</button>
-    @{
-        var prevDisabled = !Model.Inzeraty.HasPreviousPage ? "disabled" : "";
-        var nextDisabled = !Model.Inzeraty.HasNextPage ? "disabled" : "";
-    }
-    <br/>
-    <a asp-action="Index"
-       asp-route-pageNumber="@(Model.Inzeraty.PageIndex - 1)"
-       asp-route-inzeratType="@Model.InzeratType"
-       asp-route-inzeratCategory="@Model.InzeratCategory"
-       asp-route-location="@Model.Location"
-       asp-route-priceString="@Model.PriceString"
-       id="prev-button"
-       class="btn btn-default @prevDisabled">
-        Previous
-    </a>
-    <a asp-action="Index"
-       asp-route-pageNumber="@(Model.Inzeraty.PageIndex + 1)"
-       asp-route-inzeratType="@Model.InzeratType"
-       asp-route-inzeratCategory="@Model.InzeratCategory"
-       asp-route-location="@Model.Location"
-       asp-route-priceString="@Model.PriceString"
-       id="next-button"
-       class="btn btn-default @nextDisabled">
-        Next
-    </a>
-    <p>Nájdených výsledkov @(Model.Inzeraty.TotalCount)</p>
-    <p>Stránka @(Model.Inzeraty.PageIndex)/@(Model.Inzeraty.TotalPages)</p>
-</form> 
+    @await Html.PartialAsync("_FilterForm", Model)
+</form>
 
 <table class="table" id="inzeratyTable">
     <thead>
@@ -113,11 +64,11 @@
 <script type="text/javascript">
     function ignoreInzerat(id) {
         $.get("/api/ignoreInzerat/" + id,
-                function(data) {
-                    console.log("ignore inzerat with id " + data.id + " is ignored by " + data.username);
-                    $('#inzeratyTable tbody tr[data-id="' + data.id + '"]').addClass('hidden');
-                })
-            .fail(function(data) {
+            function (data) {
+                console.log("ignore inzerat with id " + data.id + " is ignored by " + data.username);
+                $('#inzeratyTable tbody tr[data-id="' + data.id + '"]').addClass('hidden');
+            })
+            .fail(function (data) {
                 console.log("ignore inzerat with id " + id + " ERROR=" + data.message);
             });
     }

@@ -16,6 +16,7 @@ namespace GLTV.Extensions
         {
             PageIndex = pageIndex;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            TotalPages = TotalPages == 0 ? 1 : TotalPages;
             TotalCount = count;
 
             this.AddRange(items);
