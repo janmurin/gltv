@@ -115,11 +115,11 @@ namespace GLTV.Controllers
             else
             {
                 // create user account.
-                if (!_allowedEmails.Contains(email))
-                {
-                    TempData["ErrorMessage"] = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
-                    return RedirectToAction(nameof(Login));
-                }
+                //if (!_allowedEmails.Contains(email))
+                //{
+                //    TempData["ErrorMessage"] = $"Email address [{email}] is not allowed for this application. Allowed emails: <br/>{String.Join(",<br/>", _allowedEmails)}.";
+                //    return RedirectToAction(nameof(Login));
+                //}
 
                 var user = new ApplicationUser { UserName = username, Email = email };
                 var result2 = await _userManager.CreateAsync(user);
