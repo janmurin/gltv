@@ -17,10 +17,12 @@ namespace GLTV.Controllers
     public class GltvApiController : Controller
     {
         private readonly IInzeratyService _inzeratyService;
+        private IEmailSender _emailSender;
 
-        public GltvApiController(IInzeratyService inzeratyService)
+        public GltvApiController(IInzeratyService inzeratyService, IEmailSender emailSender)
         {
             _inzeratyService = inzeratyService;
+            _emailSender = emailSender;
         }
 
         [Authorize]
@@ -93,6 +95,30 @@ namespace GLTV.Controllers
                 if (task.IsCompletedSuccessfully)
                 {
                     return new ObjectResult(new { id = id, username = HttpContext.User.Identity.Name });
+                }
+                else
+                {
+                    return new ObjectResult(new { message = $"{task.Exception?.Message}" });
+                }
+            });
+
+            return objectResult;
+        }
+
+        [Authorize]
+        [Produces("application/json")]
+        [Route("/api/sendNotificationEmail")]
+        public async Task<IActionResult> SendNotificationEmail()
+        {
+            string userName = HttpContext.User.Identity.Name;
+            string message = "test notification message from api";
+
+            ObjectResult objectResult = await _emailSender.SendEmailAsync($"{userName}@gmail.com", EmailType.Notification, message)
+                .ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    return new ObjectResult(new { username = userName, message = message });
                 }
                 else
                 {

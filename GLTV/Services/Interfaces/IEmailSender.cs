@@ -4,6 +4,6 @@ namespace GLTV.Services
 {
     public interface IEmailSender
     {
-        Task SendEmailAsync(string author, EmailType type, object data);
+        Task SendEmailAsync(string recipientEmail, EmailType type, object data);
     }
 }
