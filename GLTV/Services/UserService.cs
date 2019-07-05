@@ -11,10 +11,10 @@ using Newtonsoft.Json;
 
 namespace GLTV.Services
 {
-    public class UserFilterService : ServiceBase, IUserFilterService
+    public class UserService : ServiceBase, IUserService
     {
 
-        public UserFilterService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
+        public UserService(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
             : base(context, signInManager)
         {
 
@@ -61,6 +61,40 @@ namespace GLTV.Services
             Context.SaveChanges();
 
             return Task.FromResult(userFilter.FilterData);
+        }
+
+        private UserSetting FetchUserSetting()
+        {
+            var userSetting = Context.UserSetting
+                .SingleOrDefault(m => m.Username.Equals(CurrentUser.Identity.Name));
+
+            if (userSetting == null)
+            {
+                userSetting = new UserSetting()
+                {
+                    Username = CurrentUser.Identity.Name,
+                    NotificationsEnabled = false
+                };
+                Context.Update(userSetting);
+                Context.SaveChanges();
+            }
+
+            return userSetting;
+        }
+
+        public Task<UserSetting> FetchUserSettingAsync()
+        {
+            UserSetting userSetting = FetchUserSetting();
+            return Task.FromResult(userSetting);
+        }
+
+        public Task<UserSetting> UpdateUserSettingAsync(UserSetting userSetting)
+        {
+            UserSetting setting = FetchUserSetting();
+            Context.Update(setting);
+            Context.SaveChanges();
+
+            return Task.FromResult(setting);
         }
     }
 }

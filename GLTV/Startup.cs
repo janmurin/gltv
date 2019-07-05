@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace GLTV
 {
@@ -101,9 +103,10 @@ namespace GLTV
 
             // Add application services.
             services.AddScoped<IInzeratyService, InzeratyService>();
-            services.AddScoped<IUserFilterService, UserFilterService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<ILogEventService, LogEventService>();
             services.AddScoped<IEmailSender, EmailSender>();
+            services.AddHostedService<TimedHostedService>();
 
             services.AddMvc(config =>
             {

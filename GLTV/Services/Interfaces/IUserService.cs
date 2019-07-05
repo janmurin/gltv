@@ -6,9 +6,11 @@ using GLTV.Models.Objects;
 
 namespace GLTV.Services.Interfaces
 {
-    public interface IUserFilterService
+    public interface IUserService
     {
         Task<FilterData> FetchUserFilterDataAsync();
         Task<FilterData> UpdateUserFilterDataAsync(FilterData filterData);
+        Task<UserSetting> FetchUserSettingAsync();
+        Task<UserSetting> UpdateUserSettingAsync(UserSetting userSetting);
     }
 }

@@ -92,5 +92,15 @@ namespace GLTV.Services
 
             return Task.CompletedTask;
         }
+
+        public Task<NotificationLog> FetchNotificationLogAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<NotificationLog> UpdateNotificationLogAsync(NotificationLog notificationLog)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

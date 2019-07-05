@@ -26,5 +26,7 @@ namespace GLTV.Data
         public DbSet<MarkedInzerat> MarkedInzerat { get; set; }
         public DbSet<Filter> Filter { get; set; }
         public DbSet<ScraperLogEvent> ScraperLogEvent { get; set; }
+        public DbSet<UserSetting> UserSetting { get; set; }
+        public DbSet<NotificationLog> NotificationLog { get; set; }
     }
 }

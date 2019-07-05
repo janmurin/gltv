@@ -1,0 +1,23 @@
+﻿@model GLTV.Models.ViewModels.SettingsViewModel
+
+@{
+    ViewData["Title"] = "Settings";
+    ViewBag.SettingsNav = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Settings</h2>
+
+<form asp-controller="Home" asp-action="UpdateSettings" method="post" class="form-horizontal">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <div class="checkbox">
+            <label asp-for="NotificationsEnabled">
+                <input asp-for="NotificationsEnabled" class="location-checkbox" />
+                <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+                Zasielať email o nových nájdených inzerátoch
+            </label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success">Uložiť</button>
+</form>

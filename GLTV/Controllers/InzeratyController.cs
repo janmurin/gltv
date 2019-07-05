@@ -15,12 +15,12 @@ namespace GLTV.Controllers
     public class InzeratyController : Controller
     {
         private readonly IInzeratyService _inzeratyService;
-        private readonly IUserFilterService _userFilterService;
+        private readonly IUserService _userService;
 
-        public InzeratyController(IInzeratyService inzeratyService, IUserFilterService userFilterService)
+        public InzeratyController(IInzeratyService inzeratyService, IUserService userService)
         {
             _inzeratyService = inzeratyService;
-            _userFilterService = userFilterService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index(string inzeratType, string inzeratCategory, string location, string priceString, int? pageNumber)
@@ -32,7 +32,7 @@ namespace GLTV.Controllers
                 string.IsNullOrEmpty(location) && string.IsNullOrEmpty(priceString))
             {
                 // if no filter, load user's filter data
-                filterData = await _userFilterService.FetchUserFilterDataAsync();
+                filterData = await _userService.FetchUserFilterDataAsync();
                 Int32.TryParse(filterData.PriceString, out priceMax);
             }
             else
@@ -44,7 +44,7 @@ namespace GLTV.Controllers
                 Int32.TryParse(priceString, out priceMax);
                 filterData.PriceString = priceMax.ToString();
 
-                await _userFilterService.UpdateUserFilterDataAsync(filterData);
+                await _userService.UpdateUserFilterDataAsync(filterData);
             }
 
             int pageSize = 100;

@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GLTV.Models;
+using GLTV.Models.Objects;
+using GLTV.Models.ViewModels;
 using GLTV.Services;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,18 +16,16 @@ namespace GLTV.Controllers
     public class HomeController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IFileProvider _fileProvider;
         private readonly IEmailSender _emailSender;
-        //private readonly IEventService _eventService;
+        private readonly IUserService _userService;
 
-        public HomeController(SignInManager<ApplicationUser> signInManager, IFileProvider fileProvider, IEmailSender emailSender
-            //, IEventService eventService
+        public HomeController(SignInManager<ApplicationUser> signInManager, IEmailSender emailSender
+            , IUserService userService
             )
         {
             _signInManager = signInManager;
-            _fileProvider = fileProvider;
             _emailSender = emailSender;
-            //_eventService = eventService;
+            _userService = userService;
         }
 
         [AllowAnonymous]
@@ -73,6 +73,32 @@ namespace GLTV.Controllers
             //    $"User encountered exception: [{exception.Error.Message}].", null);
 
             return View();
+        }
+
+        public async Task<IActionResult> Settings(bool emailNotification)
+        {
+            UserSetting setting = await _userService.FetchUserSettingAsync();
+
+            var model = new SettingsViewModel();
+            model.NotificationsEnabled = setting.NotificationsEnabled;
+
+            return View("Settings", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateSettings([Bind]SettingsViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                UserSetting setting = await _userService.FetchUserSettingAsync();
+                setting.NotificationsEnabled = model.NotificationsEnabled;
+
+                UserSetting userSetting = await _userService.UpdateUserSettingAsync(setting);
+                model.NotificationsEnabled = userSetting.NotificationsEnabled;
+            }
+
+            return View("Settings", model);
         }
     }
 }
