@@ -5,6 +5,12 @@ using System.Threading.Tasks;
 
 namespace GLTV.Models.Objects
 {
+    public class NotificationMessage
+    { 
+        public string User { get; set; }
+        public int Count { get; set; }
+    }
+
     public class NotificationLog
     {
         public int ID { get; set; }

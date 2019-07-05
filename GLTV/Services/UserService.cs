@@ -7,6 +7,7 @@ using GLTV.Models;
 using GLTV.Models.Objects;
 using GLTV.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Internal.System.Collections.Sequences;
 using Newtonsoft.Json;
 
 namespace GLTV.Services
@@ -95,6 +96,50 @@ namespace GLTV.Services
             Context.SaveChanges();
 
             return Task.FromResult(setting);
+        }
+
+        public Task SendNewInzeratyNotifications()
+        {
+            Dictionary<string, List<Inzerat>> userInzeraty = new Dictionary<string, List<Inzerat>>();
+
+            // check if new inzeraty
+            NotificationLog nl = Context.NotificationLog.OrderByDescending(n => n.ID).FirstOrDefault();
+            if (nl is null)
+            {
+                // create initial notification log
+                Inzerat first = Context.Inzerat.OrderByDescending(i => i.ID).First();
+                nl = new NotificationLog()
+                {
+                    InzeratID = first.ID,
+                    TimeInserted = DateTime.Now,
+                    Message = GetNotifiedUsers(userInzeraty)
+                };
+
+                Context.Update(nl);
+                Context.SaveChanges();
+            }
+
+            // send new inzeraty to users
+            List<UserSetting> userSettings = Context.UserSetting.Where(u => u.NotificationsEnabled).ToList();
+
+
+            return Task.CompletedTask;
+        }
+
+        private string GetNotifiedUsers(Dictionary<string, List<Inzerat>> userInzeraty)
+        {
+            List<NotificationMessage> users = new List<NotificationMessage>();
+            foreach (KeyValuePair<string, List<Inzerat>> keyValuePair in userInzeraty)
+            {
+                users.Add(new NotificationMessage()
+                {
+                    Count = keyValuePair.Value.Count,
+                    User = keyValuePair.Key
+                });
+            }
+
+            return JsonConvert.SerializeObject(users);
+
         }
     }
 }

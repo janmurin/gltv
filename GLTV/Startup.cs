@@ -105,8 +105,11 @@ namespace GLTV
             services.AddScoped<IInzeratyService, InzeratyService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ILogEventService, LogEventService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddHostedService<TimedHostedService>();
+            //services.AddSingleton<TimedHostedService>();
+            services.AddHostedService<ConsumeScopedServiceHostedService>();
+            services.AddScoped<IScopedProcessingService, ScopedProcessingService>();
 
             services.AddMvc(config =>
             {
