@@ -11,15 +11,22 @@ namespace GLTV.Services
     public class ServiceBase
     {
         protected readonly ApplicationDbContext Context;
+        protected readonly SignInManager<ApplicationUser> _signInManager;
 
         public ServiceBase(ApplicationDbContext context, SignInManager<ApplicationUser> signInManager)
         {
             Context = context;
             AllowedExtensions = new List<string> { "jpg", "jpe", "bmp", "jpeg", "png", "mkv", "mp4" };
-            CurrentUser = signInManager.Context.User;
+            _signInManager = signInManager;
         }
 
-        protected ClaimsPrincipal CurrentUser { get; }
+        protected ClaimsPrincipal CurrentUser
+        {
+            get
+            {
+                return _signInManager.Context.User;
+            }
+        }
 
         protected List<string> AllowedExtensions { get; }
 

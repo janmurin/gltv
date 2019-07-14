@@ -22,5 +22,6 @@ namespace GLTV.Services.Interfaces
         Task CancelIgnoredInzeratForUser(int id);
         Task<PaginatedList<Inzerat>> FetchMarkedInzeratyAsync(string inzeratType, string inzeratCategory, string location, int priceMax, int pageNumber, int pageSize);
         Task<PaginatedList<Inzerat>> FetchIgnoredInzeratyAsync(string inzeratType, string inzeratCategory, string location, int priceMax, int pageNumber, int pageSize);
+        List<Inzerat> FetchInzeratyForNotifications(FilterData filterData);
     }
 }

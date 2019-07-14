@@ -140,6 +140,20 @@ namespace GLTV.Services
             return Task.FromResult(PaginatedList<Inzerat>.Create(filteredInzeraty, pageNumber, pageSize));
         }
 
+        public List<Inzerat> FetchInzeratyForNotifications(FilterData filterData)
+        {
+            int priceMax = 0;
+            Int32.TryParse(filterData.PriceString, out priceMax);
+
+            PaginatedList<Inzerat> inzeraty = FetchInzeratyAsync(filterData.InzeratType, filterData.InzeratCategory, filterData.Location,
+                priceMax, 1, 1000).Result; // max 1000 to avoid memory allocation error
+
+            List<Inzerat> last10Minutes = inzeraty.FindAll(i =>
+                DateTime.Compare(DateTime.Now - TimeSpan.FromMinutes(10), i.DateInserted) < 0);
+
+            return last10Minutes;
+        }
+
         public Task IgnoreInzeratForUser(int id)
         {
             Context.Update(new IgnoredInzerat()

@@ -98,48 +98,19 @@ namespace GLTV.Services
             return Task.FromResult(setting);
         }
 
-        public Task SendNewInzeratyNotifications()
+        public List<UserFilter> FetchUserFilterDataForNotifications()
         {
-            Dictionary<string, List<Inzerat>> userInzeraty = new Dictionary<string, List<Inzerat>>();
-
-            // check if new inzeraty
-            NotificationLog nl = Context.NotificationLog.OrderByDescending(n => n.ID).FirstOrDefault();
-            if (nl is null)
+            List<UserFilter> userFilters = (from filter in Context.UserFilter
+                join setting in Context.UserSetting
+                    on filter.Username equals setting.Username
+                where setting.NotificationsEnabled
+                select filter).ToList();
+            foreach (UserFilter filter in userFilters)
             {
-                // create initial notification log
-                Inzerat first = Context.Inzerat.OrderByDescending(i => i.ID).First();
-                nl = new NotificationLog()
-                {
-                    InzeratID = first.ID,
-                    TimeInserted = DateTime.Now,
-                    Message = GetNotifiedUsers(userInzeraty)
-                };
-
-                Context.Update(nl);
-                Context.SaveChanges();
+                filter.FilterData = JsonConvert.DeserializeObject<FilterData>(filter.FilterDataJson);
             }
-
-            // send new inzeraty to users
-            List<UserSetting> userSettings = Context.UserSetting.Where(u => u.NotificationsEnabled).ToList();
-
-
-            return Task.CompletedTask;
-        }
-
-        private string GetNotifiedUsers(Dictionary<string, List<Inzerat>> userInzeraty)
-        {
-            List<NotificationMessage> users = new List<NotificationMessage>();
-            foreach (KeyValuePair<string, List<Inzerat>> keyValuePair in userInzeraty)
-            {
-                users.Add(new NotificationMessage()
-                {
-                    Count = keyValuePair.Value.Count,
-                    User = keyValuePair.Key
-                });
-            }
-
-            return JsonConvert.SerializeObject(users);
-
+            
+            return userFilters;
         }
     }
 }

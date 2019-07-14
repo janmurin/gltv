@@ -12,5 +12,6 @@ namespace GLTV.Services.Interfaces
         Task<FilterData> UpdateUserFilterDataAsync(FilterData filterData);
         Task<UserSetting> FetchUserSettingAsync();
         Task<UserSetting> UpdateUserSettingAsync(UserSetting userSetting);
+        List<UserFilter> FetchUserFilterDataForNotifications();
     }
 }

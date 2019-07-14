@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mail;
+using System.Text;
 using System.Threading.Tasks;
 using GLTV.Extensions;
 using GLTV.Models.Objects;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 
 namespace GLTV.Services
 {
@@ -51,7 +55,7 @@ namespace GLTV.Services
                 {
                     string o = (string)data;
                     Console.WriteLine($"sending notification email to {recipientEmail}. Message is '{o}'");
-                    
+
                     MailMessage mailMessage = new MailMessage();
                     MailAddress fromAddress = new MailAddress("no-reply@scraper.sk");
                     mailMessage.From = fromAddress;
@@ -91,6 +95,39 @@ namespace GLTV.Services
             }
 
             return Task.CompletedTask;
+        }
+
+        public void SendNewInzeratyNotifications(string userEmail, List<Inzerat> userInzerats,
+            FilterData filterFilterData)
+        {
+            Console.WriteLine($"sending notification email to {userEmail}. Inzeraty size is '{userInzerats.Count}'");
+
+            MailMessage mailMessage = new MailMessage();
+            MailAddress fromAddress = new MailAddress("no-reply@scraper.sk");
+            mailMessage.From = fromAddress;
+            mailMessage.To.Add(userEmail);
+            StringBuilder sb = new StringBuilder($"<h3>Bolo nájdených {userInzerats.Count} inzerátov, ktoré vyhovujú vašemu zvolenému filtru:</h3><ul>");
+            foreach (Inzerat inzerat in userInzerats.Take(10))
+            {
+                sb.Append(
+                    $"<li><a target=\"_blank\" href=\"{inzerat.Url}\">{inzerat.Title}</a></li>");
+            }
+            sb.Append($"</ul><h4>Parametre Vášho filtra:</h4> " +
+                      $"<dl> " +
+                      $"<dt>Typ</dt> <dd>{filterFilterData.InzeratType}</dd> " +
+                      $"<dt>Kategória</dt> <dd>{filterFilterData.InzeratCategory}</dd> " +
+                      $"<dt>Lokácia</dt> <dd>{filterFilterData.Location}</dd> " +
+                      $"<dt>Maximálna cena</dt> <dd>{filterFilterData.PriceString} €</dd> " +
+                      $"</dl> " +
+                      $"<br> " +
+                      $"<strong>Ak si neželáte dostávať email o najnovších inzerátoch, zmeňte svoje <a target=\"_blank\" href=\"http://scraper.sk/home/settings\">nastavenia</a>.</strong>");
+            mailMessage.Body = sb.ToString();
+            mailMessage.IsBodyHtml = false;
+            mailMessage.Subject = "scraper.sk: Nové inzeráty";
+            SmtpClient smtpClient = new SmtpClient();
+            smtpClient.Host = "localhost";
+            smtpClient.Send(mailMessage);
+
         }
     }
 }
